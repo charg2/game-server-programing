@@ -1,0 +1,53 @@
+#pragma once
+
+
+
+enum SceneType
+{
+	ST_GAME1,
+	ST_MAX,
+};
+
+enum LayerType
+{
+	LT_BACKGROUND,
+	LT_GAME,
+	LT_PARTICLE,
+	LT_EFFECT,
+	LT_UI,
+	LT_MAX
+};
+
+enum Tag
+{
+	TAG_NONE,
+	TAG_NORMAL,
+	TAG_MAIN_PLAYER,
+	TAG_OTHER_PLAYER,
+	TAG_OBSTACLE,
+	TAG_BULLET,
+	TAG_PORTAL,
+	TAG_UI,
+	TAG_ENEMY,
+	TAG_SCENE,
+	TAG_LAYER,
+	TAG_EFFECT,
+	TAG_POOP,
+	TAG_BACKGROUND,
+};
+
+enum State
+{
+	ACTIVE,
+	PAUSED,
+	DEAD
+};
+
+enum Direction
+{
+	DIR_TOP,
+	DIR_LEFT,
+	DIR_RIGHT,
+	DIR_BOTTOM,
+	DIR_MAX
+};

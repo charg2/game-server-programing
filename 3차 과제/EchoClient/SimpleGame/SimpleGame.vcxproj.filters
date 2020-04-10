@@ -1,0 +1,287 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Lib">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{aa86e47f-445f-4440-9a76-173363b46c4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GameScene1">
+      <UniqueIdentifier>{bbc3d630-02e0-4b20-9d12-2b6eee3381f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Object">
+      <UniqueIdentifier>{041ceca4-be68-467c-8013-f73995b8dfaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\Net">
+      <UniqueIdentifier>{5361c735-a874-420e-9e9d-4b1f6155bf3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\Framework">
+      <UniqueIdentifier>{798359e0-868d-440a-82cd-ea71402da940}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\Framework\Component">
+      <UniqueIdentifier>{ecc281a4-c28d-4426-93f2-5b5c8f5f5210}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\Framework\Base">
+      <UniqueIdentifier>{fc26933b-735b-4267-a25e-71518662c290}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib\External">
+      <UniqueIdentifier>{629ccca0-ecf5-4861-9484-803a2a22e35b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Physx.h">
+      <Filter>Lib\Framework\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Lib\Framework\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Lib\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Layer.h">
+      <Filter>Lib\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework.h">
+      <Filter>Lib\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="enum.h">
+      <Filter>Lib\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="PhyxsManager.h">
+      <Filter>Lib\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Lib\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>Lib\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="GameScene1.h">
+      <Filter>소스 파일\GameScene1</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSceneBG1.h">
+      <Filter>소스 파일\GameScene1</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>소스 파일\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="StateMachine.h">
+      <Filter>Lib\Framework\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="HittedComponent.h">
+      <Filter>Lib\Framework\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="math_ex.h">
+      <Filter>Lib\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyManager.h">
+      <Filter>Lib\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="EchoClient.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="EchoSession.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>Lib\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Effect.h">
+      <Filter>Lib\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Color.h">
+      <Filter>Lib\Framework\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Lib\Framework\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\configuration.h">
+      <Filter>Lib\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\Environment.h">
+      <Filter>Lib\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\KeyManager.h">
+      <Filter>Lib\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\OuterClient.h">
+      <Filter>Lib\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\PacketVector.h">
+      <Filter>Lib\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\pre_compile.h">
+      <Filter>Lib\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\ClientSession.h">
+      <Filter>Lib\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\dump.h">
+      <Filter>Lib\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Packet.h">
+      <Filter>Lib\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Packet.hpp">
+      <Filter>Lib\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\OverlappedContext.h">
+      <Filter>Lib\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\exception.h">
+      <Filter>Lib\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\SocketAddress.h">
+      <Filter>Lib\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadPng.h">
+      <Filter>Lib\External</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound.h">
+      <Filter>Lib\External</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerManager.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="OtherPlayer.h">
+      <Filter>소스 파일\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureManager.h">
+      <Filter>Lib\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\protocol.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\network_struct.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectPool.h">
+      <Filter>Lib\Net</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Physx.cpp">
+      <Filter>Lib\Framework\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Transform.cpp">
+      <Filter>Lib\Framework\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Lib\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Layer.cpp">
+      <Filter>Lib\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework.cpp">
+      <Filter>Lib\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="PhyxsManager.cpp">
+      <Filter>Lib\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Lib\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>Lib\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="GameScene1.cpp">
+      <Filter>소스 파일\GameScene1</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSceneBG1.cpp">
+      <Filter>소스 파일\GameScene1</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>소스 파일\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="StateMachine.cpp">
+      <Filter>Lib\Framework\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="HittedComponent.cpp">
+      <Filter>Lib\Framework\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="KeyManager.cpp">
+      <Filter>Lib\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="EchoSession.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="EchoClient.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Effect.cpp">
+      <Filter>Lib\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>Lib\Framework\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector3.h">
+      <Filter>Lib\Framework\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Lib\KeyManager.cpp">
+      <Filter>Lib\Net</Filter>
+    </ClCompile>
+    <ClCompile Include="Lib\OuterClient.cpp">
+      <Filter>Lib\Net</Filter>
+    </ClCompile>
+    <ClCompile Include="Lib\ClientSession.cpp">
+      <Filter>Lib\Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\dump.cpp">
+      <Filter>Lib\Net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\SocketAddress.cpp">
+      <Filter>Lib\Net</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadPng.cpp">
+      <Filter>Lib\External</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound.cpp">
+      <Filter>Lib\External</Filter>
+    </ClCompile>
+    <ClCompile Include="OtherPlayer.cpp">
+      <Filter>소스 파일\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureManager.cpp">
+      <Filter>Lib\Framework</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\SolidRect.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\SolidRect.vs">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>
