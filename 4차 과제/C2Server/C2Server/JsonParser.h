@@ -15,20 +15,20 @@ public:
 	JsonParser();
 	~JsonParser();
 
-	bool load_json(std::string_view&& file_name);
+	bool load_json(std::wstring_view&& file_name);
 
-	bool get_int32(std::string_view&& tag, int32_t& out_data);
-	bool get_uint32(std::string_view&& tag, uint32_t& out_data);
-	bool get_int64(std::string_view&&  tag, int64_t& out_data);
-	bool get_uint64(std::string_view&& tag, uint64_t& out_data);
-	bool get_boolean(std::string_view&& tag, bool& out_data);
-	bool get_single(std::string_view&& tag, float& out_data);
-	bool get_double(std::string_view&& tag, double& out_data);
-	bool get_string(std::string_view&& tag, std::string& out_data);
+	bool get_int32(std::wstring_view&& tag, int32_t& out_data);
+	bool get_uint32(std::wstring_view&& tag, uint32_t& out_data);
+	bool get_int64(std::wstring_view&&  tag, int64_t& out_data);
+	bool get_uint64(std::wstring_view&& tag, uint64_t& out_data);
+	bool get_boolean(std::wstring_view&& tag, bool& out_data);
+	bool get_single(std::wstring_view&& tag, float& out_data);
+	bool get_double(std::wstring_view&& tag, double& out_data);
+	bool get_wstring(std::wstring_view&& tag, std::wstring& out_data);
 
 
 private:
-	rapidjson::Document buffer;
+	rapidjson::GenericDocument<rapidjson::UTF16LE<>> buffer;
 };
 
 //#include <iostream>
@@ -47,7 +47,7 @@ private:
 //
 //	bool t = true;
 //	float tt = 0;
-//	std::string ttt;
+//	std::wstring ttt;
 //	parser.get_boolean("f", t);
 //	parser.get_single("pi", tt);
 //	parser.get_string("hello", ttt);

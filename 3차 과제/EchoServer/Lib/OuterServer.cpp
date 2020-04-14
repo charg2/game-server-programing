@@ -108,7 +108,10 @@ void OuterServer::start()
 
 			if (key_manager.key_down(VirtualKey::A))
 			{
-				printf("hi");
+				int bsize;
+				int rn = sizeof(bsize);
+				getsockopt(listen_socket, SOL_SOCKET, SO_RCVBUF, (char*)&bsize, (socklen_t*)&rn);
+				printf("recv buf size : %d\n", bsize);
 			}
 			else if (key_manager.key_down(VirtualKey::B))
 			{
@@ -241,6 +244,20 @@ bool OuterServer::init_network()
 		int option = TRUE;
 		setsockopt(this->listen_socket, IPPROTO_TCP, TCP_NODELAY, (const char*)&option, sizeof(option));
 	}
+
+	/////////////////// for test
+	int bsize = 0;
+	int rn = 4;
+	if (SOCKET_ERROR == getsockopt(listen_socket, SOL_SOCKET, SO_RCVBUF, (char*)&bsize, (socklen_t*)&rn))
+		return false;
+	printf("Send buf size : %d\n", bsize);
+
+	bsize = 0;
+	setsockopt(listen_socket, SOL_SOCKET, SO_RCVBUF, (const char*)&bsize, (socklen_t)rn);
+	getsockopt(listen_socket, SOL_SOCKET, SO_RCVBUF, (char*)&bsize, (socklen_t*)&rn);
+	printf("Send buf size : %d\n", bsize);
+
+	/////////////////// for test
 
 	DWORD bytesReturned{ 0 };
 	tcp_keepalive option{ true, 10000, 1000 };
