@@ -16,6 +16,9 @@
     <Filter Include="소스 파일\lib">
       <UniqueIdentifier>{9acb60cc-ae9d-4594-af9d-365b39ea5a44}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\extlib">
+      <UniqueIdentifier>{f14dbad3-4ad6-4126-bb40-cc1aa131a7f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="OuterServer.cpp">
@@ -76,6 +79,15 @@
     </ClInclude>
     <ClInclude Include="..\..\Common\CircularBuffer.hpp">
       <Filter>소스 파일\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Packet.hpp">
+      <Filter>소스 파일\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Packet.h">
+      <Filter>소스 파일\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="macro.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

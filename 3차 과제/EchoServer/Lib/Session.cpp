@@ -60,7 +60,7 @@ bool Session::post_recv()
 		uint32_t local_last_error = GetLastError();
 		if (WSA_IO_PENDING != local_last_error)
 		{
-			printf("Not IO PENDING : %d \n", local_last_error);
+			printf("Not IO PENDING in recv : %d \n", local_last_error);
 			this->decrease_reference();
 			if (WSAECONNRESET == local_last_error)
 			{
@@ -153,7 +153,7 @@ void Session::post_send()
 		uint32_t local_last_error = GetLastError();
 		if (WSA_IO_PENDING != local_last_error)
 		{
-			printf("Not IO PENDING : %d \n", local_last_error);
+			printf("Not IO PENDING in send : %d \n", local_last_error);
 			if (WSAECONNRESET == local_last_error)
 			{
 				this->decrease_reference();
@@ -206,29 +206,29 @@ void Session::parse_packet()
 }
 
 //
-void Session::on_parse_packet(PacketHeader header, c2::Packet* packet)
-{
-	using namespace c2::enumeration;
-
-	switch (header.type)
-	{
-	case PT_NONE:
-		c2::util::crash_assert();
-		break;
-
-	case PT_CS_ECHO:
-		printf("CS_Echo \n");
-		break;
-
-	case PT_SC_ECHO:
-		printf("SC_Echo \n");
-		break;
-
-	default:
-		c2::util::crash_assert();
-		break;
-	}
-}
+//void Session::on_parse_packet(PacketHeader header, c2::Packet* packet)
+//{
+//	using namespace c2::enumeration;
+//
+//	switch (header.type)
+//	{
+//	case PT_NONE:
+//		c2::util::crash_assert();
+//		break;
+//
+//	case PT_CS_ECHO:
+//		printf("CS_Echo \n");
+//		break;
+//
+//	case PT_SC_ECHO:
+//		printf("SC_Echo \n");
+//		break;
+//
+//	default:
+//		c2::util::crash_assert();
+//		break;
+//	}
+//}
 
 void Session::send_packet(PacketHeader* header)
 {

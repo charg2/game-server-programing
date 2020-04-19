@@ -7,7 +7,6 @@
 
 OuterServer::OuterServer() : listen_socket{ INVALID_SOCKET }, generated_session_id{ }, version { c2::constant::version }
 , last_error{}, custom_error_code{ c2::enumeration::ERROR_NONE }, threads{}, is_running{}, srw_lock{}
-
 {}
 
 OuterServer::~OuterServer()

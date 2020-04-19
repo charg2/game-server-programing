@@ -89,7 +89,8 @@ namespace c2
 		write_head = 0;
 		read_head = 0;
 	}
-	//
+
+
 	//void Packet::addRef()
 	//{
 	//	InterlockedIncrement64(&ref_count);
@@ -99,7 +100,8 @@ namespace c2
 	//		//packet_pool.free(this);
 	//	//}
 	//}
-	//
+	
+
 	//void Packet::releaseRef()
 	//{
 	//	if (0 >= InterlockedDecrement64(&ref_count))

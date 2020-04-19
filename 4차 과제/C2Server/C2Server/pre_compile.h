@@ -4,8 +4,13 @@
 #include <MSWSock.h>
 #include <mstcpip.h>
 #include <memory.h>
-#include <stdint.h>
+#include <cstdint>
+#include <process.h>
 
 #include "enviroment.h"
+#include "macro.h"
+#include "../../Common/tls.h"
+#include "../../Common/concurrency.h"
 
 #pragma comment (lib, "ws2_32")
+

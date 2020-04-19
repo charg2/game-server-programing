@@ -74,6 +74,7 @@ REGISTER_HANDLER(PT_CS_MOVE)
 
 	printf("PT_CS_MOVE session_id : %d, x : %d, y : %d\n", response.session_id, response.x, response.y);
 
+	Sleep(5000);
 
 	broadcasting_helper(&response, session, false);
 	// ¥Ÿ ª—∑¡¡‹.

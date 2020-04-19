@@ -1,13 +1,61 @@
 #include "pre_compile.h"
 #include "../../Common/CircularBuffer.hpp"
+#include "../../Common/Packet.hpp"
 #include "IOContext.h"
 #include "Session.h"
+#include "OuterServer.h"
 #include "../../Common/exception.h"
 
+using namespace c2::enumeration;
+
+Session::Session() :
+refer_count{ 0 }, send_flag{ 0 }, packet_sent_count{ 0 },
+recv_packet{ }, 
+accept_context{ {}, IO_ACCEPT, nullptr},
+send_context{ {},  IO_SEND, nullptr }, 
+recv_context{ {},  IO_RECV, nullptr }, 
+discon_context{ {},IO_DISCONNECT, nullptr },
+sock_addr{}, total_recv_bytes{}, total_sent_bytes{},
+release_flag{}, io_cancled{}, sock{ INVALID_SOCKET }, server{ nullptr }
+{
+
+}
+
+Session::~Session()
+{
+}
+
+static char global_buffer[sizeof sockaddr_in * 2 + 32];
+
+void Session::post_accept()
+{
+	this->increase_refer();
+
+	DWORD bytes = 0;
+	DWORD flags = 0;
+
+	accept_context.overalpped.Internal = 0;
+	accept_context.overalpped.InternalHigh = 0;
+
+	if (FALSE == OuterServer::accept_ex(server->listen_sock, sock, global_buffer, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, &bytes, &accept_context.overalpped))
+	{
+		DWORD local_last_error = GetLastError();
+		if (WSA_IO_PENDING != local_last_error)
+		{
+			wprintf(L"AcceptEx failed with error: %u\n", WSAGetLastError());
+		}
+
+		// 그냥ㄹ 리턴
+
+		// 실패했다면 
+		// 성능을 위해선 reset하고 다시 사용. 
+
+		// 어차피 스택에 들가면 다시 사용됨.
+	}
+}
 
 void Session::post_recv()
 {
-
 	WSABUF		wsa_bufs[2];
 	uint32_t	buffer_count;
 	size_t		first_space_size = recv_buffer.direct_enqueue_size();
@@ -24,7 +72,7 @@ void Session::post_recv()
 
 		wsa_bufs[1].buf = recv_buffer.get_buffer();
 		wsa_bufs[1].len = recv_buffer.get_free_size() - first_space_size;
-
+		
 		buffer_count = 2;
 	}
 	else
@@ -35,23 +83,23 @@ void Session::post_recv()
 		buffer_count = 1;
 	}
 
-	this->increase_refer();
-
 	int64_t ret_val = WSARecv(sock, wsa_bufs, buffer_count, NULL, (LPDWORD)&flag, &this->recv_context.overalpped, NULL);
 	if (SOCKET_ERROR == ret_val)
 	{
 		uint32_t local_last_error = GetLastError();
 		if (WSA_IO_PENDING != local_last_error)
 		{
-			printf("Not IO PENDING : %d \n", local_last_error);
+			debug_console( printf("Not IO PENDING : %d \n", local_last_error) );
 			
 			this->decrease_refer();
 
-			if (WSAECONNRESET == local_last_error)
+			if (1 == InterlockedExchange(&this->io_cancled, 1) )
 			{
+				request_disconnection();
 			}
-			else if (ERROR_OPERATION_ABORTED == local_last_error)
+			else
 			{
+				CancelIoEx(reinterpret_cast<HANDLE>(sock), NULL);
 			}
 
 			return;
@@ -61,44 +109,206 @@ void Session::post_recv()
 	return;
 }
 
-void Session::post_send()
+void Session::request_disconnection()
 {
+	// session에서 하고 
+	if (FALSE == OuterServer::disconnect_ex(sock, &discon_context.overalpped, TF_REUSE_SOCKET, 0))
+	{
+		DWORD local_last_error = GetLastError();
+		if (WSA_IO_PENDING == local_last_error) // 봐준다..
+		{
 
+		}
+	}
 }
 
-void Session::recv_completion(size_t transfer_bytes)
+void Session::post_send()
 {
-	OverlappedContext* context_ptr{ reinterpret_cast<OverlappedContext*>(lpOverlapped) };
-	Session* session{ reinterpret_cast<Session*>(context_ptr->session) };
-
-	session->recv_buffer.move_front(transfer_bytes);
-	if (0 == session->recv_buffer.get_free_size())
+	for (;;)
 	{
-		// recv buffer가 가득 찼다는건 비정상적인 상황 임. 연결끊기
-		// log
+		if (1 == InterlockedExchange64(&send_flag, 1))
+		{
+			return;
+		}
+		
 
-		session->disconnected_reason = c2::enumeration::DisconnectReason::DR_RECV_BUFFER_FULL;
+		// 공백 지역...
+		// 패킷 감지를 못함.
+		if ( sned_buffer.count() == 0 )
+		{
+			// send_packet()이 호출되면 post_send()중인걸로 감지 PQCS를 실행 안함.
+			
+			send_flag = 0;
+			// 이 위에 들어온다면... send_packet() 패킷 감지를 못함... 
 
-		session->decrease_reference();
+			// 여기 이후 send packet이 호출되면 문제가없기 때문에 다시 확인함.
+			if( )
+
+
+			return;
+		}
+
+		size_t	send_packet_count = 0;
+		WSABUF wsa_bufs[c2::constant::MAX_CONCURRENT_SEND_COUNT];
+		DWORD flag{};
+
+		for (; (send_packet_count < c2::constant::MAX_CONCURRENT_SEND_COUNT) && this->sned_buffer.try_pop(this->send_packets[send_packet_count]) ; ++send_packet_count)
+		{
+			wsa_bufs[send_packet_count].buf = send_packets[send_packet_count].get_buffer();
+			wsa_bufs[send_packet_count].len = send_packets[send_packet_count].size();
+		}
+		
+
+		// 여기 이후에 send가 보내진 애들은 어캄?
+		send_context.overalpped.Internal = 0;
+		send_context.overalpped.InternalHigh = 0;
+
+		this->packet_sent_count = send_packet_count;
+		int64_t ret_val = WSASend(this->sock, wsa_bufs, send_packet_count, NULL, flag, &this->send_context.overalpped, NULL);
+		if (SOCKET_ERROR == ret_val)
+		{
+			uint32_t local_last_error = GetLastError();
+			if (WSA_IO_PENDING != local_last_error)
+			{
+				debug_console(printf("Not IO PENDING Send : %d \n", local_last_error));
+
+				this->decrease_refer();
+
+				if (1 == InterlockedExchange(&this->io_cancled, 1))
+				{
+					request_disconnection();
+				}
+				else
+				{
+					CancelIoEx(reinterpret_cast<HANDLE>(sock), NULL);
+				}
+
+				return;
+
+			}
+		}
+	}
+}
+
+void Session::send_packet(c2::Packet* out_packet)
+{
+	// packet이 들어옴.
+	// concurrent_queue에 넣음.
+
+	send_buffer.push(out_packet);
+
+
+
+	// send중이 아니라면....
+	if (send_flag == 0)
+	{
+		PostQueuedCompletionStatus(server->completion_port, 0, (ULONG_PTR)this, (LPOVERLAPPED)c2::constant::SEND_SIGN);
+	}
+}
+
+
+void Session::recv_completion(size_t transfered_bytes)
+{
+	this->recv_buffer.move_front(transfered_bytes);
+	if (0 == this->recv_buffer.get_free_size())
+	{
+		this->disconnected_reason = c2::enumeration::DisconnectReason::DR_RECV_BUFFER_FULL;
+
+		this->decrease_refer(); 
 
 		return;
 	}
 
-	session->parse_packet();
+	this->parse_packet();
 
-	session->total_recv_byte += cbTransferred;
+	server->total_recv_bytes[server->local_storage_accessor] += transfered_bytes;
 
-	//this->increase_refer();
-	//this->decrease_refer();
-	
+	this->post_recv();
+}
 
-	session->post_recv();
+void Session::send_completion(size_t transfered_bytes)
+{
+	server->total_sent_bytes[server->local_storage_accessor] += transfered_bytes;
 
+
+	uint64_t temp_packet_count = this->packet_sent_count;
+	for (size_t n = 0; n < temp_packet_count; ++n)
+		Packet::free(packet_buf[n]);
+
+
+
+	server->releaseSessionLock(id);
+	this->send_flag = 0;
+
+	this->post_send();
 }
 
 void Session::accept_completion()
 {
-	
+	HANDLE returned_hanlde = CreateIoCompletionPort((HANDLE)this->sock, server->completion_port, session_id, 0);
+	if(returned_hanlde == NULL ||  returned_hanlde != server->completion_port)
+	{
+		printf("[ERROR] LanServer::bind() failed");
+
+		session->reset();
+		
+
+	}
+
+
+
+	// recv 용 ref count 
+	this->increase_refer();
+
+	this->post_recv();
+}
+
+void Session::disconnect_completion()
+{
+	// io 정리 완료된 상태.
+	// 컨텐츠는 당연;;;
+	// 마지막으로 서버에 사용안하는 스택에 들어가서 대기함.
+	// session에서 하고 
+
+
+	decrease_refer();
+}
+
+void Session::parse_packet()
+{
+	using namespace c2::enumeration;
+
+	c2::Packet* local_packet = recv_packet;
+
+	PacketHeader header{};
+
+	for (;;)
+	{
+		size_t payload_length = recv_buffer.get_use_size();
+		if (sizeof(PacketHeader) > payload_length)
+		{
+			return;
+		}
+
+		recv_buffer.peek((char*)&header, sizeof(PacketHeader));
+		if (header.length > payload_length)
+		{
+			return;
+		}
+
+		if (header.type < PT_NONE && PT_MAX <= header.type)
+		{
+			c2::util::crash_assert();
+		}
+
+		local_packet->write(recv_buffer.get_rear_buffer(), header.length);
+
+		handler_table[header.type](this, header, *local_packet);
+
+		local_packet->rewind();
+
+		recv_buffer.move_rear(header.length);
+	}
 
 }
 
@@ -106,6 +316,7 @@ void Session::increase_refer()
 {
 	if ( 0 >= InterlockedIncrement64(&refer_count))
 	{
+		this->session_last_error = 0U;
 		c2::util::crash_assert();
 	}
 }
@@ -119,7 +330,7 @@ void Session::decrease_refer()
 		{
 			if (0 != InterlockedExchange(&this->release_flag, 1))
 			{
-				server->disconnect(this); // 정상 종료.
+				this->request_disconnection(); // 정상 종료.
 			}
 			else
 			{ 

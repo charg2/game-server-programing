@@ -158,12 +158,15 @@
     <ClInclude Include="..\..\Common\CircularBuffer.hpp" />
     <ClInclude Include="..\..\Common\concurrency.h" />
     <ClInclude Include="..\..\Common\exception.h" />
+    <ClInclude Include="..\..\Common\Packet.h" />
+    <ClInclude Include="..\..\Common\Packet.hpp" />
     <ClInclude Include="..\..\Common\SocketAddress.h" />
     <ClInclude Include="..\..\Common\tls.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="enviroment.h" />
     <ClInclude Include="IOContext.h" />
     <ClInclude Include="JsonParser.h" />
+    <ClInclude Include="macro.h" />
     <ClInclude Include="OuterServer.h" />
     <ClInclude Include="pre_compile.h" />
     <ClInclude Include="Session.h" />

@@ -26,6 +26,8 @@ public:
 	void post_send();
 
 	void parse_packet();
+
+
 	void bind_serer(OuterServer* server);
 	void disconnet();
 
