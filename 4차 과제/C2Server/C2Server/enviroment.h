@@ -64,10 +64,10 @@ void Session::send_packet(c2::Packet* out_packet)
 {
 	// packet이 들어옴.
 	// concurrent_queue에 넣음.
-	send_buffer.push(out_packet);
+	//send_buffer.push(out_packet);
 
 	// send중이 아니라면....
-	if (this->send_flag == 0)
+	if(this->send_flag == 0)
 	{
 		PostQueuedCompletionStatus(server->completion_port, 0, (ULONG_PTR)this, (LPOVERLAPPED)c2::constant::SEND_SIGN);
 	}

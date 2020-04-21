@@ -9,7 +9,7 @@
 using namespace c2::enumeration;
 
 Session::Session() :
-refer_count{ 0 }, send_flag{ 0 }, packet_sent_count{ 0 },
+io_refer_count{ 0 }, send_flag{ 0 }, packet_sent_count{ 0 },
 recv_packet{ }, 
 accept_context{ {}, IO_ACCEPT, nullptr},
 send_context{ {},  IO_SEND, nullptr }, 
@@ -198,7 +198,6 @@ void Session::send_packet(c2::Packet* out_packet)
 	send_buffer.push(out_packet);
 
 
-
 	// send중이 아니라면....
 	if (send_flag == 0)
 	{
@@ -260,6 +259,8 @@ void Session::accept_completion()
 	// recv 용 ref count 
 	this->increase_refer();
 
+	if( InterlockedIncrement(&this->io_refer_count);
+
 	this->post_recv();
 }
 
@@ -314,7 +315,7 @@ void Session::parse_packet()
 
 void Session::increase_refer()
 {
-	if ( 0 >= InterlockedIncrement64(&refer_count))
+	if ( 0 >= InterlockedIncrement64(&io_refer_count))
 	{
 		this->session_last_error = 0U;
 		c2::util::crash_assert();
@@ -323,7 +324,7 @@ void Session::increase_refer()
 
 void Session::decrease_refer()
 {
-	uint64_t ret_val = InterlockedIncrement64(&refer_count);
+	uint64_t ret_val = InterlockedIncrement64(&io_refer_count);
 	if (0 >= ret_val)
 	{
 		if ( 0 == ret_val)

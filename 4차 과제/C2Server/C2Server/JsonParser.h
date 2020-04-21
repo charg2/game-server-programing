@@ -9,28 +9,35 @@
 #include "rapidjson/document.h"
 #include "rapidjson/reader.h"
 
-class JsonParser
+
+namespace c2::util
 {
-public:
-	JsonParser();
-	~JsonParser();
 
-	bool load_json(std::wstring_view&& file_name);
+	class JsonParser
+	{
+	public:
+		JsonParser();
+		~JsonParser();
 
-	bool get_int32(std::wstring_view&& tag, int32_t& out_data);
-	bool get_uint32(std::wstring_view&& tag, uint32_t& out_data);
-	bool get_int64(std::wstring_view&&  tag, int64_t& out_data);
-	bool get_uint64(std::wstring_view&& tag, uint64_t& out_data);
-	bool get_boolean(std::wstring_view&& tag, bool& out_data);
-	bool get_single(std::wstring_view&& tag, float& out_data);
-	bool get_double(std::wstring_view&& tag, double& out_data);
-	bool get_wstring(std::wstring_view&& tag, std::wstring& out_data);
+		bool load_json(std::wstring_view&& file_name);
+
+		bool get_uint16(std::wstring_view&& tag, uint16_t& out_data);
+		bool get_int32(std::wstring_view&& tag, int32_t& out_data);
+		bool get_uint32(std::wstring_view&& tag, uint32_t& out_data);
+		bool get_int64(std::wstring_view&& tag, int64_t& out_data);
+		bool get_uint64(std::wstring_view&& tag, uint64_t& out_data);
+		bool get_boolean(std::wstring_view&& tag, bool& out_data);
+		bool get_single(std::wstring_view&& tag, float& out_data);
+		bool get_double(std::wstring_view&& tag, double& out_data);
+		bool get_wstring(std::wstring_view&& tag, std::wstring& out_data);
+		bool get_raw_wstring(std::wstring_view&& tag, wchar_t* dest, size_t raw_str_length);
 
 
-private:
-	rapidjson::GenericDocument<rapidjson::UTF16LE<>> buffer;
-};
 
+	private:
+		rapidjson::GenericDocument<rapidjson::UTF16LE<>> document;
+	};
+}
 //#include <iostream>
 //#include "JsonParser.h"
 //

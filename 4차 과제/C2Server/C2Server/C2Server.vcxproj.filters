@@ -42,6 +42,9 @@
     <ClCompile Include="..\..\Common\tls.cpp">
       <Filter>소스 파일\lib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Common\dump.cpp">
+      <Filter>소스 파일\lib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OuterServer.h">
@@ -88,6 +91,18 @@
     </ClInclude>
     <ClInclude Include="macro.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\dump.h">
+      <Filter>소스 파일\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\protocol.h">
+      <Filter>소스 파일\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\ConcurrentQueue.h">
+      <Filter>소스 파일\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\MemoryPool_Queue.h">
+      <Filter>소스 파일\lib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -146,6 +146,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Common\dump.cpp" />
     <ClCompile Include="..\..\Common\SocketAddress.cpp" />
     <ClCompile Include="..\..\Common\tls.cpp" />
     <ClCompile Include="Config.cpp" />
@@ -157,9 +158,13 @@
   <ItemGroup>
     <ClInclude Include="..\..\Common\CircularBuffer.hpp" />
     <ClInclude Include="..\..\Common\concurrency.h" />
+    <ClInclude Include="..\..\Common\ConcurrentQueue.h" />
+    <ClInclude Include="..\..\Common\dump.h" />
     <ClInclude Include="..\..\Common\exception.h" />
+    <ClInclude Include="..\..\Common\MemoryPool_Queue.h" />
     <ClInclude Include="..\..\Common\Packet.h" />
     <ClInclude Include="..\..\Common\Packet.hpp" />
+    <ClInclude Include="..\..\Common\protocol.h" />
     <ClInclude Include="..\..\Common\SocketAddress.h" />
     <ClInclude Include="..\..\Common\tls.h" />
     <ClInclude Include="Config.h" />

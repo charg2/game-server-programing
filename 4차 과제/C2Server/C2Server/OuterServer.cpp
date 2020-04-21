@@ -1,5 +1,6 @@
 #include "../../Common/Packet.hpp"
 #include "../../Common/SocketAddress.h"
+#include "JsonParser.h"
 #include "IOContext.h"
 #include "Session.h"
 #include "OuterServer.h"
@@ -11,7 +12,8 @@ thread_local size_t OuterServer::local_storage_accessor {};
 
 OuterServer::OuterServer() : listen_sock{ INVALID_SOCKET }, completion_port{ INVALID_HANDLE_VALUE }, accepter{ INVALID_HANDLE_VALUE }
 , io_handler{ nullptr }, port{ 0 }, sessions{ }
-, custom_last_error{ c2::enumeration::ER_NONE }, concurrent_connected_user{ 0 }, concurrent_thread_count { 0 }
+, custom_server_error{ c2::enumeration::ER_NONE }, custom_kernel_error{ c2::enumeration::ER_NONE } // error'
+, concurrent_connected_user{ 0 }, concurrent_thread_count { 0 }
 , version{} 
 {}
 
@@ -25,7 +27,7 @@ bool OuterServer::init_network()
 	{
 		printf("OuterServer::init() WSAStartup() failure \n");
 		//console_log();
-		this->custom_last_error = c2::enumeration::ER_COMPLETION_PORT_INITIATION_FAILURE;
+		this->custom_kernel_error = c2::enumeration::ER_COMPLETION_PORT_INITIATION_FAILURE;
 
 		return false;
 	}
@@ -109,7 +111,7 @@ bool OuterServer::init_system()
 {
 	if (NULL == CreateIoCompletionPort(this->completion_port, INVALID_HANDLE_VALUE, NULL, this->concurrent_thread_count))
 	{
-		this->custom_last_error = c2::enumeration::ER_COMPLETION_PORT_INITIATION_FAILURE;
+		this->custom_kernel_error = c2::enumeration::ER_COMPLETION_PORT_INITIATION_FAILURE;
 		return false;
 	}
 
@@ -124,7 +126,7 @@ bool OuterServer::init_system()
 		&OuterServer::accept_ex, sizeof(OuterServer::accept_ex),
 		&bytes, NULL, NULL))
 	{
-		this->custom_last_error = c2::enumeration::ER_ACCEPTEX_LAODING_FAILURE;
+		this->custom_kernel_error = c2::enumeration::ER_ACCEPTEX_LAODING_FAILURE;
 		return false;
 	}
 
@@ -135,7 +137,7 @@ bool OuterServer::init_system()
 		&OuterServer::disconnect_ex, sizeof(OuterServer::disconnect_ex),
 		&bytes, NULL, NULL))
 	{
-		this->custom_last_error = c2::enumeration::ER_ACCEPTEX_LAODING_FAILURE;
+		this->custom_kernel_error = c2::enumeration::ER_ACCEPTEX_LAODING_FAILURE;
 		return false;
 	}
 
@@ -147,7 +149,7 @@ bool OuterServer::init_system()
 		&OuterServer::connect_ex, sizeof(OuterServer::connect_ex),
 		&bytes, NULL, NULL))
 	{
-		this->custom_last_error = c2::enumeration::ER_CONNECTEX_LAODING_FAILURE;
+		this->custom_kernel_error = c2::enumeration::ER_CONNECTEX_LAODING_FAILURE;
 		return false;
 	}
 
@@ -161,7 +163,7 @@ void OuterServer::accepter_procedure(uint64_t idx)
 	uint64_t	accepted_counter  = 0;
 	if (SOCKET_ERROR == listen(local_listen_sock, SOMAXCONN_HINT(this->max_listening_count)))
 	{
-		this->custom_last_error = c2::enumeration:://;
+		this->custom_kernel_error = c2::enumeration::ER_ACCEPTEX_LAODING_FAILURE//;
 		return;
 	}
 
@@ -171,7 +173,7 @@ void OuterServer::accepter_procedure(uint64_t idx)
 	{
 		// 세션을 얻고...
 
-		Sleep();
+		Sleep(100);
 	}
 }
 
@@ -196,7 +198,7 @@ void OuterServer::io_service_procedure(uint64_t id)
 			break;
 		}
 
-		Session*   session	= acquire_session_lock(completion_key); 
+		Session*   session	= acquire_session_ownership(completion_key); 
 		
 		// acquire session
 		if ((size_t)overlapped_ptr == c2::constant::SEND_SIGN)
@@ -227,7 +229,7 @@ void OuterServer::io_service_procedure(uint64_t id)
 		}
 
 		// release session
-		release_session_lock(completion_key);
+		release_session_ownership(completion_key);
 	}
 }
 
@@ -264,6 +266,47 @@ uint32_t WINAPI OuterServer::start_thread(LPVOID param)
 }
 
 
+void OuterServer::load_config_using_json(const wchar_t* file_name)
+{
+	c2::util::JsonParser json_file;
+	
+	do
+	{
+		if (false == json_file.load_json(file_name))
+			break;
+			
+		if (false == json_file.get_raw_wstring(L"server_version", this->version, count_of(version)))
+			break;
+
+		if (false == json_file.get_boolean(L"enable_nagle_opt", this->nagle_opt))
+			break;
+
+		if (false == json_file.get_boolean(L"enabled_keep_alive_opt", this->keep_alive_opt))
+			break;
+
+		if (false == json_file.get_uint64(L"concurrent_thread_count", this->concurrent_thread_count))
+			break;
+
+		if (false == json_file.get_uint16(L"server_port", this->port))
+			break;
+
+		if (false == json_file.get_raw_wstring(L"server_ip", this->ip, count_of(ip) ))
+			break;
+
+		if (false == json_file.get_uint16(L"capacity", this->capacity))
+			break;
+
+		if (false == json_file.get_uint16(L"max_listening_count", this->max_listening_count))
+			break;
+
+		return;
+
+	} while (false);
+
+
+	c2::util::crash_assert();
+}
+
 bool OuterServer::initialize()
 {
 	do
@@ -278,7 +321,7 @@ bool OuterServer::initialize()
 			break;
 
 
-return true;
+		return true;
 
 	} while (false);
 
@@ -326,20 +369,32 @@ Session* OuterServer::create_sessions(size_t n)
 
 void OuterServer::disconnect(uint64_t session_id)
 {
-	Session* session = acquire_session_lock(session_id);
+	Session* session = acquire_session_ownership(session_id);
 
-	if (session->refer_count != 1)
+	if (session->io_refer_count != 1)
 	{
-		debug_console("OuterServer::disconnect() : session_id : %d, ref_count : %d", session->session_id, session->refer_count);
+		debug_console("OuterServer::disconnect() : session_id : %d, ref_count : %d", session->session_id, session->io_refer_count);
 		c2::util::crash_assert();
 	}
 
 
 	on_disconnect(session);
 
-	release_session_lock(session_id);
+	release_session_ownership(session_id);
 	// 스택에 넣어주고.
 	// push.(session_id);
+}
+
+void OuterServer::on_wake_io_thread()
+{
+}
+
+void OuterServer::on_sleep_io_thread()
+{
+}
+
+void OuterServer::disconnect_after_sending(uint64_t session_id)
+{
 }
 
 
@@ -384,7 +439,7 @@ size_t OuterServer::get_toatl_sent_bytes()
 }
 
 
-Session* OuterServer::acquire_session_lock(int64_t index)
+Session* OuterServer::acquire_session_ownership(int64_t index)
 {
 	Session* session = sessions[(uint16_t)index];
 	
@@ -401,7 +456,7 @@ Session* OuterServer::acquire_session_lock(int64_t index)
 	
 }
 
-void OuterServer::release_session_lock(int64_t index)
+void OuterServer::release_session_ownership(int64_t index)
 {
 
 }

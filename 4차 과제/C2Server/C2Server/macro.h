@@ -4,6 +4,8 @@
 #define get_session_index(num)				( num >> 16 )
 #define set_session_id(num, session_idx)	( ( num << 16 ) | (uint16_t)session_idx )
 
+#define count_of(arr)						sizeof(arr) / sizeof(arr[0])
+
 #define release_mode
 #ifdef release_mode
 	#define debug_code( a )			/##/ { (a); }

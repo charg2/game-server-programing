@@ -52,7 +52,6 @@ public:
 			return rear - front - 1;
 		else
 			return Capacity - front;
-
 	}
 	size_t	direct_dequeue_size(void)
 	{

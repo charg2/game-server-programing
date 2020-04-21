@@ -5,11 +5,10 @@
 
 struct ThreadInfo
 {
-	OuterServer* server;
+	OuterServer*				server;
 	c2::enumeration::ThreadType thread_tye;
 	size_t						index;
 };
-
 
 class Session;
 class OuterServer
@@ -20,6 +19,7 @@ public:
 	OuterServer(OuterServer&& server) noexcept = delete;
 	virtual ~OuterServer();
 
+	void load_config_using_json(const wchar_t* file_name);
 	bool initialize();
 	bool init_network();
 	bool init_sessions();
@@ -40,6 +40,11 @@ public:
 	void				disconnect(uint64_t session_id);
 
 	virtual void		on_wake_io_thread();
+	virtual void		on_sleep_io_thread();
+	void				disconnect_after_sending(uint64_t session_id);
+
+	Session*							acquire_session_ownership(int64_t session_id);
+	void								release_session_ownership(int64_t session_id);
 
 
 	const wchar_t*						get_version() const;
@@ -51,9 +56,6 @@ public:
 	size_t								get_toatl_recv_bytes();
 	size_t								get_toatl_sent_bytes();
 
-	Session*							acquire_session_lock(int64_t index);
-	void								release_session_lock(int64_t index);
-
 protected:
 	void					accepter_procedure(uint64_t idx);
 	void					io_service_procedure(uint64_t idx);
@@ -61,30 +63,37 @@ protected:
 	static uint32_t WINAPI 	start_thread(LPVOID param);
 
 protected:
-	// cache line 1
 	// virtual function table								// 								
-	uint64_t					concurrent_connected_user;	// 8 
-	size_t						concurrent_thread_count;	// 8
-	wchar_t*					version;					// 8
-	wchar_t						ip[16];						// 32
 	SOCKET						listen_sock;				// 8
 	HANDLE						accepter;					// 8
 	HANDLE						completion_port;			// 8
-	HANDLE						session_heap;
 
 	HANDLE*						io_handler;					// 8
-	c2::enumeration::ErrorCode	custom_last_error;			// 8
-	uint16_t					port;						// 2
+	c2::enumeration::ErrorCode	custom_server_error;		// 8  user
+	c2::enumeration::ErrorCode	custom_kernel_error;		// 8  kernel
 	uint16_t					max_listening_count;		// 2
-//
+
+
+	Session*					sessions[5000];				// 40000
+	/*HANDLE						session_heap;				//8 */
+	uint64_t					concurrent_connected_user;	// 8 
+
+
+	size_t						concurrent_thread_count;	// 8
+	wchar_t						ip[16];						// 32
+	wchar_t						version[16];				// 32
+	bool						nagle_opt;					// 1
+	bool						keep_alive_opt;				// 1
+	uint16_t					capacity;					// 2
+	uint16_t					port;						// 2
+
+
 	uint64_t*					total_recv_bytes;			// 8
 	uint64_t*					total_recv_count;			// 8
 	uint64_t*					total_sent_bytes;			// 8
 	uint64_t*					total_sent_count;			// 8
 
-	Session*					sessions[5000];				// 40000
-	
-	
+
 private:
 	static LPFN_ACCEPTEX		accept_ex;			
 	static LPFN_DISCONNECTEX	disconnect_ex;

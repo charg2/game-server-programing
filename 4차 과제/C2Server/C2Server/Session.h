@@ -72,7 +72,7 @@ public:
 
 private:
 	// read and write frequently.
-	int64_t			refer_count;	// 8
+	int64_t			io_refer_count;	// 8
 	int64_t			session_id;		// 8
 	int64_t			send_flag;		// 8
 	CircularBuffer  recv_buffer;	// 24
