@@ -1,6 +1,4 @@
-﻿#ifndef EXCEPTION_H
-#define EXCEPTION_H
-
+﻿#pragma once
 #include <intrin.h>
 #include <cstdint>
 
@@ -69,4 +67,3 @@ namespace c2
 
 }
 
-#endif

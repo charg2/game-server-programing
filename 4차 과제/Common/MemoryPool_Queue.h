@@ -144,7 +144,7 @@ namespace c2::concurrency
 			node->next = nullptr;
 
 			if (node->magic_number != kDeadBeef)  // magicNumber Check
-				c2::util::crash_assert(false);
+				c2::util::crash_assert();
 
 			if (PlacementNew) // 필요하다면 소멸자 호출.
 				node->data.~Type();

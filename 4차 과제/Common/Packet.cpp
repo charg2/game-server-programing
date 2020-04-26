@@ -6,7 +6,6 @@
 
 namespace c2
 {
-
 	Packet::Packet() : buffer{ nullptr }, payload_capacity{ kMaximumSegmentSize }, write_head{ 0 }, read_head{ 0 }//, ref_count{ 0 }
 	{
 		buffer = new char[kMaximumSegmentSize];
@@ -352,15 +351,15 @@ namespace c2
 		write_head = read_head = 0; 
 	}
 
-	//Packet* Packet::alloc()
-	//{
-	//	return packet_pool.alloc();
-	//}
-	//
-	//void Packet::free(Packet* packet)
-	//{
-	//	packet_pool.free(packet);
-	//}
+	Packet* Packet::alloc()
+	{
+		return packet_pool.alloc();
+	}
+
+	void Packet::free(Packet* packet)
+	{
+		packet_pool.free(packet);
+	}
 
 	//// primitive types version 
 	//template<typename T>

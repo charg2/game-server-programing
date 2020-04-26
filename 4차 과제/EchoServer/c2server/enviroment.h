@@ -5,8 +5,8 @@ namespace c2
 {
 	namespace constant
 	{
-		constexpr inline size_t SEND_SIGN = 5001U;
-		constexpr inline size_t MAX_CONCURRENT_SEND_COUNT = 256U;
+		constexpr size_t SEND_SIGN = 5001U;
+		constexpr size_t MAX_CONCURRENT_SEND_COUNT = 256U;
 	}
 
 	namespace enumeration

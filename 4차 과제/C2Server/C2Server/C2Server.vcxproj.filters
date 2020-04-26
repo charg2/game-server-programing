@@ -19,6 +19,9 @@
     <Filter Include="소스 파일\extlib">
       <UniqueIdentifier>{f14dbad3-4ad6-4126-bb40-cc1aa131a7f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\extlib\rapidjson">
+      <UniqueIdentifier>{8030517b-2334-450a-a044-d1dda475b7da}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="OuterServer.cpp">
@@ -44,6 +47,21 @@
     </ClCompile>
     <ClCompile Include="..\..\Common\dump.cpp">
       <Filter>소스 파일\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\ConcurrentStack.cpp">
+      <Filter>소스 파일\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\BackOff.cpp">
+      <Filter>소스 파일\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Common\MemoryPoolTLS.cpp">
+      <Filter>소스 파일\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="packet_handler.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="protocol.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -80,12 +98,6 @@
     <ClInclude Include="..\..\Common\exception.h">
       <Filter>소스 파일\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Common\CircularBuffer.hpp">
-      <Filter>소스 파일\lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Common\Packet.hpp">
-      <Filter>소스 파일\lib</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Common\Packet.h">
       <Filter>소스 파일\lib</Filter>
     </ClInclude>
@@ -104,8 +116,40 @@
     <ClInclude Include="..\..\Common\MemoryPool_Queue.h">
       <Filter>소스 파일\lib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Common\ConcurrentStack.h">
+      <Filter>소스 파일\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\MemoryPool_Stack.h">
+      <Filter>소스 파일\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\BackOff.h">
+      <Filter>소스 파일\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\MemoryPoolTLS.h">
+      <Filter>소스 파일\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="packet_handler.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\CircularBuffer.h">
+      <Filter>소스 파일\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Packet.cpp">
+      <Filter>소스 파일\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="config.json" />
+    <None Include="..\..\Common\spin_wait.asm">
+      <Filter>소스 파일\lib</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="..\..\Common\spin_wait.obj">
+      <Filter>소스 파일\lib</Filter>
+    </Object>
   </ItemGroup>
 </Project>

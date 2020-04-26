@@ -17,7 +17,6 @@
 #include "ThreadCallHistory.h"
 #include "CallHistory.h"
 
-
 #endif
 
 
@@ -129,7 +128,7 @@ namespace c2::concurrency
 				return false;
 			}
 
-			// ½º³À¼¦
+			// Ä¸Ã³.
 			EndNode		local_head;
 			EndNode		local_tail;
 			Node*		next_node;
@@ -176,6 +175,8 @@ namespace c2::concurrency
 			return this->head.node->next == nullptr;
 		}
 
+
+		// this method don't garantee concurrency-safe
 		size_t unsafe_size() const
 		{
 			return this->size;

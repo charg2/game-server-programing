@@ -101,7 +101,7 @@ private:
 	SOCKET			sock;					// 8
 	OuterServer*	server;					// 8
 
-	DisconnectReason disconnected_reason;
+	c2::enumeration::DisconnectReason disconnected_reason;
 	friend class OuterServer;
 };
 

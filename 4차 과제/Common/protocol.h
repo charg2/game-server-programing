@@ -36,13 +36,30 @@ namespace c2::enumeration
 #pragma pack(push, 1)
 
 using namespace c2::enumeration;
-struct PacketHeader
+
+struct PacketHeader 
 {
 	uint16_t   length;
 	PacketType type;
 
 	static constexpr size_t header_length { sizeof(uint16_t) + sizeof(PacketType) };
 };
+
+struct PacketHeaderBase
+{
+	uint16_t   length;
+	PacketType type;
+
+	static constexpr size_t header_length{ sizeof(uint16_t) + sizeof(PacketType) };
+};
+
+union PacketHederU
+{
+	PacketHeaderBase	header;
+	int32_t				header_to_i;
+};
+
+
 
 static_assert(sizeof(PacketHeader) == 4, "\"PacketHeader\" struct length must be 4");
 static_assert(sizeof(int32_t) == sizeof(int) && sizeof(uint32_t) == sizeof(unsigned int));

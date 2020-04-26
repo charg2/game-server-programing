@@ -8,14 +8,15 @@
 // SPSC Queue
 
 // 1page
-template <size_t Capacity = 65536>
+constexpr size_t Capacity = 65536;
+//template <size_t Capacity = 65536>
 class CircularBuffer
 {
 public:
 	CircularBuffer(void)
 		: buffer{ new char[Capacity] {} }/*, bufferEnd{ buffer + Capacity - 1 }*/, front{ 0 }, rear{ 0 }//, size{ 0 }
 	{
-		static_assert(Capacity > 0, "Capacity must be greater than zero.");
+		static_assert(Capacity >= 2, "Capacity must be greater than 2.");
 	}
 
 	~CircularBuffer()

@@ -7,8 +7,8 @@
 
 //#include <string>
 //#include <list>
-//#include "MemoryPoolTLS.h"
 #include "exception.h"
+#include "MemoryPoolTLS.h"
 
 //#include "Profiler.h"
 
@@ -31,8 +31,6 @@ namespace c2
 		Packet& operator=(Packet&& other) noexcept;
 
 		void clear();
-		//void addRef();
-		//void releaseRef();
 		char* get_buffer() const noexcept;
 
 		void rewind() noexcept;
@@ -58,8 +56,8 @@ namespace c2
 		//template<typename T>
 		//Packet& operator>>(Out T& dest);
 
-		//static Packet* alloc();
-		//static void free(Packet* packet);
+		static Packet* alloc();
+		static void free(Packet* packet);
 
 	private:
 		char*	buffer;
@@ -71,7 +69,7 @@ namespace c2
 		/*int64_t ref_count;
 		int64_t release_flag;*/
 
-		//static c2::concurrency::MemoryPoolTLS<Packet> packet_pool;
+		static inline c2::concurrency::MemoryPoolTLS<Packet> packet_pool;
 	};
 }
 #endif

@@ -7,9 +7,9 @@ class OuterServer
 {
 	struct ThreadInfo
 	{
-		OuterServer*					server;
-		c2::enumeration::ThreadType		thread_tye;
-		size_t							index;
+		OuterServer*				server;
+		c2::enumeration::ThreadType thread_tye;
+		size_t						index;
 	};
 
 public:
@@ -26,11 +26,11 @@ public:
 	
 	void finalize();
 
-	virtual void		on_connect(uint64_t session_id) ;
-	virtual void		on_disconnect(uint64_t session_id);
-	virtual bool		on_accept(Session* session) ;
-	virtual void		on_wake_io_thread() ;
-	virtual void		on_sleep_io_thread() ;
+	virtual void		on_connect(uint64_t session_id) = 0;
+	virtual void		on_disconnect(uint64_t session_id) = 0;
+	virtual bool		on_accept(Session* session) = 0;
+	virtual void		on_wake_io_thread() = 0;
+	virtual void		on_sleep_io_thread() = 0;
 
 	
 	virtual	Session*	create_sessions(size_t n);
@@ -59,7 +59,7 @@ public:
 protected:
 	void					accepter_procedure(uint64_t idx);
 	void					io_service_procedure(uint64_t idx);
-	virtual void			custom_precedure(uint64_t idx);
+	virtual void			custom_precedure(uint64_t idx) = 0;
 	static uint32_t WINAPI 	start_thread(LPVOID param);
 
 
@@ -96,9 +96,9 @@ protected:
 	alignas(64)	int64_t		total_sent_count;			// 8
 
 private:
-	static inline LPFN_ACCEPTEX		accept_ex		{};
-	static inline LPFN_DISCONNECTEX	disconnect_ex	{};
-	static inline LPFN_CONNECTEX	connect_ex		{};
+	static inline LPFN_ACCEPTEX		accept_ex		{ nullptr };
+	static inline LPFN_DISCONNECTEX	disconnect_ex	{ nullptr };
+	static inline LPFN_CONNECTEX	connect_ex		{ nullptr };
 
 	static inline thread_local size_t	local_storage_accessor{};
 

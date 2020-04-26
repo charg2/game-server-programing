@@ -1,9 +1,10 @@
-#include "main.h"
+#include <type_traits>
+#include <string>
+#include <iostream>
+//#include "OuterServer.h"
 
 int main()
 {
-	OuterServer server;
-	server.initialize();
 	//JsonParser parser;
 	//if (false == parser.load_json(L"config.json"))
 	//{

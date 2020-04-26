@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{C4C119DB-452E-4584-A2AE-C721DE50F275}</ProjectGuid>
-    <RootNamespace>C2Server</RootNamespace>
+    <ProjectGuid>{F4D3B027-ABC0-4970-A83B-ED1A2CE018DD}</ProjectGuid>
+    <RootNamespace>EchoServer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -69,6 +69,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
@@ -78,9 +81,24 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
-  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <Optimization>Disabled</Optimization>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -88,7 +106,6 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -102,7 +119,6 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -117,26 +133,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
       <Optimization>Disabled</Optimization>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -146,53 +144,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Common\BackOff.cpp" />
-    <ClCompile Include="..\..\Common\ConcurrentStack.cpp" />
-    <ClCompile Include="..\..\Common\dump.cpp" />
-    <ClCompile Include="..\..\Common\MemoryPoolTLS.cpp" />
-    <ClCompile Include="..\..\Common\SocketAddress.cpp" />
-    <ClCompile Include="..\..\Common\tls.cpp" />
-    <ClCompile Include="Config.cpp" />
-    <ClCompile Include="JsonParser.cpp" />
+    <ClCompile Include="EchoServer.cpp" />
+    <ClCompile Include="EchoSession.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="OuterServer.cpp" />
-    <ClCompile Include="packet_handler.cpp" />
-    <ClCompile Include="protocol.cpp" />
-    <ClCompile Include="Session.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Common\BackOff.h" />
-    <ClInclude Include="..\..\Common\CircularBuffer.h" />
-    <ClInclude Include="..\..\Common\concurrency.h" />
-    <ClInclude Include="..\..\Common\ConcurrentQueue.h" />
-    <ClInclude Include="..\..\Common\ConcurrentStack.h" />
-    <ClInclude Include="..\..\Common\dump.h" />
-    <ClInclude Include="..\..\Common\exception.h" />
-    <ClInclude Include="..\..\Common\MemoryPoolTLS.h" />
-    <ClInclude Include="..\..\Common\MemoryPool_Queue.h" />
-    <ClInclude Include="..\..\Common\MemoryPool_Stack.h" />
-    <ClInclude Include="..\..\Common\Packet.h" />
-    <ClInclude Include="..\..\Common\Packet.cpp" />
-    <ClInclude Include="..\..\Common\protocol.h" />
-    <ClInclude Include="..\..\Common\SocketAddress.h" />
-    <ClInclude Include="..\..\Common\tls.h" />
-    <ClInclude Include="Config.h" />
-    <ClInclude Include="enviroment.h" />
-    <ClInclude Include="IOContext.h" />
-    <ClInclude Include="JsonParser.h" />
-    <ClInclude Include="macro.h" />
-    <ClInclude Include="main.h" />
-    <ClInclude Include="OuterServer.h" />
-    <ClInclude Include="packet_handler.h" />
-    <ClInclude Include="pre_compile.h" />
-    <ClInclude Include="Session.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\Common\spin_wait.asm" />
-    <None Include="config.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="..\..\Common\spin_wait.obj" />
+    <ClInclude Include="EchoServer.h" />
+    <ClInclude Include="EchoSession.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

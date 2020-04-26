@@ -11,8 +11,6 @@
 #include "macro.h"
 
 #include "../../Common/exception.h"
-#include "../../Common/Packet.h"
-#include "IOContext.h"
 
 #pragma comment (lib, "ws2_32")
 

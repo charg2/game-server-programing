@@ -1,13 +1,13 @@
 #include "pre_compile.h"
+#include "../../Common/Packet.h"
+#include "../../Common/Packet.cpp"
 #include "../../Common/SocketAddress.h"
 #include "JsonParser.h"
+#include "IOContext.h"
 #include "../../Common/CircularBuffer.h"
 #include "Session.h"
 #include "OuterServer.h"
 
-//LPFN_ACCEPTEX		OuterServer::accept_ex{  };
-//LPFN_DISCONNECTEX	OuterServer::disconnect_ex{  };
-//LPFN_CONNECTEX		OuterServer::connect_ex{  };
 
 //thread_local size_t OuterServer::local_storage_accessor {};
 
@@ -250,10 +250,6 @@ void OuterServer::io_service_procedure(uint64_t custom_thread_id)
 	}
 }
 
-void OuterServer::custom_precedure(uint64_t idx)
-{
-}
-
 
 
 
@@ -284,7 +280,6 @@ uint32_t WINAPI OuterServer::start_thread(LPVOID param)
 	}
 
 	delete info;
-	return 0;
 }
 
 
@@ -324,19 +319,6 @@ void OuterServer::on_connect(uint64_t session_id)
 }
 
 void OuterServer::on_disconnect(uint64_t session_id)
-{
-}
-
-bool OuterServer::on_accept(Session* session)
-{
-	return false;
-}
-
-void OuterServer::on_wake_io_thread()
-{
-}
-
-void OuterServer::on_sleep_io_thread()
 {
 }
 

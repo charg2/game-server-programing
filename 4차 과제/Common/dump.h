@@ -6,6 +6,8 @@
 #include <thread>
 #pragma comment (lib, "Dbghelp")
 
-LONG WINAPI ExceptionFilter(EXCEPTION_POINTERS* exceptionInfo);
-
+namespace c2::diagnostics
+{
+	LONG WINAPI ExceptionFilter(EXCEPTION_POINTERS* exceptionInfo);
+}
 #endif
