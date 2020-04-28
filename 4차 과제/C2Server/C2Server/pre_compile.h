@@ -10,9 +10,10 @@
 #include "enviroment.h"
 #include "macro.h"
 
-#include "../../Common/exception.h"
-#include "../../Common/Packet.h"
-#include "IOContext.h"
+#include "concurrency/tls.h"
+#include "util/exception.h"
+#include "network/Packet.h"
+#include "packet_handler.h"
 
 #pragma comment (lib, "ws2_32")
 

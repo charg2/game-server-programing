@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../../Common/protocol.h"
-#include "../../Common/Packet.h"
+#include "protocol.h"
+#include "network/Packet.h"
 #include "Session.h"
+
 
 
 using namespace::c2;

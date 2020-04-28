@@ -1,8 +1,7 @@
 #pragma once
-#include "../../Common/Packet.h"
 #include "IOContext.h"
-#include "../../Common/ConcurrentQueue.h"
-#include "../../Common/CircularBuffer.h"
+#include "concurrency/ConcurrentQueue.h"
+#include "CircularBuffer.h"
 
 class OuterServer;
 class CircularBuffer;

@@ -2,7 +2,7 @@
 
 #include "../Common/protocol.h"
 #include "../Common/Packet.h"
-#include "Lib/Session.h"
+#include "../C2Server/C2Server/Session.h"
 
 
 using namespace::c2;

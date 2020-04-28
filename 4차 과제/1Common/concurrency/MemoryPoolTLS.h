@@ -58,7 +58,7 @@ namespace c2::concurrency
 			void free()
 			{
 				if (maxBlockIndex == InterlockedIncrement64(&count_of_release))
-					owner->chunk_pool->free(this);
+					owner->chunk_pool.free(this);
 			}
 
 			MemoryPoolTLS*	owner;
@@ -74,7 +74,7 @@ namespace c2::concurrency
 
 			//chunk_pool = new ConcurrentQueueMemoryPool<Chunk, Capacity, PlacementNew>;
 			//chunk_pool = new ConcurrentQueueMemoryPool64<Chunk, Capacity, PlacementNew >;
-			chunk_pool = new ConcurrentStackMemoryPool<Chunk, Capacity, PlacementNew >;
+			//chunk_pool = new ConcurrentStackMemoryPool<Chunk, Capacity, PlacementNew >;
 			//chunk_pool = new ConcurrentLightStackMemoryPool<Chunk, Capacity, PlacementNew >;
 
 			pool_tls_idx = get_tls_idx();
@@ -82,7 +82,7 @@ namespace c2::concurrency
 
 		~MemoryPoolTLS()
 		{
-			delete chunk_pool;
+			//delete chunk_pool;
 		}
 
 
@@ -92,7 +92,7 @@ namespace c2::concurrency
 
 			if (nullptr == current_chunk)
 			{
-				current_chunk = chunk_pool->alloc();
+				current_chunk = chunk_pool.alloc();
 
 				if (nullptr == current_chunk)
 					c2::util::crash_assert();
@@ -117,7 +117,7 @@ namespace c2::concurrency
 		//c2::concurrency::
 		//ConcurrentQueueMemoryPool<Chunk, Capacity, PlacementNew>* chunk_pool;
 		//ConcurrentQueueMemoryPool64<Chunk, Capacity, PlacementNew >* chunk_pool;
-		 ConcurrentStackMemoryPool<Chunk, Capacity, PlacementNew >* chunk_pool; 
+		 ConcurrentStackMemoryPool<Chunk, Capacity, PlacementNew > chunk_pool; 
 		// ConcurrentLightStackMemoryPool<Chunk, Capacity, PlacementNew >* chunk_pool; 
 
 

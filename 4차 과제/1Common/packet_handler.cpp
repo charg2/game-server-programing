@@ -1,14 +1,15 @@
+#include <string>
+#include "../C2Server/C2Server/Session.h"
+#include "../EchoServer/EchoSession.h"
 #include "packet_handler.h"
-#include "Session.h"
-//#include "../../EchoServer/EchoSession.h"
 //#include "math_ex.hpp"
 
 HandlerFunc handler_table[PT_MAX] { };
 
-//#define broadcasting_helper( out_data_ptr, session_ptr, except_me ) ((OuterServer*)((Session*)session)->server)->broadcast_to_all(out_data_ptr, session_ptr, except_me);
-//#define disconnection_helper( target_session, reason ) session->server->disconnect_session(target_session, reason);
-//#define deserializaton_helper( structor )  in_packet.read(&structor, sizeof(structor));
-// 
+#define broadcasting_helper( out_data_ptr, session_ptr, except_me ) ((EchoServer*)((EchoSession*)session)->server)->broadcast_to_all(out_data_ptr, session_ptr, except_me);
+#define disconnection_helper( target_session, reason ) session->server->disconnect_session(target_session, reason);
+#define deserializaton_helper( structor )  in_packet.read(&structor, sizeof(structor));
+ 
 REGISTER_HANDLER(PT_NONE)
 {
 	printf("\n\nPT_NONE\n\n");

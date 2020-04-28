@@ -1,8 +1,8 @@
 #include "pre_compile.h"
-#include "../../Common/SocketAddress.h"
-#include "JsonParser.h"
-#include "../../Common/CircularBuffer.h"
+#include "IOContext.h"
+#include "util/JsonParser.h"
 #include "Session.h"
+#include "network/SocketAddress.h"
 #include "OuterServer.h"
 
 //LPFN_ACCEPTEX		OuterServer::accept_ex{  };
@@ -11,11 +11,15 @@
 
 //thread_local size_t OuterServer::local_storage_accessor {};
 
-OuterServer::OuterServer() : listen_sock{ INVALID_SOCKET }, completion_port{ INVALID_HANDLE_VALUE }, accepter{ INVALID_HANDLE_VALUE }
-, io_handler{ nullptr }, port{ 0 }, sessions{ }
-, custom_last_server_error{ c2::enumeration::ER_NONE }, custom_last_os_error{ c2::enumeration::ER_NONE } // error'
-, concurrent_connected_user{ 0 }, concurrent_thread_count { 0 }
-, version{} 
+OuterServer::OuterServer()
+	: listen_sock{ INVALID_SOCKET }, completion_port{ INVALID_HANDLE_VALUE }, accepter{ INVALID_HANDLE_VALUE }, session_heap{ INVALID_HANDLE_VALUE }
+	, io_handler{ nullptr }, ip{}, port{ 0 }, sessions{ }
+	, custom_last_server_error{ c2::enumeration::ER_NONE }, custom_last_os_error{ c2::enumeration::ER_NONE } // error'
+	, concurrent_connected_user{ 0 }, concurrent_thread_count{ 0 }
+	, version{}
+	, enable_nagle_opt{ false }, enable_keep_alive_opt{}
+	, max_listening_count{}, capacity{}
+	, total_recv_count{}, total_recv_bytes{}, total_sent_bytes{}, total_sent_count{}
 {}
 
 OuterServer::~OuterServer()
@@ -33,7 +37,8 @@ bool OuterServer::init_network_and_system()
 		return false;
 	}
 
-	if (NULL == CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, this->concurrent_thread_count))
+	completion_port = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, this->concurrent_thread_count);
+	if (NULL == completion_port)
 	{
 		debug_code(printf("%s::%s \n", __FILE__, __LINE__));
 
@@ -46,7 +51,7 @@ bool OuterServer::init_network_and_system()
 	if (INVALID_SOCKET == this->listen_sock)
 	{
 		debug_code(printf("%s::%s \n", __FILE__, __LINE__));
-		
+
 		return false;
 	}
 
@@ -64,7 +69,7 @@ bool OuterServer::init_network_and_system()
 	if (SOCKET_ERROR == setsockopt(listen_sock, SOL_SOCKET, SO_LINGER, (char*)&linger_opt, sizeof(LINGER)))
 	{
 		debug_code(printf("%s::%s \n", __FILE__, __LINE__));
-		
+
 		return false;
 	}
 
@@ -123,20 +128,32 @@ bool OuterServer::init_network_and_system()
 
 
 
-	return true;
 }
 
 bool OuterServer::init_sessions()
 {
-	Session* created_sessions = create_sessions(5000);
-
-	this->sessions = created_sessions;
-
-	for (int n = 0; n < 5000; ++n)
+	session_heap = HeapCreate(/* HEAP_ZERO_MEMORY */ HEAP_GENERATE_EXCEPTIONS, 0, NULL);
+	if (INVALID_HANDLE_VALUE == session_heap)
 	{
-		this->sessions[n].session_id = n;
-		this->sessions[n].server = this;
+		c2::util::crash_assert();
+	}
+
+	sessions = (Session**)HeapAlloc(session_heap, HEAP_GENERATE_EXCEPTIONS, sizeof(Session*) * this->capacity);
+	for (int n = 0; n < this->capacity; ++n)
+	{
+		sessions[n] = nullptr;
 		id_pool.push(n);
+	}
+
+	on_create_sessions(this->capacity);
+
+	//this->sessions = created_sessions;
+
+	for (int n = 0; n < this->capacity; ++n)
+	{
+		//new(&sessions[n]) Session();
+		sessions[n]->session_id = n;
+		sessions[n]->server = this;
 	}
 
 	return true;
@@ -145,24 +162,24 @@ bool OuterServer::init_sessions()
 bool OuterServer::init_threads()
 {
 	uint64_t n = 0;
-	for (; n < this->concurrent_thread_count; ++n )
+	for (; n < this->concurrent_thread_count; ++n)
 	{
-		void* params = new void* [3]{ (void*)this, (void*)c2::enumeration::ThreadType::TT_IO, (void*)n};
+		void* params = new void* [3]{ (void*)this, (void*)c2::enumeration::ThreadType::TT_IO, (void*)n };
 
 		accepter = (HANDLE)_beginthreadex(NULL, NULL, OuterServer::start_thread, params, NULL, NULL);
 	}
 
 	// ¡¢º”¿ª ≥™¡ﬂø° πﬁ±‚ ¿ß«ÿ §∑§∑
 	void* params = new void* [3]{ (void*)this, (void*)c2::enumeration::ThreadType::TT_ACCEPTER, (void*)n };
-	accepter = (HANDLE)_beginthreadex(NULL, NULL, OuterServer::start_thread, params ,NULL, NULL );
+	accepter = (HANDLE)_beginthreadex(NULL, NULL, OuterServer::start_thread, params, NULL, NULL);
 
 	return true;
 }
 
 void OuterServer::accepter_procedure(uint64_t idx)
-{	 
+{
 	SOCKET		local_listen_sock = this->listen_sock;
-	uint64_t	post_accepted_counter  = 0;
+	uint64_t	post_accepted_counter = 0;
 
 	if (SOCKET_ERROR == listen(local_listen_sock, SOMAXCONN_HINT(this->max_listening_count)))
 	{
@@ -171,7 +188,7 @@ void OuterServer::accepter_procedure(uint64_t idx)
 	}
 
 	// concurrent_stack ¿ª≈Î«ÿº≠ ≤®≥ø.
-	for ( ; post_accepted_counter  < this->capacity; )
+	for (; post_accepted_counter < this->capacity; )
 	{
 		// ººº«¿ª æÚ∞Ì...
 
@@ -188,15 +205,15 @@ void OuterServer::io_service_procedure(uint64_t custom_thread_id)
 {
 	OuterServer::local_storage_accessor = custom_thread_id;
 
-	HANDLE	local_completion_port	{ this->completion_port };
-	int64_t	thread_id				{ GetCurrentThreadId() };
+	HANDLE	local_completion_port{ this->completion_port };
+	int64_t	thread_id{ GetCurrentThreadId() };
 
 	for (;;)
 	{
 		DWORD			transfered_bytes{};
 		LPOVERLAPPED	overlapped_ptr{};
 		ULONG_PTR		completion_key{};
-		
+
 		bool ret = GetQueuedCompletionStatus(local_completion_port, &transfered_bytes, &completion_key, &overlapped_ptr, INFINITE);
 		if (completion_key == 0 && overlapped_ptr == nullptr && transfered_bytes == 0)
 		{
@@ -206,11 +223,11 @@ void OuterServer::io_service_procedure(uint64_t custom_thread_id)
 		on_wake_io_thread();
 
 		Session* session = acquire_session_ownership(completion_key);
-		if(nullptr == session)
+		if (nullptr == session)
 		{
 			c2::util::crash_assert();
 		}
-		
+
 		// acquire session
 		if ((size_t)overlapped_ptr == c2::constant::SEND_SIGN)
 		{
@@ -218,7 +235,7 @@ void OuterServer::io_service_procedure(uint64_t custom_thread_id)
 			continue;
 		}
 
-		IoContext* context_ptr	{ reinterpret_cast<IoContext*>(overlapped_ptr) };
+		IoContext* context_ptr{ reinterpret_cast<IoContext*>(overlapped_ptr) };
 
 		switch (context_ptr->io_type)
 		{
@@ -259,28 +276,28 @@ void OuterServer::custom_precedure(uint64_t idx)
 
 uint32_t WINAPI OuterServer::start_thread(LPVOID param)
 //void OuterServer::start_thread(OuterServer* server, c2::enumeration::ThreadType thread_type, void* param)
-{			
+{
 	using namespace c2::enumeration;
 
 	ThreadInfo* info = reinterpret_cast<ThreadInfo*>(param);
 
 	switch (info->thread_tye)
 	{
-		case ThreadType::TT_IO:
-			info->server->io_service_procedure(info->index);
-			break;
-		
-		case ThreadType::TT_ACCEPTER:
-			info->server->accepter_procedure(info->index);
-			break;
+	case ThreadType::TT_IO:
+		info->server->io_service_procedure(info->index);
+		break;
 
-		case ThreadType::TT_CUSTOM:
-			info->server->custom_precedure(info->index);
-			break;
+	case ThreadType::TT_ACCEPTER:
+		info->server->accepter_procedure(info->index);
+		break;
 
-		default:
-			c2::util::crash_assert();
-			break;
+	case ThreadType::TT_CUSTOM:
+		info->server->custom_precedure(info->index);
+		break;
+
+	default:
+		c2::util::crash_assert();
+		break;
 	}
 
 	delete info;
@@ -312,9 +329,6 @@ bool OuterServer::initialize()
 
 void OuterServer::finalize()
 {
-
-
-
 	this->destroy_sessions();
 }
 
@@ -340,9 +354,22 @@ void OuterServer::on_sleep_io_thread()
 {
 }
 
-Session* OuterServer::create_sessions(size_t n)
+//Session* OuterServer::create_sessions(size_t n)
+//{
+//	return reinterpret_cast<Session*>(HeapAlloc(session_heap, 0, sizeof(Session) * n));
+//	//return reinterpret_cast<Session*>(new Session[n]);
+//}
+
+void OuterServer::on_create_sessions(size_t n)
 {
-	return reinterpret_cast<Session*>(HeapAlloc(session_heap, 0, sizeof(Session) * n));
+	Session* sessions_ptr = (Session*)HeapAlloc(session_heap, 0, sizeof(Session) * n);
+	
+	for (size_t i = 0; i < n; ++i)
+	{
+		sessions[n] = sessions_ptr;
+		new(sessions[n]) Session();
+	}
+
 	//return reinterpret_cast<Session*>(new Session[n]);
 }
 
@@ -350,7 +377,7 @@ void OuterServer::destroy_sessions()
 {
 	HeapDestroy(session_heap); // Ω«∆–«œµÁ∞° ∏ªµÁ∞° §ª§ª ø°∑Ø Æc æ»«‘
 
-	session_heap = INVALID_HANDLE_VALUE;
+	//session_heap = INVALID_HANDLE_VALUE;
 }
 
 
@@ -386,14 +413,14 @@ void OuterServer::request_disconnection(uint64_t session_id, c2::enumeration::Di
 			InterlockedDecrement64(&session->refer_count);
 			release_session(session);
 			return;
-		//case WSAEINVAL:
-		//	break;
+			//case WSAEINVAL:
+			//	break;
 
 		default:
 			c2::util::crash_assert(); // ¥˝«¡ ≥≤∞‹∫∏¿⁄.
 			break;
 		}
-	}	
+	}
 
 }
 
@@ -410,7 +437,7 @@ void OuterServer::release_session(Session* session)
 
 	uint64_t session_id = session->session_id;
 
-	id_pool.push(  increase_session_stamp(session_id) );
+	id_pool.push(increase_session_stamp(session_id));
 }
 
 
@@ -422,12 +449,12 @@ void OuterServer::disconnect_after_sending_packet(uint64_t session_id, c2::Packe
 void OuterServer::send_packet(uint64_t session_id, c2::Packet* out_packet)
 {
 	Session* session = this->acquire_session_ownership(session_id);
-	
-// packet¿Ã µÈæÓø».
-// concurrent_queueø° ≥÷¿Ω.
-	 session->send_buffer.push(out_packet);
 
-// send¡ﬂ¿Ã æ∆¥œ∂Û∏È....
+	// packet¿Ã µÈæÓø».
+	// concurrent_queueø° ≥÷¿Ω.
+	session->send_buffer.push(out_packet);
+
+	// send¡ﬂ¿Ã æ∆¥œ∂Û∏È....
 	if (session->send_flag == 0)
 	{
 		PostQueuedCompletionStatus(this->completion_port, 0, (ULONG_PTR)session_id, (LPOVERLAPPED)c2::constant::SEND_SIGN);
@@ -447,12 +474,12 @@ void OuterServer::set_custom_last_error(c2::enumeration::ErrorCode err_code)
 
 Session* OuterServer::acquire_session_ownership(int64_t index)
 {
-	Session* session = &sessions[(uint16_t)index];
-	if (0 >= InterlockedIncrement64(&session->refer_count)) 
-	{ 
+	Session* session = sessions[(uint16_t)index];
+	if (0 >= InterlockedIncrement64(&session->refer_count))
+	{
 
-		debug_code(printf("%s:%s \n",__FILE__, __LINE__));
-		c2::util::crash_assert(); 
+		debug_code(printf("%s:%s \n", __FILE__, __LINE__));
+		c2::util::crash_assert();
 	}
 
 	if (index != session->session_id) // µø¿œ«— ≥‡ºÆ¿Œ¡ˆ »Æ¿Œ.
@@ -464,13 +491,13 @@ Session* OuterServer::acquire_session_ownership(int64_t index)
 	}
 
 	// disconnectEx∏¶ ∞…æÓæﬂ «œ≥™;
-	
+
 
 }
 
 void OuterServer::release_session_ownership(int64_t session_id)
 {
-	Session* session = &sessions[(uint16_t)session_id];
+	Session* session = sessions[(uint16_t)session_id];
 	uint64_t ret_val = InterlockedDecrement64(&session->refer_count);
 
 	if (0 >= ret_val)
@@ -551,39 +578,32 @@ void OuterServer::load_config_using_json(const wchar_t* file_name)
 {
 	c2::util::JsonParser json_file;
 
-	do
-	{
-		if (false == json_file.load_json(file_name))
-			break;
+	if (false == json_file.load_json(file_name))
+		c2::util::crash_assert();
 
-		if (false == json_file.get_raw_wstring(L"server_version", this->version, count_of(version)))
-			break;
+	if (false == json_file.get_raw_wstring(L"server_version", this->version, count_of(version)))
+		c2::util::crash_assert();
 
-		if (false == json_file.get_boolean(L"enable_nagle_opt", this->enable_nagle_opt))
-			break;
+	if (false == json_file.get_boolean(L"enable_nagle_opt", this->enable_nagle_opt))
+		c2::util::crash_assert();
 
-		if (false == json_file.get_boolean(L"enabled_keep_alive_opt", this->keep_alive_opt))
-			break;
+	if (false == json_file.get_boolean(L"enable_keep_alive_opt", this->enable_keep_alive_opt))
+		c2::util::crash_assert();
 
-		if (false == json_file.get_uint64(L"concurrent_thread_count", this->concurrent_thread_count))
-			break;
+	if (false == json_file.get_uint64(L"concurrent_thread_count", this->concurrent_thread_count))
+		c2::util::crash_assert();
 
-		if (false == json_file.get_uint16(L"server_port", this->port))
-			break;
+	if (false == json_file.get_uint16(L"server_port", this->port))
+		c2::util::crash_assert();
 
-		if (false == json_file.get_raw_wstring(L"server_ip", this->ip, count_of(ip)))
-			break;
+	if (false == json_file.get_raw_wstring(L"server_ip", this->ip, count_of(ip)))
+		c2::util::crash_assert();
 
-		if (false == json_file.get_uint16(L"capacity", this->capacity))
-			break;
+	if (false == json_file.get_uint16(L"capacity", this->capacity))
+		c2::util::crash_assert();
 
-		if (false == json_file.get_uint16(L"max_listening_count", this->max_listening_count))
-			break;
+	if (false == json_file.get_uint16(L"max_listening_count", this->max_listening_count))
+		c2::util::crash_assert();
 
-		return;
-
-	} while (false);
-
-
-	c2::util::crash_assert();
+	return;
 }

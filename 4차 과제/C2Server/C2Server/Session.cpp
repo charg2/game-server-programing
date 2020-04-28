@@ -1,5 +1,4 @@
 #include "pre_compile.h"
-#include "../../Common/Packet.h"
 #include "Session.h"
 #include "OuterServer.h"
 
@@ -218,8 +217,9 @@ void Session::send_completion(size_t transfered_bytes)
 	for (size_t n = 0; n < temp_packet_count; ++n)
 		c2::Packet::free(sent_packets[n]);
 
-	this->send_flag = 0;
 	this->packet_sent_count = 0;
+
+	this->send_flag = 0;
 
 	this->post_send();
 
@@ -264,35 +264,35 @@ void Session::parse_packet()
 
 	c2::Packet* local_packet = &recv_packet;
 
-	//PacketHeader header{};
+	PacketHeader header{};
 
-	//for (;;)
-	//{
-	//	size_t payload_length = recv_buffer.get_use_size();
-	//	if (sizeof(PacketHeader) > payload_length)
-	//	{
-	//		return;
-	//	}
+	for (;;)
+	{
+		size_t payload_length = recv_buffer.get_use_size();
+		if (sizeof(PacketHeader) > payload_length)
+		{
+			return;
+		}
 
-	//	recv_buffer.peek((char*)&header, sizeof(PacketHeader));
-	//	if (header.length > payload_length)
-	//	{
-	//		return;
-	//	}
+		recv_buffer.peek((char*)&header, sizeof(PacketHeader));
+		if (header.length > payload_length)
+		{
+			return;
+		}
 
-	//	if (header.type < PT_NONE && PT_MAX <= header.type)
-	//	{
-	//		c2::util::crash_assert();
-	//	}
+		if (header.type < PT_NONE && PT_MAX <= header.type)
+		{
+			c2::util::crash_assert();
+		}
 
-	//	local_packet->write(recv_buffer.get_rear_buffer(), header.length);
+		local_packet->write(recv_buffer.get_rear_buffer(), header.length);
 
-	//	handler_table[header.type](this, header, *local_packet);
+		handler_table[header.type](this, header, *local_packet);
 
-	//	local_packet->rewind();
+		local_packet->rewind();
 
-	//	recv_buffer.move_rear(header.length);
-	//}
+		recv_buffer.move_rear(header.length);
+	}
 
 }
 

@@ -4,6 +4,7 @@ int main()
 {
 	OuterServer server;
 	server.initialize();
+	server.load_config_using_json(L"config.json");
 	//JsonParser parser;
 	//if (false == parser.load_json(L"config.json"))
 	//{

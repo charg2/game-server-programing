@@ -18,6 +18,56 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CircularBuffer.h" />
+    <ClInclude Include="concurrency\BackOff.h" />
+    <ClInclude Include="concurrency\concurrency.h" />
+    <ClInclude Include="concurrency\ConcurrentQueue.h" />
+    <ClInclude Include="concurrency\ConcurrentStack.h" />
+    <ClInclude Include="concurrency\MemoryPoolTLS.h" />
+    <ClInclude Include="concurrency\MemoryPool_Queue.h" />
+    <ClInclude Include="concurrency\MemoryPool_Stack.h" />
+    <ClInclude Include="concurrency\tls.h" />
+    <ClInclude Include="enviroment.h" />
+    <ClInclude Include="IOContext.h" />
+    <ClInclude Include="IO\KeyManager.h" />
+    <ClInclude Include="macro.h" />
+    <ClInclude Include="main.h" />
+    <ClInclude Include="network\Packet.h" />
+    <ClInclude Include="network\SocketAddress.h" />
+    <ClInclude Include="network_struct.h" />
+    <ClInclude Include="OuterServer.h" />
+    <ClInclude Include="packet_handler.h" />
+    <ClInclude Include="pre_compile.h" />
+    <ClInclude Include="protocol.h" />
+    <ClInclude Include="Session.h" />
+    <ClInclude Include="util\dump.h" />
+    <ClInclude Include="util\exception.h" />
+    <ClInclude Include="util\JsonParser.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="concurrency\BackOff.cpp" />
+    <ClCompile Include="concurrency\ConcurrentStack.cpp" />
+    <ClCompile Include="concurrency\MemoryPoolTLS.cpp" />
+    <ClCompile Include="concurrency\tls.cpp" />
+    <ClCompile Include="IO\KeyManager.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="network\Packet.cpp" />
+    <ClCompile Include="network\SocketAddress.cpp" />
+    <ClCompile Include="OuterServer.cpp" />
+    <ClCompile Include="packet_handler.cpp" />
+    <ClCompile Include="protocol.cpp" />
+    <ClCompile Include="Session.cpp" />
+    <ClCompile Include="util\dump.cpp" />
+    <ClCompile Include="util\JsonParser.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="concurrency\spin_wait.asm" />
+    <None Include="config.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="concurrency\spin_wait.obj" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{C4C119DB-452E-4584-A2AE-C721DE50F275}</ProjectGuid>
@@ -145,55 +195,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\Common\BackOff.cpp" />
-    <ClCompile Include="..\..\Common\ConcurrentStack.cpp" />
-    <ClCompile Include="..\..\Common\dump.cpp" />
-    <ClCompile Include="..\..\Common\MemoryPoolTLS.cpp" />
-    <ClCompile Include="..\..\Common\SocketAddress.cpp" />
-    <ClCompile Include="..\..\Common\tls.cpp" />
-    <ClCompile Include="Config.cpp" />
-    <ClCompile Include="JsonParser.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="OuterServer.cpp" />
-    <ClCompile Include="packet_handler.cpp" />
-    <ClCompile Include="protocol.cpp" />
-    <ClCompile Include="Session.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\Common\BackOff.h" />
-    <ClInclude Include="..\..\Common\CircularBuffer.h" />
-    <ClInclude Include="..\..\Common\concurrency.h" />
-    <ClInclude Include="..\..\Common\ConcurrentQueue.h" />
-    <ClInclude Include="..\..\Common\ConcurrentStack.h" />
-    <ClInclude Include="..\..\Common\dump.h" />
-    <ClInclude Include="..\..\Common\exception.h" />
-    <ClInclude Include="..\..\Common\MemoryPoolTLS.h" />
-    <ClInclude Include="..\..\Common\MemoryPool_Queue.h" />
-    <ClInclude Include="..\..\Common\MemoryPool_Stack.h" />
-    <ClInclude Include="..\..\Common\Packet.h" />
-    <ClInclude Include="..\..\Common\Packet.cpp" />
-    <ClInclude Include="..\..\Common\protocol.h" />
-    <ClInclude Include="..\..\Common\SocketAddress.h" />
-    <ClInclude Include="..\..\Common\tls.h" />
-    <ClInclude Include="Config.h" />
-    <ClInclude Include="enviroment.h" />
-    <ClInclude Include="IOContext.h" />
-    <ClInclude Include="JsonParser.h" />
-    <ClInclude Include="macro.h" />
-    <ClInclude Include="main.h" />
-    <ClInclude Include="OuterServer.h" />
-    <ClInclude Include="packet_handler.h" />
-    <ClInclude Include="pre_compile.h" />
-    <ClInclude Include="Session.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\Common\spin_wait.asm" />
-    <None Include="config.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="..\..\Common\spin_wait.obj" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -1,11 +1,10 @@
 #pragma once
 #include "BackOff.h"
 
-
 #include "concurrency.h"
 
 //#include "BackOff.h"
-#include "exception.h"
+#include "../util/exception.h"
 
 
 // Lock - Free ConcurrentStackMemoryPool
@@ -41,17 +40,20 @@ namespace c2::concurrency
 				c2::util::crash_assert();
 			
 			top				= (TopNode*)HeapAlloc(heap_handle, HEAP_GENERATE_EXCEPTIONS, sizeof(TopNode));
-			top->node		= (BlockNode*)HeapAlloc(heap_handle , HEAP_GENERATE_EXCEPTIONS, sizeof(BlockNode) * kDefaultCapacity);
+			top->node		= (BlockNode*)HeapAlloc(heap_handle , HEAP_GENERATE_EXCEPTIONS, sizeof(BlockNode) * Capacity);
 			top->stamp		= 1984;
 
-			for ( int n = 0 ; n < kDefaultCapacity; ++n)
+			size_t block_size = sizeof(BlockNode);
+			size_t capacity_size = Capacity;
+
+			for ( int n = 0 ; n < Capacity; ++n)
 				new(&top->node[n]) BlockNode;
 
 			top->node->next_block = &top->node[1];
 
 			BlockNode* newBlock = nullptr;
 
-			for (this->freeBlock_count = 1; this->freeBlock_count < kDefaultCapacity; ++this->freeBlock_count)
+			for (this->freeBlock_count = 1; this->freeBlock_count < Capacity; ++this->freeBlock_count)
 			{
 				newBlock = &top->node[freeBlock_count];
 				newBlock->next_block = &top->node[freeBlock_count + 1];
@@ -70,7 +72,7 @@ namespace c2::concurrency
 			BlockNode*	temp		{ nullptr };
 			TopNode		local_top	{ this->top->node, this->top->stamp };
 			BlockNode*	new_block;
-			BackOff backoff{ BackOff::min_delay };
+			BackOff     backoff{ BackOff::min_delay };
 
 			for (;;)
 			{

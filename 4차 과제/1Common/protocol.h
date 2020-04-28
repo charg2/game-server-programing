@@ -53,12 +53,6 @@ struct PacketHeaderBase
 	static constexpr size_t header_length{ sizeof(uint16_t) + sizeof(PacketType) };
 };
 
-union PacketHederU
-{
-	PacketHeaderBase	header;
-	int32_t				header_to_i;
-};
-
 
 
 static_assert(sizeof(PacketHeader) == 4, "\"PacketHeader\" struct length must be 4");

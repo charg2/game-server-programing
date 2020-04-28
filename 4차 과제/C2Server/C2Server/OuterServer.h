@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Common/ConcurrentStack.h"
+#include "concurrency/ConcurrentStack.h"
 
 class Session;
 class OuterServer
@@ -26,14 +26,14 @@ public:
 	
 	void finalize();
 
-	virtual void		on_connect(uint64_t session_id) ;
+	virtual void		on_connect(uint64_t session_id);
 	virtual void		on_disconnect(uint64_t session_id);
-	virtual bool		on_accept(Session* session) ;
-	virtual void		on_wake_io_thread() ;
-	virtual void		on_sleep_io_thread() ;
+	virtual bool		on_accept(Session* session);
+	virtual void		on_wake_io_thread();
+	virtual void		on_sleep_io_thread();
 
 	
-	virtual	Session*	create_sessions(size_t n);
+	virtual void		on_create_sessions(size_t n);
 	void				destroy_sessions();
 
 	void				request_disconnection(uint64_t session_id, c2::enumeration::DisconnectReason dr);
@@ -74,7 +74,7 @@ protected:
 	c2::enumeration::ErrorCode	custom_last_os_error;		// 8  kernel
 
 
-	Session*					sessions;					// 8
+	Session**					sessions;					// 8
 	uint16_t					max_listening_count;		// 2
 	HANDLE						session_heap;				//8 
 	uint64_t					concurrent_connected_user;	// 8 
@@ -84,11 +84,11 @@ protected:
 	wchar_t						ip[16];						// 32
 	wchar_t						version[16];				// 32
 	bool						enable_nagle_opt;					// 1
-	bool						keep_alive_opt;				// 1
+	bool						enable_keep_alive_opt;				// 1
 	uint16_t					capacity;					// 2
 	uint16_t					port;						// 2
 
-	c2::concurrency::ConcurrentStack<uint64_t>	id_pool;
+	c2::concurrency::ConcurrentStack<uint64_t, 5000>	id_pool;
 
 	alignas(64)	int64_t		total_recv_bytes;			// 8
 	alignas(64)	int64_t		total_recv_count;			// 8

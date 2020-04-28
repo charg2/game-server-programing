@@ -4,10 +4,10 @@
 #include <string_view>
 #include <string>
 #include <fstream>
-#include "rapidjson/rapidjson.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/document.h"
-#include "rapidjson/reader.h"
+#include "../rapidjson/rapidjson.h"
+#include "../rapidjson/writer.h"
+#include "../rapidjson/document.h"
+#include "../rapidjson/reader.h"
 
 
 namespace c2::util
@@ -31,8 +31,6 @@ namespace c2::util
 		bool get_double(std::wstring_view&& tag, double& out_data);
 		bool get_wstring(std::wstring_view&& tag, std::wstring& out_data);
 		bool get_raw_wstring(std::wstring_view&& tag, wchar_t* dest, size_t raw_str_length);
-
-
 
 	private:
 		rapidjson::GenericDocument<rapidjson::UTF16LE<>> document;

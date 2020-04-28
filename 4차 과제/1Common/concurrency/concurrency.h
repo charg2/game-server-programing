@@ -16,7 +16,7 @@ namespace c2::concurrency
 	constexpr size_t kDeadDead				{ 0xDEADDEAD };
 #endif
 	constexpr size_t kDefaultCapacity		{ 0'1024 };
-	constexpr size_t defaultChunkCapacity	{  1024 };
+	constexpr size_t defaultChunkCapacity	{ 1024 };
 	constexpr size_t numberOfBlockInChunk	{ 256 };
 	constexpr size_t maxBlockIndex			{ numberOfBlockInChunk - 1 };
 }
