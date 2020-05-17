@@ -151,6 +151,8 @@ struct ByeRequest : public PacketHeader
 	{
 		length = sizeof(ByeRequest);
 		type = PT_CS_BYE;
+
+
 	}
 };
 

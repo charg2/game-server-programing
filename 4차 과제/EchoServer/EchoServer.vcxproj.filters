@@ -30,13 +30,7 @@
     <ClCompile Include="EchoSession.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\C2Server\C2Server\JsonParser.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
     <ClCompile Include="..\C2Server\C2Server\OuterServer.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\C2Server\C2Server\packet_handler.cpp">
       <Filter>lib</Filter>
     </ClCompile>
     <ClCompile Include="..\C2Server\C2Server\protocol.cpp">
@@ -45,35 +39,38 @@
     <ClCompile Include="..\C2Server\C2Server\Session.cpp">
       <Filter>lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\C2Server\C2Server\Config.cpp">
+    <ClCompile Include="..\C2Server\C2Server\packet_handler_base.cpp">
       <Filter>lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\ConcurrentStack.cpp">
+    <ClCompile Include="..\C2Server\C2Server\concurrency\BackOff.cpp">
       <Filter>lib\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\dump.cpp">
+    <ClCompile Include="..\C2Server\C2Server\concurrency\ConcurrentStack.cpp">
       <Filter>lib\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\KeyManager.cpp">
+    <ClCompile Include="..\C2Server\C2Server\concurrency\MemoryPoolTLS.cpp">
       <Filter>lib\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\MemoryPoolTLS.cpp">
+    <ClCompile Include="..\C2Server\C2Server\concurrency\tls.cpp">
       <Filter>lib\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\Packet.cpp">
+    <ClCompile Include="..\C2Server\C2Server\IO\KeyManager.cpp">
       <Filter>lib\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\packet_handler.cpp">
+    <ClCompile Include="..\C2Server\C2Server\network\Packet.cpp">
       <Filter>lib\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\SocketAddress.cpp">
+    <ClCompile Include="..\C2Server\C2Server\network\SocketAddress.cpp">
       <Filter>lib\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\tls.cpp">
+    <ClCompile Include="..\C2Server\C2Server\util\JsonParser.cpp">
       <Filter>lib\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\Common\BackOff.cpp">
+    <ClCompile Include="..\C2Server\C2Server\util\dump.cpp">
       <Filter>lib\common</Filter>
+    </ClCompile>
+    <ClCompile Include="packet_handler_echo.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -92,9 +89,6 @@
     <ClInclude Include="..\C2Server\C2Server\IOContext.h">
       <Filter>lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\JsonParser.h">
-      <Filter>lib</Filter>
-    </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\macro.h">
       <Filter>lib</Filter>
     </ClInclude>
@@ -110,61 +104,49 @@
     <ClInclude Include="..\C2Server\C2Server\Session.h">
       <Filter>lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\Config.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\ConcurrentStack.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\dump.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\exception.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\KeyManager.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\MemoryPool_Queue.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\MemoryPool_Stack.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\MemoryPoolTLS.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\network_struct.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\OverlappedContext.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\Packet.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\packet_handler.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
     <ClInclude Include="..\Common\protocol.h">
       <Filter>lib\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\Common\SocketAddress.h">
+    <ClInclude Include="..\C2Server\C2Server\concurrency\BackOff.h">
       <Filter>lib\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\Common\tls.h">
+    <ClInclude Include="..\C2Server\C2Server\concurrency\concurrency.h">
       <Filter>lib\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\Common\BackOff.h">
+    <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentQueue.h">
       <Filter>lib\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\Common\CircularBuffer.h">
+    <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentStack.h">
       <Filter>lib\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\Common\concurrency.h">
+    <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPool_Queue.h">
       <Filter>lib\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\Common\ConcurrentQueue.h">
+    <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPool_Stack.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPoolTLS.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\concurrency\tls.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\IO\KeyManager.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\network\Packet.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\network\SocketAddress.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\util\JsonParser.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\util\dump.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\util\exception.h">
       <Filter>lib\common</Filter>
     </ClInclude>
   </ItemGroup>
@@ -172,15 +154,15 @@
     <None Include="..\C2Server\C2Server\config.json">
       <Filter>lib</Filter>
     </None>
-    <None Include="..\Common\spin_wait.asm">
-      <Filter>lib\common</Filter>
-    </None>
     <None Include="config.json">
       <Filter>헤더 파일</Filter>
     </None>
+    <None Include="..\C2Server\C2Server\concurrency\spin_wait.asm">
+      <Filter>lib\common</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Object Include="..\Common\spin_wait.obj">
+    <Object Include="..\C2Server\C2Server\concurrency\spin_wait.obj">
       <Filter>lib\common</Filter>
     </Object>
   </ItemGroup>

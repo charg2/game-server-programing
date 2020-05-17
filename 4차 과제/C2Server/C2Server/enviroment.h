@@ -7,6 +7,7 @@ namespace c2
 	{
 		constexpr inline size_t SEND_SIGN = 5001U;
 		constexpr inline size_t MAX_CONCURRENT_SEND_COUNT = 256U;
+		constexpr inline size_t CACHE_LINE = 64U;
 	}
 
 	namespace enumeration

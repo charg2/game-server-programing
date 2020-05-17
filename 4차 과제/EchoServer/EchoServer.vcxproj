@@ -90,7 +90,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <Optimization>Disabled</Optimization>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -105,7 +105,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -118,7 +118,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -134,7 +134,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <Optimization>Disabled</Optimization>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -144,64 +144,58 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\C2Server\C2Server\Config.cpp" />
-    <ClCompile Include="..\C2Server\C2Server\JsonParser.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\concurrency\BackOff.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\concurrency\ConcurrentStack.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\concurrency\MemoryPoolTLS.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\concurrency\tls.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\IO\KeyManager.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\network\Packet.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\network\SocketAddress.cpp" />
     <ClCompile Include="..\C2Server\C2Server\OuterServer.cpp" />
-    <ClCompile Include="..\C2Server\C2Server\packet_handler.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\packet_handler_base.cpp" />
     <ClCompile Include="..\C2Server\C2Server\protocol.cpp" />
     <ClCompile Include="..\C2Server\C2Server\Session.cpp" />
-    <ClCompile Include="..\Common\BackOff.cpp" />
-    <ClCompile Include="..\Common\ConcurrentStack.cpp" />
-    <ClCompile Include="..\Common\dump.cpp" />
-    <ClCompile Include="..\Common\KeyManager.cpp" />
-    <ClCompile Include="..\Common\MemoryPoolTLS.cpp" />
-    <ClCompile Include="..\Common\Packet.cpp" />
-    <ClCompile Include="..\Common\packet_handler.cpp" />
-    <ClCompile Include="..\Common\SocketAddress.cpp" />
-    <ClCompile Include="..\Common\tls.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\util\dump.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\util\JsonParser.cpp" />
     <ClCompile Include="EchoServer.cpp" />
     <ClCompile Include="EchoSession.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="packet_handler_echo.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\C2Server\C2Server\Config.h" />
+    <ClInclude Include="..\C2Server\C2Server\concurrency\BackOff.h" />
+    <ClInclude Include="..\C2Server\C2Server\concurrency\concurrency.h" />
+    <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentQueue.h" />
+    <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentStack.h" />
+    <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPoolTLS.h" />
+    <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPool_Queue.h" />
+    <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPool_Stack.h" />
+    <ClInclude Include="..\C2Server\C2Server\concurrency\tls.h" />
     <ClInclude Include="..\C2Server\C2Server\enviroment.h" />
     <ClInclude Include="..\C2Server\C2Server\IOContext.h" />
-    <ClInclude Include="..\C2Server\C2Server\JsonParser.h" />
+    <ClInclude Include="..\C2Server\C2Server\IO\KeyManager.h" />
     <ClInclude Include="..\C2Server\C2Server\macro.h" />
+    <ClInclude Include="..\C2Server\C2Server\network\Packet.h" />
+    <ClInclude Include="..\C2Server\C2Server\network\SocketAddress.h" />
     <ClInclude Include="..\C2Server\C2Server\OuterServer.h" />
     <ClInclude Include="..\C2Server\C2Server\packet_handler.h" />
     <ClInclude Include="..\C2Server\C2Server\pre_compile.h" />
     <ClInclude Include="..\C2Server\C2Server\Session.h" />
-    <ClInclude Include="..\Common\BackOff.h" />
-    <ClInclude Include="..\Common\CircularBuffer.h" />
-    <ClInclude Include="..\Common\concurrency.h" />
-    <ClInclude Include="..\Common\ConcurrentQueue.h" />
-    <ClInclude Include="..\Common\ConcurrentStack.h" />
-    <ClInclude Include="..\Common\dump.h" />
-    <ClInclude Include="..\Common\exception.h" />
-    <ClInclude Include="..\Common\KeyManager.h" />
-    <ClInclude Include="..\Common\MemoryPoolTLS.h" />
-    <ClInclude Include="..\Common\MemoryPool_Queue.h" />
-    <ClInclude Include="..\Common\MemoryPool_Stack.h" />
-    <ClInclude Include="..\Common\network_struct.h" />
-    <ClInclude Include="..\Common\OverlappedContext.h" />
-    <ClInclude Include="..\Common\Packet.h" />
-    <ClInclude Include="..\Common\packet_handler.h" />
+    <ClInclude Include="..\C2Server\C2Server\util\dump.h" />
+    <ClInclude Include="..\C2Server\C2Server\util\exception.h" />
+    <ClInclude Include="..\C2Server\C2Server\util\JsonParser.h" />
     <ClInclude Include="..\Common\protocol.h" />
-    <ClInclude Include="..\Common\SocketAddress.h" />
-    <ClInclude Include="..\Common\tls.h" />
     <ClInclude Include="EchoServer.h" />
     <ClInclude Include="EchoSession.h" />
     <ClInclude Include="main.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\C2Server\C2Server\concurrency\spin_wait.asm" />
     <None Include="..\C2Server\C2Server\config.json" />
-    <None Include="..\Common\spin_wait.asm" />
     <None Include="config.json" />
   </ItemGroup>
   <ItemGroup>
-    <Object Include="..\Common\spin_wait.obj" />
+    <Object Include="..\C2Server\C2Server\concurrency\spin_wait.obj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

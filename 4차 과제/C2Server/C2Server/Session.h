@@ -31,12 +31,10 @@ class CircularBuffer;
 
 // post_recv -> +1 
 // recv_completion -> -1
-
 // session_id 스탬프로 쓰고.
 // 생성 소멸용 레퍼카운트를씀.
 // ref count 올릴때... 
 /*
-
 1. 서버에서 접근
 2. recv 시작시....  // 처음에만 올릴거임 항상 recv유지할겅기 때문에.
 3. send  // 실제로 보낼때?
@@ -71,7 +69,7 @@ public:
 	void increase_refer();
 	void decrease_refer();
 
-private:
+public:
 	// read and write frequently.
 	int64_t			refer_count;	// 8
 	int64_t			session_id;		// 8
@@ -80,8 +78,6 @@ private:
 	c2::Packet*		sent_packets[c2::constant::MAX_CONCURRENT_SEND_COUNT]; //   
 	c2::Packet		recv_packet;
 
-
-	// c2::concurrent_queue packet buffer;
 	uint64_t						packet_sent_count;
 	c2::concurrency::ConcurrentQueue<c2::Packet*>	send_buffer;
 

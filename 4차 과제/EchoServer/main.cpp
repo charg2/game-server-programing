@@ -1,5 +1,6 @@
 #include "main.h"
 #include "EchoServer.h"
+
 void main()
 {
 	EchoServer server;
@@ -8,7 +9,8 @@ void main()
 
 	server.initialize();
 
-	server.finalize();
+	
+	Sleep(INFINITE);
 
-	//server.finalize();
+	server.finalize();
 }

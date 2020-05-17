@@ -309,6 +309,7 @@ namespace c2
 
 
 
+
 	private:
 		char*	buffer;
 		size_t	payload_capacity;

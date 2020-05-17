@@ -1,6 +1,17 @@
 #pragma once
 
+#include <type_traits>
 #include "concurrency/ConcurrentStack.h"
+
+
+#define session_mapping_helper( session_class ) \
+static_assert(std::is_base_of<Session, session_class>::value, #session_class ## "is not derived from Session"); \
+session_class* session_class##_ptr = (session_class*)HeapAlloc(session_heap, 0, sizeof(session_class) * capacity); \
+for (size_t i = 0; i < capacity; ++i) \
+{ \
+sessions[i] = (Session*)&session_class##_ptr[i]; \
+new(sessions[i]) session_class(); \
+} \
 
 class Session;
 class OuterServer
@@ -24,6 +35,7 @@ public:
 	bool init_sessions();
 	bool init_threads();
 	
+	void start();
 	void finalize();
 
 	virtual void		on_connect(uint64_t session_id);
@@ -73,12 +85,10 @@ protected:
 	c2::enumeration::ErrorCode	custom_last_server_error;	// 8  user
 	c2::enumeration::ErrorCode	custom_last_os_error;		// 8  kernel
 
-
 	Session**					sessions;					// 8
-	uint16_t					max_listening_count;		// 2
+	uint16_t					maximum_listening_count;		// 2
 	HANDLE						session_heap;				//8 
-	uint64_t					concurrent_connected_user;	// 8 
-
+	uint16_t					maximum_accpet_count;	// 8 
 
 	size_t						concurrent_thread_count;	// 8
 	wchar_t						ip[16];						// 32
@@ -90,10 +100,11 @@ protected:
 
 	c2::concurrency::ConcurrentStack<uint64_t, 5000>	id_pool;
 
-	alignas(64)	int64_t		total_recv_bytes;			// 8
-	alignas(64)	int64_t		total_recv_count;			// 8
-	alignas(64)	int64_t		total_sent_bytes;			// 8
-	alignas(64)	int64_t		total_sent_count;			// 8
+	alignas(c2::constant::CACHE_LINE)	int64_t		total_recv_bytes;			// 8
+	alignas(c2::constant::CACHE_LINE)	int64_t		total_recv_count;			// 8
+	alignas(c2::constant::CACHE_LINE)	int64_t		total_sent_bytes;			// 8
+	alignas(c2::constant::CACHE_LINE)	int64_t		total_sent_count;			// 8
+	alignas(c2::constant::CACHE_LINE)	uint64_t	current_accepted_count;			// 8
 
 private:
 	static inline LPFN_ACCEPTEX		accept_ex		{};

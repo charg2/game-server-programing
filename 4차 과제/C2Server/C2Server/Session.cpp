@@ -243,6 +243,8 @@ void Session::accept_completion()
 	//{
 	//}
 
+	InterlockedIncrement(&server->current_accepted_count); 
+	
 	// 인터락 증감을 하지 않고 대로 사용함.
 	this->post_recv();
 }
@@ -263,6 +265,7 @@ void Session::parse_packet()
 	using namespace c2::enumeration;
 
 	c2::Packet* local_packet = &recv_packet;
+	local_packet->clear();
 
 	PacketHeader header{};
 

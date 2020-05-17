@@ -11,15 +11,18 @@
 
 //thread_local size_t OuterServer::local_storage_accessor {};
 
+
+
+
 OuterServer::OuterServer()
 	: listen_sock{ INVALID_SOCKET }, completion_port{ INVALID_HANDLE_VALUE }, accepter{ INVALID_HANDLE_VALUE }, session_heap{ INVALID_HANDLE_VALUE }
 	, io_handler{ nullptr }, ip{}, port{ 0 }, sessions{ }
 	, custom_last_server_error{ c2::enumeration::ER_NONE }, custom_last_os_error{ c2::enumeration::ER_NONE } // error'
-	, concurrent_connected_user{ 0 }, concurrent_thread_count{ 0 }
+	, maximum_accpet_count{ 0 }, concurrent_thread_count{ 0 }
 	, version{}
 	, enable_nagle_opt{ false }, enable_keep_alive_opt{}
-	, max_listening_count{}, capacity{}
-	, total_recv_count{}, total_recv_bytes{}, total_sent_bytes{}, total_sent_count{}
+	, maximum_listening_count{}, capacity{}
+	, total_recv_count{}, total_recv_bytes{}, total_sent_bytes{}, total_sent_count{}, current_accepted_count{}
 {}
 
 OuterServer::~OuterServer()
@@ -138,6 +141,7 @@ bool OuterServer::init_sessions()
 		c2::util::crash_assert();
 	}
 
+	// 배열 생성.
 	sessions = (Session**)HeapAlloc(session_heap, HEAP_GENERATE_EXCEPTIONS, sizeof(Session*) * this->capacity);
 	for (int n = 0; n < this->capacity; ++n)
 	{
@@ -176,12 +180,43 @@ bool OuterServer::init_threads()
 	return true;
 }
 
+void OuterServer::start()
+{
+	uint16_t	local_maximum_accept_count = this->maximum_accpet_count;
+	size_t		accpet_waiting_count = 0;
+	size_t		id = 0;
+	// 대기하고 
+
+	// session 꺼내서 
+	for (;;)
+	{
+		//  대기인수보다 적게 대기 하고 있거나  +  stack 비어있지 않을때
+		while (accpet_waiting_count - this->current_accepted_count < local_maximum_accept_count)
+		{
+			if (id_pool.try_pop(id))
+			{
+				Session* session = this->acquire_session_ownership(id);
+
+				session->post_accept();
+
+				accpet_waiting_count += 1;
+			}
+			else
+			{
+				Sleep(100);
+			}
+		}
+
+		// 아니면 입력 감시.
+	}
+}
+
 void OuterServer::accepter_procedure(uint64_t idx)
 {
 	SOCKET		local_listen_sock = this->listen_sock;
 	uint64_t	post_accepted_counter = 0;
 
-	if (SOCKET_ERROR == listen(local_listen_sock, SOMAXCONN_HINT(this->max_listening_count)))
+	if (SOCKET_ERROR == listen(local_listen_sock, SOMAXCONN_HINT(this->maximum_listening_count)))
 	{
 		this->custom_last_os_error = c2::enumeration::ER_ACCEPTEX_LAODING_FAILURE; // ;
 		return;
@@ -313,10 +348,10 @@ bool OuterServer::initialize()
 		if (false == init_network_and_system())
 			break;
 
-		if (false == init_threads())
+		if (false == init_sessions())
 			break;
 
-		if (false == init_sessions())
+		if (false == init_threads())
 			break;
 
 
@@ -332,33 +367,15 @@ void OuterServer::finalize()
 	this->destroy_sessions();
 }
 
-
-void OuterServer::on_connect(uint64_t session_id)
-{
-}
-
-void OuterServer::on_disconnect(uint64_t session_id)
-{
-}
-
+void OuterServer::on_connect(uint64_t session_id){}
 bool OuterServer::on_accept(Session* session)
 {
 	return false;
 }
 
-void OuterServer::on_wake_io_thread()
-{
-}
-
-void OuterServer::on_sleep_io_thread()
-{
-}
-
-//Session* OuterServer::create_sessions(size_t n)
-//{
-//	return reinterpret_cast<Session*>(HeapAlloc(session_heap, 0, sizeof(Session) * n));
-//	//return reinterpret_cast<Session*>(new Session[n]);
-//}
+void OuterServer::on_disconnect(uint64_t session_id){}
+void OuterServer::on_wake_io_thread() {}
+void OuterServer::on_sleep_io_thread() {}
 
 void OuterServer::on_create_sessions(size_t n)
 {
@@ -443,7 +460,6 @@ void OuterServer::release_session(Session* session)
 
 void OuterServer::disconnect_after_sending_packet(uint64_t session_id, c2::Packet* out_packet)
 {
-
 }
 
 void OuterServer::send_packet(uint64_t session_id, c2::Packet* out_packet)
@@ -554,7 +570,7 @@ size_t OuterServer::get_total_sent_bytes()
 
 constexpr size_t OuterServer::get_ccu() const
 {
-	return concurrent_connected_user;
+	return maximum_accpet_count;
 }
 
 const wchar_t* OuterServer::get_version() const
@@ -602,7 +618,10 @@ void OuterServer::load_config_using_json(const wchar_t* file_name)
 	if (false == json_file.get_uint16(L"capacity", this->capacity))
 		c2::util::crash_assert();
 
-	if (false == json_file.get_uint16(L"max_listening_count", this->max_listening_count))
+	if (false == json_file.get_uint16(L"maximum_listening_count", this->maximum_listening_count))
+		c2::util::crash_assert();
+
+	if (false == json_file.get_uint16(L"maximum_accpet_count", this->maximum_accpet_count))
 		c2::util::crash_assert();
 
 	return;
