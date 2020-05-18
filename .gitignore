@@ -6,6 +6,9 @@
 # Prerequisites
 *.d
 
+##dumpo
+*.dmp
+
 # Compiled Object files
 *.slo
 *.lo
