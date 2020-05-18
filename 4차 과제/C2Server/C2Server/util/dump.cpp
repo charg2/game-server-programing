@@ -27,6 +27,12 @@ namespace c2::diagnostics
 
 	LONG WINAPI ExceptionFilter(EXCEPTION_POINTERS* e)
 	{
+		printf("Exception : 0x%08X\r\n",
+			e->ExceptionRecord->ExceptionCode);
+		printf("Exception Address : 0x%08p\r\n",
+			e->ExceptionRecord->ExceptionAddress);
+
+
 		static uint64_t dump_count = 0;
 		uint64_t ret = InterlockedIncrement(&dump_count);
 

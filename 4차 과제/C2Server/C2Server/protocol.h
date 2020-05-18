@@ -37,20 +37,20 @@ namespace c2::enumeration
 
 using namespace c2::enumeration;
 
+//struct PacketHeaderBase
+//{
+//	uint16_t   length;
+//	PacketType type;
+//
+//	static constexpr size_t header_length{ sizeof(uint16_t) + sizeof(PacketType) };
+//};
+
 struct PacketHeader 
 {
 	uint16_t   length;
 	PacketType type;
 
 	static constexpr size_t header_length { sizeof(uint16_t) + sizeof(PacketType) };
-};
-
-struct PacketHeaderBase
-{
-	uint16_t   length;
-	PacketType type;
-
-	static constexpr size_t header_length{ sizeof(uint16_t) + sizeof(PacketType) };
 };
 
 

@@ -7,24 +7,22 @@ using namespace c2::enumeration;
 Session::Session() :
 refer_count{ 0 }, send_flag{ 0 }, packet_sent_count{ 0 },
 recv_packet{ }, 
-accept_context{ {}, IO_ACCEPT, nullptr},
-send_context{ {},  IO_SEND, nullptr }, 
-recv_context{ {},  IO_RECV, nullptr }, 
-discon_context{ {},IO_DISCONNECT, nullptr },
+accept_context{ {}, IO_ACCEPT, this}, send_context{ {},  IO_SEND, this },
+recv_context{ {},  IO_RECV, this }, discon_context{ {},IO_DISCONNECT, this },
 sock_addr{}, total_recv_bytes{}, total_sent_bytes{},
 release_flag{}, io_cancled{}, sock{ INVALID_SOCKET }, server{ nullptr }
 {
-
+	this->sock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 }
 
-Session::~Session()
-{
-}
+Session::~Session(){}
 
 static char global_buffer[sizeof sockaddr_in * 2 + 32];
 
 void Session::post_accept()
 {
+	printf("session::post_accpet() : %d\n", session_id);
+
 	this->increase_refer();
 
 	DWORD bytes = 0;
@@ -40,7 +38,6 @@ void Session::post_accept()
 		{
 			debug_code( wprintf(L"AcceptEx failed with error: %u\n", WSAGetLastError()) );
 		}
-
 		// 그냥ㄹ 리턴
 
 		// 실패했다면 
@@ -81,12 +78,12 @@ void Session::post_recv()
 
 
 	int64_t ret_val = WSARecv(sock, wsa_bufs, buffer_count, NULL, (LPDWORD)&flag, &this->recv_context.overalpped, NULL);
-	if (SOCKET_ERROR == ret_val)
+	if (SOCKET_ERROR == ret_val)	
 	{
 		uint32_t local_last_error = GetLastError();
 		if (WSA_IO_PENDING != local_last_error)
 		{
-			debug_code( printf("[ERROR] %s, %s, %s : %d \n", __FILE__, __LINE__ , __FUNCSIG__, local_last_error) );
+			//debug_code( printf("[ERROR] %s, %s, %s : %d \n", __FILE__, __LINE__ , __FUNCSIG__, local_last_error) );
 			
 			int64_t ret_val = InterlockedDecrement64(&this->refer_count);
 
@@ -168,12 +165,11 @@ void Session::post_send()
 			uint32_t local_last_error = GetLastError();
 			if (WSA_IO_PENDING != local_last_error)
 			{
-				debug_console(printf("ret_val of WSASend() is not IO_PENDING  : %d \n", local_last_error));
+				//debug_console(printf("ret_val of WSASend() is not IO_PENDING  : %d \n", local_last_error));
 
 				InterlockedDecrement64(&this->refer_count);
 
 				//this->decrease_refer();
-				
 				if (1 == InterlockedExchange(&this->io_cancled, 1))
 				{
 					request_disconnection();
@@ -193,6 +189,7 @@ void Session::post_send()
 void Session::recv_completion(size_t transfered_bytes)
 {
 	this->recv_buffer.move_front(transfered_bytes);
+	//printf("recv_completion : %d, free size : %d \n", transfered_bytes, recv_buffer.get_free_size());
 	if (0 == this->recv_buffer.get_free_size())
 	{
 		if (0 == InterlockedDecrement64(&this->refer_count))
@@ -203,9 +200,12 @@ void Session::recv_completion(size_t transfered_bytes)
 		return;
 	}
 
-	this->parse_packet();
+	//this->parse_packet();
+	this->parse_packet_echo();
 
-	InterlockedAdd64(&server->total_recv_bytes ,transfered_bytes);
+	InterlockedAdd64(&server->total_recv_bytes, transfered_bytes);
+
+	InterlockedIncrement64(&server->total_recv_count);
 
 	this->post_recv();
 }
@@ -223,11 +223,16 @@ void Session::send_completion(size_t transfered_bytes)
 
 	this->post_send();
 
+	InterlockedAdd64(&server->total_sent_bytes, transfered_bytes);
+
+	InterlockedIncrement64(&server->total_sent_count);
+
 	server->release_session_ownership( this->session_id);
 }
 
 void Session::accept_completion()
 {
+	//printf("accept_acompletion id : %d \n", session_id);
 	HANDLE returned_hanlde = CreateIoCompletionPort((HANDLE)this->sock, server->completion_port, session_id, 0);
 	if(returned_hanlde == NULL ||  returned_hanlde != server->completion_port)
 	{
@@ -296,8 +301,52 @@ void Session::parse_packet()
 
 		recv_buffer.move_rear(header.length);
 	}
-
 }
+
+void Session::parse_packet_echo()
+{
+	using namespace c2::enumeration;
+
+	c2::Packet* local_packet = &recv_packet;
+	local_packet->clear();
+	PacketHeader temp{};
+	uint16_t header{};
+
+	for (;;)
+	{
+		size_t payload_length = recv_buffer.get_use_size();
+		if (sizeof(uint16_t) > payload_length)
+		{
+			return;
+		}
+
+		recv_buffer.peek( (char*)&header, sizeof(uint16_t) );
+		if ( ( header + sizeof(header)) > payload_length)
+		{
+			return;
+		}
+
+		header += sizeof(header);
+
+		size_t direct_deque_size = recv_buffer.direct_dequeue_size();
+		if (direct_deque_size >= header)
+		{
+			local_packet->write(recv_buffer.get_rear_buffer(), header);
+		}
+		else
+		{
+			local_packet->write(recv_buffer.get_rear_buffer(), direct_deque_size);
+			local_packet->write(recv_buffer.get_buffer(),  header - direct_deque_size);
+		}
+
+		handler_table[c2::enumeration::PacketType::PT_CS_ECHO](this, temp, *local_packet);
+
+		local_packet->clear();
+
+		recv_buffer.move_rear(header);
+	}
+}
+
 
 void Session::reset()
 {

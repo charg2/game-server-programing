@@ -43,8 +43,9 @@ public:
 	virtual bool		on_accept(Session* session);
 	virtual void		on_wake_io_thread();
 	virtual void		on_sleep_io_thread();
-
 	
+	virtual void		on_update();
+
 	virtual void		on_create_sessions(size_t n);
 	void				destroy_sessions();
 

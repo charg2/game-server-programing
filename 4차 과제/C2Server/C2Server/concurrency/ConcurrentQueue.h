@@ -26,11 +26,10 @@ namespace c2::concurrency
 	class ConcurrentQueue
 	{
 	public:
-		struct Node
+		struct alignas(16)  Node
 		{
 			Node* next;
 			T	  data;
-	
 		};
 
 		struct alignas(16) EndNode
@@ -59,8 +58,8 @@ namespace c2::concurrency
 		{
 			node_pool = new c2::concurrency::ConcurrentQueueMemoryPool<Node, 4096, false>;
 
-			head = (EndNode*)_aligned_malloc(sizeof(EndNode), 16);
-			tail = (EndNode*)_aligned_malloc(sizeof(EndNode), 16);
+			head = (EndNode*)_aligned_malloc(sizeof(EndNode), 64);
+			tail = (EndNode*)_aligned_malloc(sizeof(EndNode), 64);
 
 			head->node = tail->node = node_pool->alloc();
 			//head->node = tail->node = new Node;
@@ -82,7 +81,6 @@ namespace c2::concurrency
 
 		// tail 에 한개를 넘게 붙는 경우는 없음.
 		// 결국 두번째 녀석이 계속 밀어줌
-
 		void push(T src)
 		{
 			Node* node		= node_pool->alloc();
@@ -91,17 +89,17 @@ namespace c2::concurrency
 
 			for (;;)
 			{
-				EndNode local_tail{ tail->node, tail->id };
+				EndNode local_tail{ tail->node, tail->id }; // 캡처
 
-				if (nullptr == local_tail.node->next) // 비었으면?
+				if (nullptr == local_tail.node->next)		// 비었으면?
 				{
 					if (NULL == InterlockedCompareExchange64((int64_t*)&this->tail->node->next, (int64_t)node, NULL)) // 꼬리에 붙이기.
 					{
-						InterlockedIncrement64(&this->size);
+						InterlockedIncrement64(&this->size);		// 카운트 
 
-						if (tail->node->next != nullptr) // 와 고새 누가 밀어줌 개굴따리ㅋㅋ 비싼 연산 안해도 됨.. 
+						if (tail->node->next != nullptr)			// 와 고새 누가 밀어줌 개굴따리ㅋㅋ 비싼 연산 안해도 됨.. 
 						{
-							InterlockedCompareExchange128((int64_t*)tail, local_tail.id + 1, (int64_t)local_tail.node->next, (int64_t*)&local_tail);
+							InterlockedCompareExchange128((int64_t*)tail, local_tail.id + 1, (int64_t)local_tail.node->next, (int64_t*)&local_tail); 
 						}
 
 						break;
@@ -110,11 +108,11 @@ namespace c2::concurrency
 				else // node를 못 넣는 경우 꼬리를 밀음.
 				{
 					if (local_tail.node->next != nullptr) // 제발 누가 밀었어라;;.
-						InterlockedCompareExchange128((int64_t*)& tail, local_tail.id + 1, (int64_t)local_tail.node->next, (int64_t*)& local_tail);
+					{
+						InterlockedCompareExchange128((int64_t*)tail, local_tail.id + 1, (int64_t)local_tail.node->next, (int64_t*)&local_tail);
+					}
 				}
 			}
-
-			
 		}
 
 
@@ -129,8 +127,8 @@ namespace c2::concurrency
 			}
 
 			// 캡처.
-			EndNode		local_head;
-			EndNode		local_tail;
+			alignas(16) EndNode		local_head;
+			alignas(16) EndNode		local_tail;
 			Node*		next_node;
 
 			for (;;)
@@ -143,13 +141,14 @@ namespace c2::concurrency
 
 				if (local_head.node == local_tail.node) // 노드 안밀렸을때.
 				{
-					if (nullptr == local_head.node->next) // 
+					if (nullptr == local_head.node->next)
 					{
 						continue;
 					}
 					else if (local_tail.node->next != nullptr) 
 					{
-						InterlockedCompareExchange128((int64_t*)& tail, local_tail.id + 1, (int64_t)local_tail.node->next, (int64_t*)& local_tail);
+						InterlockedCompareExchange128((int64_t*)tail, local_tail.id + 1, (int64_t)local_tail.node->next, (int64_t*)&local_tail);
+						//InterlockedCompareExchange128((int64_t*)&tail, local_tail.id + 1, (int64_t)local_tail.node->next, (int64_t*)& local_tail);
 						continue;
 					}
 				}

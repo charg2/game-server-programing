@@ -31,3 +31,25 @@ bool EchoServer::on_accept(Session* session) { return true; }
 void EchoServer::on_wake_io_thread(){}
 void EchoServer::on_sleep_io_thread(){}
 void EchoServer::custom_precedure(uint64_t idx) {}
+
+void EchoServer::on_update()
+{
+	static size_t count = 0;
+
+	count += 1;
+	if (count > 30)
+	{
+		printf("total send count : %d \n total recv count : %d \n total send bute : %d \n total recv byte : %d \n "\
+			, total_sent_count
+			, total_recv_count
+			, total_sent_bytes
+			, total_recv_bytes);
+
+		count = 0;
+	}
+}
+
+//void EchoServer::on_update()
+//{
+//	//
+//}

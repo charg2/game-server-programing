@@ -33,7 +33,7 @@ bool OuterServer::init_network_and_system()
 	WSAData wsa;
 	if (0 != WSAStartup(MAKEWORD(2, 2), &wsa))
 	{
-		debug_code(printf("%s::%s \n", __FILE__, #__LINE__));
+		//debug_code(printf("%s::%s \n", __FILE__, #__LINE__));
 
 		this->custom_last_os_error = c2::enumeration::ER_COMPLETION_PORT_INITIATION_FAILURE;
 
@@ -59,7 +59,7 @@ bool OuterServer::init_network_and_system()
 	}
 
 
-	HANDLE returned_hanlde = CreateIoCompletionPort((HANDLE)this->listen_sock, this->completion_port, 0, 0);
+	HANDLE returned_hanlde = CreateIoCompletionPort((HANDLE)this->listen_sock, this->completion_port, c2::constant::ASYNC_ACCEPT_SIGN, 0);
 	if (returned_hanlde == NULL || returned_hanlde != this->completion_port)
 	{
 		debug_code(printf("%s::%s \n", __FILE__, __LINE__));
@@ -182,32 +182,35 @@ bool OuterServer::init_threads()
 
 void OuterServer::start()
 {
-	uint16_t	local_maximum_accept_count = this->maximum_accpet_count;
-	size_t		accpet_waiting_count = 0;
-	size_t		id = 0;
-	// 대기하고 
+	//const uint16_t	maximum_accept_waiting_count = this->maximum_accpet_count;
+	//size_t			accpet_waiting_count = 0;
+	//size_t			id = 0;
 
 	// session 꺼내서 
 	for (;;)
 	{
-		//  대기인수보다 적게 대기 하고 있거나  +  stack 비어있지 않을때
-		while (accpet_waiting_count - this->current_accepted_count < local_maximum_accept_count)
-		{
-			if (id_pool.try_pop(id))
-			{
-				Session* session = this->acquire_session_ownership(id);
+		////  대기인수보다 적게 대기 하고 있거나  +  stack 비어있지 않을때
+		//while (accpet_waiting_count - this->current_accepted_count < maximum_accept_waiting_count)
+		//{
+		//	if (id_pool.try_pop(id))
+		//	{
+		//		Session* session = this->acquire_session_ownership(id);
 
-				session->post_accept();
+		//		session->post_accept();
 
-				accpet_waiting_count += 1;
-			}
-			else
-			{
-				Sleep(100);
-			}
-		}
+		//		accpet_waiting_count += 1;
 
-		// 아니면 입력 감시.
+		//		release_session_ownership(id);
+		//	}
+		//	else
+		//	{
+		//		break;
+		//	}
+		//}
+
+		//on_update();
+
+		Sleep(30);
 	}
 }
 
@@ -222,14 +225,46 @@ void OuterServer::accepter_procedure(uint64_t idx)
 		return;
 	}
 
-	// concurrent_stack 을통해서 꺼냄.
-	for (; post_accepted_counter < this->capacity; )
+	//// concurrent_stack 을통해서 꺼냄.
+	//for (; post_accepted_counter < this->capacity; )
+	//{
+	//	// 세션을 얻고...
+
+	//	post_accepted_counter += 1;
+
+	//	Sleep(100);
+	//}
+
+	const uint16_t	maximum_accept_waiting_count = this->maximum_accpet_count;
+	size_t			accpet_waiting_count = 0;
+	size_t			id = 0;
+
+	// session 꺼내서 
+	for (;;)
 	{
-		// 세션을 얻고...
+		//  대기인수보다 적게 대기 하고 있거나  +  stack 비어있지 않을때
+		while (accpet_waiting_count - this->current_accepted_count < maximum_accept_waiting_count)
+		{
+			if (id_pool.try_pop(id))
+			{
+				Session* session = this->acquire_session_ownership(id);
 
-		post_accepted_counter += 1;
+				session->post_accept();
 
-		Sleep(100);
+				accpet_waiting_count += 1;
+
+				printf("id : %d \n", session->session_id);
+				release_session_ownership(id);
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		on_update();
+
+		Sleep(30);
 	}
 
 
@@ -245,9 +280,9 @@ void OuterServer::io_service_procedure(uint64_t custom_thread_id)
 
 	for (;;)
 	{
-		DWORD			transfered_bytes{};
-		LPOVERLAPPED	overlapped_ptr{};
-		ULONG_PTR		completion_key{};
+		DWORD			transfered_bytes	{};
+		LPOVERLAPPED	overlapped_ptr		{};
+		ULONG_PTR		completion_key		{};
 
 		bool ret = GetQueuedCompletionStatus(local_completion_port, &transfered_bytes, &completion_key, &overlapped_ptr, INFINITE);
 		if (completion_key == 0 && overlapped_ptr == nullptr && transfered_bytes == 0)
@@ -257,6 +292,18 @@ void OuterServer::io_service_procedure(uint64_t custom_thread_id)
 
 		on_wake_io_thread();
 
+		// accpet 처리.
+		if (completion_key == c2::constant::ASYNC_ACCEPT_SIGN)
+		{
+			IoContext* context_ptr{ reinterpret_cast<IoContext*>(overlapped_ptr) };
+			Session* session = (Session*)context_ptr->session;
+			
+			session->accept_completion();
+
+			continue;
+		}
+
+		// 
 		Session* session = acquire_session_ownership(completion_key);
 		if (nullptr == session)
 		{
@@ -264,14 +311,16 @@ void OuterServer::io_service_procedure(uint64_t custom_thread_id)
 		}
 
 		// acquire session
-		if ((size_t)overlapped_ptr == c2::constant::SEND_SIGN)
+		if ((size_t)overlapped_ptr == c2::constant::SEND_SIGN) 
 		{
 			session->post_send();
+
+			release_session_ownership(completion_key);
+
 			continue;
 		}
 
-		IoContext* context_ptr{ reinterpret_cast<IoContext*>(overlapped_ptr) };
-
+		IoContext* context_ptr	{ reinterpret_cast<IoContext*>(overlapped_ptr) };
 		switch (context_ptr->io_type)
 		{
 		case IO_RECV:
@@ -282,14 +331,13 @@ void OuterServer::io_service_procedure(uint64_t custom_thread_id)
 			session->send_completion(transfered_bytes);
 			break;
 
-		case IO_ACCEPT:
-			session->accept_completion();
-			break;
-
 		case IO_DISCONNECT:
 			session->disconnect_completion();
 			break;
 
+		case IO_ACCEPT:
+			//session->accept_completion();
+			//break;
 		default:
 			c2::util::crash_assert();
 			break;
@@ -377,6 +425,10 @@ void OuterServer::on_disconnect(uint64_t session_id){}
 void OuterServer::on_wake_io_thread() {}
 void OuterServer::on_sleep_io_thread() {}
 
+void OuterServer::on_update()
+{
+}
+
 void OuterServer::on_create_sessions(size_t n)
 {
 	Session* sessions_ptr = (Session*)HeapAlloc(session_heap, 0, sizeof(Session) * n);
@@ -406,7 +458,7 @@ void OuterServer::request_disconnection(uint64_t session_id, c2::enumeration::Di
 
 	if (session->release_flag != 1)
 	{
-		debug_console(printf("OuterServer::disconnect() : session_id : %d, ref_count : %d", session->session_id, session->refer_count));
+		//debug_console(printf("OuterServer::disconnect() : session_id : %d, ref_count : %d", session->session_id, session->refer_count));
 		c2::util::crash_assert();
 	}
 
@@ -493,7 +545,6 @@ Session* OuterServer::acquire_session_ownership(int64_t index)
 	Session* session = sessions[(uint16_t)index];
 	if (0 >= InterlockedIncrement64(&session->refer_count))
 	{
-
 		debug_code(printf("%s:%s \n", __FILE__, __LINE__));
 		c2::util::crash_assert();
 	}
@@ -502,13 +553,14 @@ Session* OuterServer::acquire_session_ownership(int64_t index)
 	{
 		// 문제가 발생한 상황.
 		inline_decrease_refer(session, c2::enumeration::DisconnectReason::DR_NONE);
+		
+		c2::util::crash_assert();
 
 		return nullptr;
 	}
 
 	// disconnectEx를 걸어야 하나;
-
-
+	return session;
 }
 
 void OuterServer::release_session_ownership(int64_t session_id)
@@ -621,7 +673,7 @@ void OuterServer::load_config_using_json(const wchar_t* file_name)
 	if (false == json_file.get_uint16(L"maximum_listening_count", this->maximum_listening_count))
 		c2::util::crash_assert();
 
-	if (false == json_file.get_uint16(L"maximum_accpet_count", this->maximum_accpet_count))
+	if (false == json_file.get_uint16(L"maximum_accept_count", this->maximum_accpet_count))
 		c2::util::crash_assert();
 
 	return;

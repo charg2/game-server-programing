@@ -6,6 +6,8 @@ class EchoSession : public Session
 {
 public :
 	EchoSession();
-	~ EchoSession();
+	~EchoSession();
+
+
 };
 

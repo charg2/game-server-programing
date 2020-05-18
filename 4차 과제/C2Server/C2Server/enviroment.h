@@ -6,6 +6,9 @@ namespace c2
 	namespace constant
 	{
 		constexpr inline size_t SEND_SIGN = 5001U;
+		//constexpr inline size_t SEND_SIGN = 'SEND' + 1;
+		//static_assert( ( SEND_SIGN % 4 ) != 0, "Send sign must  " );
+		constexpr inline size_t ASYNC_ACCEPT_SIGN = 5003U;
 		constexpr inline size_t MAX_CONCURRENT_SEND_COUNT = 256U;
 		constexpr inline size_t CACHE_LINE = 64U;
 	}
@@ -14,10 +17,10 @@ namespace c2
 	{
 		enum IoType 
 		{
-			IO_ACCEPT,
 			IO_RECV,
 			IO_SEND,
 			IO_DISCONNECT,
+			IO_ACCEPT,
 		};
 
 		enum ErrorCode
@@ -46,8 +49,7 @@ namespace c2
 		};
 
 		enum SessionState
-		{
-		};
+		{};
 
 		enum ThreadType
 		{
