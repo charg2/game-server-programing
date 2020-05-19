@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+// for mmo termp
 namespace c2::enumeration
 {
 	enum PacketType : uint16_t
@@ -30,7 +31,6 @@ namespace c2::enumeration
 
 		PT_MAX,
 	};
-
 }
 
 #pragma pack(push, 1)
