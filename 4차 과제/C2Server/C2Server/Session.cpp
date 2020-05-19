@@ -200,8 +200,8 @@ void Session::recv_completion(size_t transfered_bytes)
 		return;
 	}
 
-	//this->parse_packet();
-	this->parse_packet_echo();
+	this->parse_packet();
+	//this->parse_packet_echo();
 
 	InterlockedAdd64(&server->total_recv_bytes, transfered_bytes);
 
