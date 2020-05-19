@@ -4,33 +4,48 @@
 
 namespace c2::enumeration
 {
+	//enum PacketType : uint16_t
+	//{
+	//	PT_NONE,
+
+	//	PT_CS_HI,
+
+	//	PT_SC_HI,
+	//	PT_SC_OTHER_INFO,
+	//	PT_SC_HI_AROUND,
+	//	
+	//	PT_CS_CHATTING,
+	//	PT_SC_CHATTING,
+
+	//	PT_CS_MOVE,
+	//	PT_SC_MOVE,
+
+	//	PT_CS_BYE,
+	//	PT_SC_BYE,
+
+	//	PT_CS_HEARTBEAT,
+	//	PT_SC_HEARTBEAT,
+
+	//	PT_SC_ECHO,
+	//	PT_CS_ECHO,
+
+	//	PT_MAX,
+	//};
+
 	enum PacketType : uint16_t
 	{
 		PT_NONE,
 
-		PT_CS_HI,
-		PT_SC_HI,
-		PT_SC_OTHER_INFO,
-		PT_SC_HI_AROUND,
+		C2S_LOGIN,
+		C2S_MOVE,
 		
-		PT_CS_CHATTING,
-		PT_SC_CHATTING,
-
-		PT_CS_MOVE,
-		PT_SC_MOVE,
-
-		PT_CS_BYE,
-		PT_SC_BYE,
-
-		PT_CS_HEARTBEAT,
-		PT_SC_HEARTBEAT,
-
-		PT_SC_ECHO,
-		PT_CS_ECHO,
+		S2C_LOGIN_OK,
+		S2C_MOVE,
+		S2C_ENTER,
+		S2C_LEAVE,
 
 		PT_MAX,
 	};
-
 }
 
 #pragma pack(push, 1)

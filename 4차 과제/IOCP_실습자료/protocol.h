@@ -16,6 +16,8 @@ constexpr int MAX_STR_LEN = 255;
 #define S2C_ENTER			3
 #define S2C_LEAVE			4
 
+
+
 #pragma pack(push ,1)
 
 struct sc_packet_login_ok {

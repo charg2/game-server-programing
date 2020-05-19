@@ -23,6 +23,7 @@
     <ProjectGuid>{F4D3B027-ABC0-4970-A83B-ED1A2CE018DD}</ProjectGuid>
     <RootNamespace>EchoServer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>MMOServer</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
