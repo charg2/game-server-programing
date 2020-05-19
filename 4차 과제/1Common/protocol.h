@@ -28,7 +28,6 @@ namespace c2::enumeration
 
 	//	PT_SC_ECHO,
 	//	PT_CS_ECHO,
-
 	//	PT_MAX,
 	//};
 
