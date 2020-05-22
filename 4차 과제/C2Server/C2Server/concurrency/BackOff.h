@@ -1,3 +1,5 @@
+
+#pragma once
 #include <random>
 #pragma comment(lib, "Winmm")
 
@@ -15,8 +17,8 @@ namespace c2::concurrency
 	public:
 		int limit;
 
-		static constexpr size_t min_delay = 1000;
-		static constexpr size_t max_delay = 10000;
+		static inline constexpr size_t min_delay = 1000;
+		static inline constexpr size_t max_delay = 10000;
 	};
 
 }

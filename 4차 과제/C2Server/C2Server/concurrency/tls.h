@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include "concurrency.h"
 
 #define get_tls_idx()		InterlockedIncrement64(&current_tls_idx)
 #define get_tls(index)		thread_local_storage[index]

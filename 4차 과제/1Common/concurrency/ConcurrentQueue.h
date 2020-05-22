@@ -93,9 +93,9 @@ namespace c2::concurrency
 			{
 				EndNode local_tail{ tail->node, tail->id };
 
-				if (nullptr == local_tail.node->next) // 비었으면?
+				if (nullptr == local_tail.node->next) // first Test
 				{
-					if (NULL == InterlockedCompareExchange64((int64_t*)&this->tail->node->next, (int64_t)node, NULL)) // 꼬리에 붙이기.
+					if (NULL == InterlockedCompareExchange64((int64_t*)&this->tail->node->next, (int64_t)node, NULL)) // second Test
 					{
 						InterlockedIncrement64(&this->size);
 
@@ -110,7 +110,12 @@ namespace c2::concurrency
 				else // node를 못 넣는 경우 꼬리를 밀음.
 				{
 					if (local_tail.node->next != nullptr) // 제발 누가 밀었어라;;.
-						InterlockedCompareExchange128((int64_t*)& tail, local_tail.id + 1, (int64_t)local_tail.node->next, (int64_t*)& local_tail);
+					{
+						if ( 0 == InterlockedCompareExchange128((int64_t*)&tail, local_tail.id + 1, (int64_t)local_tail.node->next, (int64_t*)&local_tail))
+						{
+
+						}
+					}
 				}
 			}
 

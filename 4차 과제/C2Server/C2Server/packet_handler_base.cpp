@@ -9,11 +9,13 @@ HandlerFunc handler_table[PT_MAX] { };
 //#define disconnection_helper( target_session, reason ) session->server->disconnect_session(target_session, reason);
 //#define deserializaton_helper( structor )  in_packet.read(&structor, sizeof(structor));
 // 
+
 REGISTER_HANDLER(PT_NONE)
 {
 	printf("\n\nPT_NONE\n\n");
 	c2::util::crash_assert();
 }
+
 
 //REGISTER_HANDLER(PT_CS_MOVE) 
 //{

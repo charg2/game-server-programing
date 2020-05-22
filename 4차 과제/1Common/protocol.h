@@ -4,41 +4,14 @@
 
 namespace c2::enumeration
 {
-	//enum PacketType : uint16_t
-	//{
-	//	PT_NONE,
-
-	//	PT_CS_HI,
-
-	//	PT_SC_HI,
-	//	PT_SC_OTHER_INFO,
-	//	PT_SC_HI_AROUND,
-	//	
-	//	PT_CS_CHATTING,
-	//	PT_SC_CHATTING,
-
-	//	PT_CS_MOVE,
-	//	PT_SC_MOVE,
-
-	//	PT_CS_BYE,
-	//	PT_SC_BYE,
-
-	//	PT_CS_HEARTBEAT,
-	//	PT_SC_HEARTBEAT,
-
-	//	PT_SC_ECHO,
-	//	PT_CS_ECHO,
-	//	PT_MAX,
-	//};
-
-	enum PacketType : uint16_t
+	enum PacketType : char
 	{
 		PT_NONE,
 
-		C2S_LOGIN,
+		C2S_LOGIN = 1,
 		C2S_MOVE,
 		
-		S2C_LOGIN_OK,
+		S2C_LOGIN_OK = 1,
 		S2C_MOVE,
 		S2C_ENTER,
 		S2C_LEAVE,
@@ -53,129 +26,76 @@ using namespace c2::enumeration;
 
 struct PacketHeader 
 {
-	uint16_t   length;
-	PacketType type;
+	char		length;
+	PacketType	type;
 
 	static constexpr size_t header_length { sizeof(uint16_t) + sizeof(PacketType) };
 };
 
-struct PacketHeaderBase
-{
-	uint16_t   length;
-	PacketType type;
 
-	static constexpr size_t header_length{ sizeof(uint16_t) + sizeof(PacketType) };
-};
-
-
-
-static_assert(sizeof(PacketHeader) == 4, "\"PacketHeader\" struct length must be 4");
 static_assert(sizeof(int32_t) == sizeof(int) && sizeof(uint32_t) == sizeof(unsigned int));
 
-struct HiRequest : public PacketHeader
+struct sc_packet_login_ok 
 {
-	//fixed
+	PacketHeader header;
 
-	struct HiRequest()
-	{
-		length = sizeof(HiRequest); // + 
-		type = PT_CS_HI;
-	}
+	int		id;
+	short	x, y;
+	short	hp;
+	short	level;
+	int		exp;
 };
 
-struct HiResponse : public PacketHeader
+struct sc_packet_move 
 {
-	wchar_t		nickname[16];
-	uint64_t	session_id;
-	int8_t		x;
-	int8_t		y;
-	bool		result;
-	uint32_t	reserve;
-	HiResponse()
-	{
-		length = sizeof(HiResponse);
-		type = PT_SC_HI;
-		reserve = 0xDEADDEAD;
-	}
+	PacketHeader header;
+
+	int id;
+	short x, y;
 };
 
-struct OtherInfo : public PacketHeader
+struct sc_packet_enter 
 {
-	wchar_t		nickname[16];
-	uint64_t	session_id;
-	int8_t		x;
-	int8_t		y;
-	uint32_t	reserve;
+	PacketHeader header;
 
-	OtherInfo()
-	{
-		length = sizeof(OtherInfo);
-		type = PT_SC_OTHER_INFO;
-		reserve = 0xDEADBEEF;
-	}
+	int id;
+	char name[MAX_ID_LEN];
+	char o_type;
+	short x, y;
 };
 
-struct HiResponseAround : public PacketHeader
+struct sc_packet_leave 
 {
-	uint64_t	session_id;
-	wchar_t		nickname[16];
-	int8_t		x;
-	int8_t		y;
+	PacketHeader header;
 
-	HiResponseAround()
-	{
-		length = sizeof(HiResponseAround);
-		type = PT_SC_HI_AROUND;
-	}
+	int id;
 };
 
-struct MoveRequest : public PacketHeader
+struct sc_packet_chat 
 {
-	uint64_t	session_id;
-	int8_t		direction;
+	PacketHeader header;
 
-	static constexpr size_t packet_length{ header_length + sizeof(session_id) + sizeof(direction) };
-
-	MoveRequest()
-	{
-		length = sizeof(MoveRequest);
-		type = PT_CS_MOVE;
-	}
+	int	 id;
+	char chat[100];
 };
 
-struct MoveResponse : public PacketHeader
+struct cs_packet_login 
 {
-	uint64_t		session_id;
-	int8_t			x;
-	int8_t			y;
-	int8_t			z;
+	PacketHeader header;
 
-	MoveResponse()
-	{
-		length = sizeof(MoveResponse);
-		type = PT_SC_MOVE;
-	}
+	char	name[MAX_ID_LEN];
 };
 
-struct ByeRequest : public PacketHeader
-{
-	uint64_t	session_id;
+constexpr unsigned char D_UP = 0;
+constexpr unsigned char D_DOWN = 1;
+constexpr unsigned char D_LEFT = 2;
+constexpr unsigned char D_RIGHT = 3;
 
-	struct ByeRequest()
-	{
-		length = sizeof(ByeRequest);
-		type = PT_CS_BYE;
-	}
+struct cs_packet_move {
+	char	size;
+	char	type;
+	char	direction;
 };
 
-struct ByeResponse : public PacketHeader
-{
-	uint64_t	session_id;
 
-	ByeResponse()
-	{
-		length = sizeof(ByeResponse);
-		type = PT_SC_BYE ;
-	}
-};
 #pragma pack(pop)

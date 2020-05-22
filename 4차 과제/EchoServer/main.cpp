@@ -1,30 +1,17 @@
-#include "main.h"
-#include "EchoServer.h"
-
-
-LONG CALLBACK UnhandledExceptionHandler(EXCEPTION_POINTERS* lpExceptionInfo)
-{
-	printf("Exception : 0x%08X\r\n",
-		lpExceptionInfo->ExceptionRecord->ExceptionCode);
-	printf("Exception Address : 0x%08p\r\n",
-		lpExceptionInfo->ExceptionRecord->ExceptionAddress);
-
-	return EXCEPTION_EXECUTE_HANDLER;
-}
-
+﻿#include "main.h"
 
 void main()
 {
-	EchoServer server;
+	MMOServer* server = new MMOServer();
 	
-	SetUnhandledExceptionFilter(c2::diagnostics::ExceptionFilter);
-	//SetUnhandledExceptionFilter(UnhandledExceptionHandler);
+	server->setup_dump();
 
-	server.load_config_using_json(L"config.json");
+	server->load_config_using_json(L"config.json");
 
-	server.initialize();
+	server->initialize();
 
-	server.start();
+	server->start();
 	
-	server.finalize();
+	server->finalize();
 }
+

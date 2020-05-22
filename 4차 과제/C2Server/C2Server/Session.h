@@ -79,7 +79,7 @@ public:
 	c2::Packet*		sent_packets[c2::constant::MAX_CONCURRENT_SEND_COUNT]; //   
 	c2::Packet		recv_packet;
 
-	uint64_t						packet_sent_count;
+	uint64_t										packet_sent_count;
 	c2::concurrency::ConcurrentQueue<c2::Packet*>	send_buffer;
 
 	IoContext		recv_context;			// 48 ( 32 + 8 + 8 )

@@ -37,3 +37,5 @@ void default_handler(Session* session, PacketHeader header, c2::Packet& in_packe
 	static void handler_##PT_TYPE(Session* session, PacketHeader header,  c2::Packet& in_packet);\
 	static struct RegisterHandler _register_##PT_TYPE(PT_TYPE, handler_##PT_TYPE); \
 	static void handler_##PT_TYPE(Session* session, PacketHeader header,  c2::Packet& in_packet)
+
+

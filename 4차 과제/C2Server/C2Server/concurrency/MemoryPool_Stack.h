@@ -26,7 +26,7 @@ namespace c2::concurrency
 			BlockNode*		next_block;
 		};
 
-		struct alignas(16) TopNode
+		struct alignas(64) TopNode
 		{
 			BlockNode*	node;
 			uint64_t	stamp;
@@ -38,16 +38,22 @@ namespace c2::concurrency
 			heap_handle = HeapCreate( /* HEAP_ZERO_MEMORY */ HEAP_GENERATE_EXCEPTIONS, 0, NULL);
 			if (NULL == heap_handle)
 				c2::util::crash_assert();
-			
-			top				= (TopNode*)HeapAlloc(heap_handle, HEAP_GENERATE_EXCEPTIONS, sizeof(TopNode));
-			top->node		= (BlockNode*)HeapAlloc(heap_handle , HEAP_GENERATE_EXCEPTIONS, sizeof(BlockNode) * Capacity);
-			top->stamp		= 1984;
+
+			top = (TopNode*)HeapAlloc(heap_handle, HEAP_GENERATE_EXCEPTIONS, sizeof(TopNode));
+			top->node = (BlockNode*)HeapAlloc(heap_handle, HEAP_GENERATE_EXCEPTIONS, sizeof(BlockNode) * Capacity);
+			//printf("%s  total size : %d  \n block size : %d  block count : %d \n-------------------\n", "ConcurrentStackMPool", sizeof(BlockNode)* Capacity, sizeof(BlockNode), Capacity);
+			top->stamp = 1984;
 
 			size_t block_size = sizeof(BlockNode);
 			size_t capacity_size = Capacity;
 
-			for ( int n = 0 ; n < Capacity; ++n)
+			//printf("------------------\n start %s \n ptr : %p total size : %llu   block size : %llu  block count : %llu \n", __FILE__, top->node, sizeof(BlockNode)* Capacity, sizeof(BlockNode), Capacity);
+
+			for (int n = 0; n < Capacity; ++n)
+			{
+				//printf("%d ¹øÂ° ptr : %p total size : %llu   block size : %d  block count : %llu \n", n, &top->node[n], sizeof(BlockNode)* Capacity, sizeof(BlockNode), Capacity);
 				new(&top->node[n]) BlockNode;
+			}
 
 			top->node->next_block = &top->node[1];
 
@@ -58,6 +64,8 @@ namespace c2::concurrency
 				newBlock = &top->node[freeBlock_count];
 				newBlock->next_block = &top->node[freeBlock_count + 1];
 			}
+
+			//printf("\n block count : %d   last address : %p \n", this->freeBlock_count, (void*)( (size_t)top->node + (size_t)(sizeof(BlockNode) * Capacity)));
 
 			newBlock->next_block = nullptr;
 		}

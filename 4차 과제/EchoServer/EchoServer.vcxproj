@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -158,10 +158,14 @@
     <ClCompile Include="..\C2Server\C2Server\Session.cpp" />
     <ClCompile Include="..\C2Server\C2Server\util\dump.cpp" />
     <ClCompile Include="..\C2Server\C2Server\util\JsonParser.cpp" />
-    <ClCompile Include="EchoServer.cpp" />
-    <ClCompile Include="EchoSession.cpp" />
+    <ClCompile Include="MMOPlayer.cpp" />
+    <ClCompile Include="MMOSector.cpp" />
+    <ClCompile Include="MMOServer.cpp" />
+    <ClCompile Include="MMOSession.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="packet_handler_echo.cpp" />
+    <ClCompile Include="MMOSimulator.cpp" />
+    <ClCompile Include="MMOZone.cpp" />
+    <ClCompile Include="packet_handler_mmo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\C2Server\C2Server\concurrency\BackOff.h" />
@@ -171,6 +175,7 @@
     <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPoolTLS.h" />
     <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPool_Queue.h" />
     <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPool_Stack.h" />
+    <ClInclude Include="..\C2Server\C2Server\concurrency\MPSCQueue.h" />
     <ClInclude Include="..\C2Server\C2Server\concurrency\tls.h" />
     <ClInclude Include="..\C2Server\C2Server\enviroment.h" />
     <ClInclude Include="..\C2Server\C2Server\IOContext.h" />
@@ -181,18 +186,22 @@
     <ClInclude Include="..\C2Server\C2Server\OuterServer.h" />
     <ClInclude Include="..\C2Server\C2Server\packet_handler.h" />
     <ClInclude Include="..\C2Server\C2Server\pre_compile.h" />
+    <ClInclude Include="..\C2Server\C2Server\protocol.h" />
     <ClInclude Include="..\C2Server\C2Server\Session.h" />
     <ClInclude Include="..\C2Server\C2Server\util\dump.h" />
     <ClInclude Include="..\C2Server\C2Server\util\exception.h" />
     <ClInclude Include="..\C2Server\C2Server\util\JsonParser.h" />
-    <ClInclude Include="..\Common\protocol.h" />
-    <ClInclude Include="EchoServer.h" />
-    <ClInclude Include="EchoSession.h" />
+    <ClInclude Include="MMOPlayer.h" />
+    <ClInclude Include="MMOSector.h" />
+    <ClInclude Include="MMOServer.h" />
+    <ClInclude Include="MMOSession.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="MMOSimulator.h" />
+    <ClInclude Include="MMOZone.h" />
+    <ClInclude Include="pre_compile_mmo.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\C2Server\C2Server\concurrency\spin_wait.asm" />
-    <None Include="..\C2Server\C2Server\config.json" />
     <None Include="config.json" />
   </ItemGroup>
   <ItemGroup>

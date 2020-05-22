@@ -17,12 +17,10 @@ release_flag{}, io_cancled{}, sock{ INVALID_SOCKET }, server{ nullptr }
 
 Session::~Session(){}
 
-static char global_buffer[sizeof sockaddr_in * 2 + 32];
+static char global_buffer[sizeof(sockaddr_in) * 2 + 32];
 
 void Session::post_accept()
 {
-	printf("session::post_accpet() : %d\n", session_id);
-
 	this->increase_refer();
 
 	DWORD bytes = 0;
@@ -129,7 +127,6 @@ void Session::post_send()
 		if ( send_buffer.unsafe_size() == 0 )
 		{
 			// send_packet()이 호출되면 post_send()중인걸로 감지 PQCS를 실행 안함.
-			
 			send_flag = 0;
 			// 이 위에 들어온다면... send_packet() 패킷 감지를 못함... 
 
@@ -144,7 +141,7 @@ void Session::post_send()
 		WSABUF	wsa_bufs[c2::constant::MAX_CONCURRENT_SEND_COUNT];
 		DWORD	flag{};
 
-		for (; (send_packet_count < c2::constant::MAX_CONCURRENT_SEND_COUNT) && this->send_buffer.pop(this->sent_packets[send_packet_count]) ; ++send_packet_count)
+		for (; (send_packet_count < c2::constant::MAX_CONCURRENT_SEND_COUNT) && this->send_buffer.try_pop(this->sent_packets[send_packet_count]) ; ++send_packet_count)
 		{
 			wsa_bufs[send_packet_count].buf = sent_packets[send_packet_count]->get_buffer();
 			wsa_bufs[send_packet_count].len = sent_packets[send_packet_count]->size();
@@ -303,49 +300,49 @@ void Session::parse_packet()
 	}
 }
 
-void Session::parse_packet_echo()
-{
-	using namespace c2::enumeration;
-
-	c2::Packet* local_packet = &recv_packet;
-	local_packet->clear();
-	PacketHeader temp{};
-	uint16_t header{};
-
-	for (;;)
-	{
-		size_t payload_length = recv_buffer.get_use_size();
-		if (sizeof(uint16_t) > payload_length)
-		{
-			return;
-		}
-
-		recv_buffer.peek( (char*)&header, sizeof(uint16_t) );
-		if ( ( header + sizeof(header)) > payload_length)
-		{
-			return;
-		}
-
-		header += sizeof(header);
-
-		size_t direct_deque_size = recv_buffer.direct_dequeue_size();
-		if (direct_deque_size >= header)
-		{
-			local_packet->write(recv_buffer.get_rear_buffer(), header);
-		}
-		else
-		{
-			local_packet->write(recv_buffer.get_rear_buffer(), direct_deque_size);
-			local_packet->write(recv_buffer.get_buffer(),  header - direct_deque_size);
-		}
-
-		handler_table[c2::enumeration::PacketType::PT_CS_ECHO](this, temp, *local_packet);
-
-		local_packet->clear();
-
-		recv_buffer.move_rear(header);
-	}
-}
+//void Session::parse_packet_echo()
+//{
+//	using namespace c2::enumeration;
+//
+//	c2::Packet* local_packet = &recv_packet;
+//	local_packet->clear();
+//	PacketHeader temp{};
+//	uint16_t header{};
+//
+//	for (;;)
+//	{
+//		size_t payload_length = recv_buffer.get_use_size();
+//		if (sizeof(uint16_t) > payload_length)
+//		{
+//			return;
+//		}
+//
+//		recv_buffer.peek( (char*)&header, sizeof(uint16_t) );
+//		if ( ( header + sizeof(header)) > payload_length)
+//		{
+//			return;
+//		}
+//
+//		header += sizeof(header);
+//
+//		size_t direct_deque_size = recv_buffer.direct_dequeue_size();
+//		if (direct_deque_size >= header)
+//		{
+//			local_packet->write(recv_buffer.get_rear_buffer(), header);
+//		}
+//		else
+//		{
+//			local_packet->write(recv_buffer.get_rear_buffer(), direct_deque_size);
+//			local_packet->write(recv_buffer.get_buffer(),  header - direct_deque_size);
+//		}
+//
+//		handler_table[c2::enumeration::PacketType::PT_CS_ECHO](this, temp, *local_packet);
+//
+//		local_packet->clear();
+//
+//		recv_buffer.move_rear(header);
+//	}
+//}
 
 
 void Session::reset()

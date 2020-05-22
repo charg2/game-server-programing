@@ -57,9 +57,6 @@
     <ClInclude Include="concurrency\MemoryPool_Queue.h">
       <Filter>소스 파일\lib\concurrency</Filter>
     </ClInclude>
-    <ClInclude Include="IO\KeyManager.h">
-      <Filter>소스 파일\lib</Filter>
-    </ClInclude>
     <ClInclude Include="util\JsonParser.h">
       <Filter>소스 파일\lib\util</Filter>
     </ClInclude>
@@ -108,6 +105,9 @@
     <ClInclude Include="enviroment.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
+    <ClInclude Include="IO\KeyManager.h">
+      <Filter>소스 파일\lib\util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="concurrency\MemoryPoolTLS.cpp">
@@ -121,9 +121,6 @@
     </ClCompile>
     <ClCompile Include="concurrency\ConcurrentStack.cpp">
       <Filter>소스 파일\lib\concurrency</Filter>
-    </ClCompile>
-    <ClCompile Include="IO\KeyManager.cpp">
-      <Filter>소스 파일\lib</Filter>
     </ClCompile>
     <ClCompile Include="util\JsonParser.cpp">
       <Filter>소스 파일\lib\util</Filter>
@@ -151,6 +148,9 @@
     </ClCompile>
     <ClCompile Include="Session.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\KeyManager.cpp">
+      <Filter>소스 파일\lib\util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

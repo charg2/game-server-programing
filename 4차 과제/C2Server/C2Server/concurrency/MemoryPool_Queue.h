@@ -27,31 +27,36 @@ namespace c2::concurrency
 		};
 
 	private:
-		HANDLE		heap_handle;			// almost read-only
+		HANDLE		heap_handle;	// only once write almost read-only...
 		char		chche_line_pad1[64- sizeof(heap_handle)];
-		EndNode		tail;
+		EndNode		tail;			// always read write
 		char		chche_line_pad2[64 - sizeof(tail)];
-		EndNode		head;
+		EndNode		head;			
 		char		chche_line_pad3[64 - sizeof(head)];
-		int64_t		size;
+		int64_t		size;			
 		char		chche_line_pad4[64 - sizeof(size)];
-
+		// 프리패칭은 예상 못하겟다;
 
 	public:
 		ConcurrentQueueMemoryPool() : heap_handle{ INVALID_HANDLE_VALUE }, head{ nullptr, 1984 }, tail{ nullptr, 0x198A }
 			, size{ 0 }
+
 		{
 			static_assert(Capacity > 0, "Capacity must be greater than zero.");
 
-			heap_handle = HeapCreate( /* HEAP_ZERO_MEMORY */ NULL, Capacity * sizeof(BlockNode) * 2, NULL);            // 최대크기(자동 증가)
+			heap_handle = HeapCreate( /* HEAP_ZERO_MEMORY */ HEAP_GENERATE_EXCEPTIONS, /*Capacity * sizeof(BlockNode) * 2 */0, NULL);            // 최대크기(자동 증가)
 			if (INVALID_HANDLE_VALUE == heap_handle)
 				c2::util::crash_assert();
 
-			head.node = (BlockNode*)HeapAlloc(heap_handle, 0, sizeof(BlockNode) * Capacity);
+			head.node = (BlockNode*)HeapAlloc(heap_handle, HEAP_GENERATE_EXCEPTIONS, sizeof(BlockNode) * Capacity);
+
+			//printf("------------------\n %s \n total size : %d  \n block size : %d  block count : %d \n-------------------\n", __FILE__ ,sizeof(BlockNode)* Capacity, sizeof(BlockNode), Capacity);
+			//printf("%s total size : %d  block size : %d  block count : %d ptr : %p \n-------------------\n", "ConcurrentQueueMPool", sizeof(BlockNode)* Capacity, sizeof(BlockNode), Capacity, head.node);
 
 			for (int n = 0; n < Capacity; ++n)
 			{
 				new(&head.node[n]) BlockNode;
+				//printf("%d 번째 ptr : %p total size : %llu   block size : %d  block count : %llu \n", n, &head.node[n], sizeof(BlockNode)* Capacity, sizeof(BlockNode), Capacity);
 				/*((BlockNode*)(&head.node[n]))->magic_number = kDeadBeef;
 				((BlockNode*)(&head.node[n]))->next			= nullptr;*/
 			}
@@ -98,7 +103,7 @@ namespace c2::concurrency
 					if (nullptr == local_head.node->next) // case : 진짜 비었을때
 					{
 						// 할당시 현재의 갯수 만큼.
-						local_head.node = (BlockNode*)HeapAlloc( heap_handle, NULL, sizeof(BlockNode) );
+						local_head.node = (BlockNode*)HeapAlloc( heap_handle, HEAP_GENERATE_EXCEPTIONS, sizeof(BlockNode) );
 
 						//new(local_head.node) BlockNode; 
 						local_head.node->next		  = nullptr;

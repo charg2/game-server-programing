@@ -6,7 +6,7 @@
 
 #define session_mapping_helper( session_class ) \
 static_assert(std::is_base_of<Session, session_class>::value, #session_class ## "is not derived from Session"); \
-session_class* session_class##_ptr = (session_class*)HeapAlloc(session_heap, 0, sizeof(session_class) * capacity); \
+session_class* session_class##_ptr = (session_class*)HeapAlloc(session_heap, HEAP_GENERATE_EXCEPTIONS , sizeof(session_class) * capacity); \
 for (size_t i = 0; i < capacity; ++i) \
 { \
 sessions[i] = (Session*)&session_class##_ptr[i]; \
@@ -35,7 +35,8 @@ public:
 	bool init_sessions();
 	bool init_threads();
 	
-	void start();
+	virtual void start();
+	void setup_dump();
 	void finalize();
 
 	virtual void		on_connect(uint64_t session_id);

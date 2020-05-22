@@ -14,9 +14,17 @@ class CircularBuffer
 {
 public:
 	CircularBuffer(void)
-		: buffer{ new char[Capacity] {} }/*, bufferEnd{ buffer + Capacity - 1 }*/, front{ 0 }, rear{ 0 }//, size{ 0 }
+		: buffer{ }/*, bufferEnd{ buffer + Capacity - 1 }*/, front{ 0 }, rear{ 0 }//, size{ 0 }
 	{
 		static_assert(Capacity >= 2, "Capacity must be greater than 2.");
+
+		if (INVALID_HANDLE_VALUE == CircularBuffer::buffer_heap)
+		{
+			CircularBuffer::buffer_heap = HeapCreate( /* HEAP_ZERO_MEMORY */ HEAP_GENERATE_EXCEPTIONS, 0, NULL);
+		}
+
+		//buffer = new char[Capacity];
+		buffer = (char*)HeapAlloc(buffer_heap, HEAP_GENERATE_EXCEPTIONS, Capacity);
 	}
 
 	~CircularBuffer()
@@ -198,6 +206,8 @@ private:
 
 	char* buffer;
 	//char* bufferEnd;
+
+	static inline HANDLE buffer_heap{ INVALID_HANDLE_VALUE };
 };
 
 

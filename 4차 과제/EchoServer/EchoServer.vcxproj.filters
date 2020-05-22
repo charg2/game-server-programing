@@ -19,42 +19,24 @@
     <Filter Include="lib\common">
       <UniqueIdentifier>{c9048252-fc94-42de-b87a-a14f8ace8030}</UniqueIdentifier>
     </Filter>
+    <Filter Include="mmo simulator">
+      <UniqueIdentifier>{f129fc6f-3b8e-40a8-8d88-b20f1749d8e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mmo server">
+      <UniqueIdentifier>{837d2cf9-4ca5-4cd0-831b-f89d07929ed8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\server">
+      <UniqueIdentifier>{67d8251d-fb34-4861-b097-f9b827ea56ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\common\concurrency">
+      <UniqueIdentifier>{fdcc5583-6eb8-4b4a-af39-90ba2882c131}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\common\util">
+      <UniqueIdentifier>{f6a6f3ee-fb1b-4d55-9493-372df03e26ff}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="EchoServer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="EchoSession.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="..\C2Server\C2Server\OuterServer.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\C2Server\C2Server\protocol.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\C2Server\C2Server\Session.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\C2Server\C2Server\packet_handler_base.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\C2Server\C2Server\concurrency\BackOff.cpp">
-      <Filter>lib\common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\C2Server\C2Server\concurrency\ConcurrentStack.cpp">
-      <Filter>lib\common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\C2Server\C2Server\concurrency\MemoryPoolTLS.cpp">
-      <Filter>lib\common</Filter>
-    </ClCompile>
     <ClCompile Include="..\C2Server\C2Server\concurrency\tls.cpp">
-      <Filter>lib\common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\C2Server\C2Server\IO\KeyManager.cpp">
       <Filter>lib\common</Filter>
     </ClCompile>
     <ClCompile Include="..\C2Server\C2Server\network\Packet.cpp">
@@ -63,75 +45,66 @@
     <ClCompile Include="..\C2Server\C2Server\network\SocketAddress.cpp">
       <Filter>lib\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\C2Server\C2Server\util\JsonParser.cpp">
-      <Filter>lib\common</Filter>
+    <ClCompile Include="main.cpp">
+      <Filter>헤더 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MMOServer.cpp">
+      <Filter>mmo server</Filter>
+    </ClCompile>
+    <ClCompile Include="MMOSession.cpp">
+      <Filter>mmo server</Filter>
+    </ClCompile>
+    <ClCompile Include="packet_handler_mmo.cpp">
+      <Filter>mmo server</Filter>
+    </ClCompile>
+    <ClCompile Include="MMOSimulator.cpp">
+      <Filter>mmo simulator</Filter>
+    </ClCompile>
+    <ClCompile Include="MMOPlayer.cpp">
+      <Filter>mmo simulator</Filter>
+    </ClCompile>
+    <ClCompile Include="MMOSector.cpp">
+      <Filter>mmo simulator</Filter>
+    </ClCompile>
+    <ClCompile Include="MMOZone.cpp">
+      <Filter>mmo simulator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\C2Server\C2Server\OuterServer.cpp">
+      <Filter>lib\server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\C2Server\C2Server\packet_handler_base.cpp">
+      <Filter>lib\server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\C2Server\C2Server\protocol.cpp">
+      <Filter>lib\server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\C2Server\C2Server\Session.cpp">
+      <Filter>lib\server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\C2Server\C2Server\concurrency\ConcurrentStack.cpp">
+      <Filter>lib\common\concurrency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\C2Server\C2Server\concurrency\BackOff.cpp">
+      <Filter>lib\common\concurrency</Filter>
     </ClCompile>
     <ClCompile Include="..\C2Server\C2Server\util\dump.cpp">
-      <Filter>lib\common</Filter>
+      <Filter>lib\common\util</Filter>
     </ClCompile>
-    <ClCompile Include="packet_handler_echo.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="..\C2Server\C2Server\util\JsonParser.cpp">
+      <Filter>lib\common\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\C2Server\C2Server\IO\KeyManager.cpp">
+      <Filter>lib\common\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\C2Server\C2Server\concurrency\MemoryPoolTLS.cpp">
+      <Filter>lib\common\concurrency</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EchoServer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="EchoSession.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="main.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\enviroment.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\IOContext.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\macro.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\OuterServer.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\packet_handler.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\pre_compile.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\Session.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\protocol.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\concurrency\BackOff.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\concurrency\concurrency.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentQueue.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentStack.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPool_Queue.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPool_Stack.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPoolTLS.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\concurrency\tls.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\IO\KeyManager.h">
       <Filter>lib\common</Filter>
     </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\network\Packet.h">
@@ -140,25 +113,94 @@
     <ClInclude Include="..\C2Server\C2Server\network\SocketAddress.h">
       <Filter>lib\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\util\JsonParser.h">
-      <Filter>lib\common</Filter>
+    <ClInclude Include="MMOServer.h">
+      <Filter>mmo server</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOSession.h">
+      <Filter>mmo server</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOSimulator.h">
+      <Filter>mmo simulator</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOPlayer.h">
+      <Filter>mmo simulator</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOSector.h">
+      <Filter>mmo simulator</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOZone.h">
+      <Filter>mmo simulator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\enviroment.h">
+      <Filter>lib\server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\IOContext.h">
+      <Filter>lib\server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\macro.h">
+      <Filter>lib\server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\OuterServer.h">
+      <Filter>lib\server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\packet_handler.h">
+      <Filter>lib\server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\pre_compile.h">
+      <Filter>lib\server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\Session.h">
+      <Filter>lib\server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\concurrency\BackOff.h">
+      <Filter>lib\common\concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\concurrency\concurrency.h">
+      <Filter>lib\common\concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentQueue.h">
+      <Filter>lib\common\concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentStack.h">
+      <Filter>lib\common\concurrency</Filter>
     </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\util\dump.h">
-      <Filter>lib\common</Filter>
+      <Filter>lib\common\util</Filter>
     </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\util\exception.h">
-      <Filter>lib\common</Filter>
+      <Filter>lib\common\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\util\JsonParser.h">
+      <Filter>lib\common\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\IO\KeyManager.h">
+      <Filter>lib\common\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPool_Queue.h">
+      <Filter>lib\common\concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPool_Stack.h">
+      <Filter>lib\common\concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPoolTLS.h">
+      <Filter>lib\common\concurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\protocol.h">
+      <Filter>lib\server</Filter>
+    </ClInclude>
+    <ClInclude Include="pre_compile_mmo.h">
+      <Filter>mmo server</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\concurrency\MPSCQueue.h">
+      <Filter>lib\common\concurrency</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\C2Server\C2Server\config.json">
-      <Filter>lib</Filter>
-    </None>
-    <None Include="config.json">
-      <Filter>헤더 파일</Filter>
-    </None>
     <None Include="..\C2Server\C2Server\concurrency\spin_wait.asm">
       <Filter>lib\common</Filter>
+    </None>
+    <None Include="config.json">
+      <Filter>리소스 파일</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

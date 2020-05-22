@@ -6,9 +6,9 @@
 #include "../util/dump.h"
 #include "../util/exception.h"
 
-//#include "MemoryPool_Queue.h"
+#include "MemoryPool_Queue.h"
 //#include "MemPool_Queue64.h"
-#include "MemoryPool_Stack.h"
+//#include "MemoryPool_Stack.h"
 //#include "MemoryPool_Stack_Light.h"
 
 // 블럭당 갯수등 바꿔보면서 테스트하자.
@@ -115,9 +115,9 @@ namespace c2::concurrency
 
 	private:
 		//c2::concurrency::
-		//ConcurrentQueueMemoryPool<Chunk, Capacity, PlacementNew>* chunk_pool;
+		ConcurrentQueueMemoryPool<Chunk, Capacity, PlacementNew> chunk_pool;
 		//ConcurrentQueueMemoryPool64<Chunk, Capacity, PlacementNew >* chunk_pool;
-		 ConcurrentStackMemoryPool<Chunk, Capacity, PlacementNew > chunk_pool; 
+		 //ConcurrentStackMemoryPool<Chunk, Capacity, PlacementNew> chunk_pool;  // no ptr
 		// ConcurrentLightStackMemoryPool<Chunk, Capacity, PlacementNew >* chunk_pool; 
 
 

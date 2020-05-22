@@ -17,7 +17,14 @@ namespace c2
 	public:
 		Packet() : buffer{ nullptr }, payload_capacity{ kMaximumSegmentSize }, write_head{ 0 }, read_head{ 0 }//, ref_count{ 0 }
 		{
-			buffer = new char[kMaximumSegmentSize];
+			if (INVALID_HANDLE_VALUE == Packet::buffer_heap)
+			{
+				Packet::buffer_heap = HeapCreate( /* HEAP_ZERO_MEMORY */ HEAP_GENERATE_EXCEPTIONS, 0, NULL);
+			}
+
+			//buffer = new char[kMaximumSegmentSize];
+			buffer = (char*)HeapAlloc(buffer_heap, HEAP_GENERATE_EXCEPTIONS, kMaximumSegmentSize);
+			//new char[kMaximumSegmentSize];
 		}
 		//Packet(const Packet& other);
 		//Packet(Packet&& other) noexcept;
@@ -321,5 +328,6 @@ namespace c2
 		int64_t release_flag;*/
 
 		static inline c2::concurrency::MemoryPoolTLS<Packet> packet_pool{};
+		static inline HANDLE buffer_heap { INVALID_HANDLE_VALUE };
 	};
 }

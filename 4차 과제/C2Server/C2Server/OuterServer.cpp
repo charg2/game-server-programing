@@ -142,10 +142,10 @@ bool OuterServer::init_sessions()
 	}
 
 	// 배열 생성.
-	sessions = (Session**)HeapAlloc(session_heap, HEAP_GENERATE_EXCEPTIONS, sizeof(Session*) * this->capacity);
+	
+	sessions = (Session**)HeapAlloc(session_heap, HEAP_GENERATE_EXCEPTIONS | HEAP_ZERO_MEMORY, sizeof(Session*) * this->capacity);
 	for (int n = 0; n < this->capacity; ++n)
 	{
-		sessions[n] = nullptr;
 		id_pool.push(n);
 	}
 
@@ -182,36 +182,15 @@ bool OuterServer::init_threads()
 
 void OuterServer::start()
 {
-	//const uint16_t	maximum_accept_waiting_count = this->maximum_accpet_count;
-	//size_t			accpet_waiting_count = 0;
-	//size_t			id = 0;
-
-	// session 꺼내서 
 	for (;;)
 	{
-		////  대기인수보다 적게 대기 하고 있거나  +  stack 비어있지 않을때
-		//while (accpet_waiting_count - this->current_accepted_count < maximum_accept_waiting_count)
-		//{
-		//	if (id_pool.try_pop(id))
-		//	{
-		//		Session* session = this->acquire_session_ownership(id);
-
-		//		session->post_accept();
-
-		//		accpet_waiting_count += 1;
-
-		//		release_session_ownership(id);
-		//	}
-		//	else
-		//	{
-		//		break;
-		//	}
-		//}
-
-		//on_update();
-
 		Sleep(30);
 	}
+}
+
+void OuterServer::setup_dump()
+{
+	SetUnhandledExceptionFilter(c2::diagnostics::ExceptionFilter);
 }
 
 void OuterServer::accepter_procedure(uint64_t idx)
@@ -254,6 +233,7 @@ void OuterServer::accepter_procedure(uint64_t idx)
 				accpet_waiting_count += 1;
 
 				printf("id : %d \n", session->session_id);
+
 				release_session_ownership(id);
 			}
 			else
@@ -431,12 +411,12 @@ void OuterServer::on_update()
 
 void OuterServer::on_create_sessions(size_t n)
 {
-	Session* sessions_ptr = (Session*)HeapAlloc(session_heap, 0, sizeof(Session) * n);
+	Session* sessions_ptr = (Session*)HeapAlloc(session_heap, HEAP_GENERATE_EXCEPTIONS, sizeof(Session) * n);
 	
 	for (size_t i = 0; i < n; ++i)
 	{
-		sessions[n] = sessions_ptr;
-		new(sessions[n]) Session();
+		sessions[i] = sessions_ptr;
+		new(sessions[i]) Session();
 	}
 
 	//return reinterpret_cast<Session*>(new Session[n]);
@@ -543,6 +523,7 @@ void OuterServer::set_custom_last_error(c2::enumeration::ErrorCode err_code)
 Session* OuterServer::acquire_session_ownership(int64_t index)
 {
 	Session* session = sessions[(uint16_t)index];
+	printf("%p\n", session);
 	if (0 >= InterlockedIncrement64(&session->refer_count))
 	{
 		debug_code(printf("%s:%s \n", __FILE__, __LINE__));
@@ -645,6 +626,23 @@ const c2::enumeration::ErrorCode OuterServer::get_server_last_error() const
 void OuterServer::load_config_using_json(const wchar_t* file_name)
 {
 	c2::util::JsonParser json_file;
+
+	//do
+	//{
+	//	if (false == json_file.load_json(file_name)) break;
+	//	if (false == json_file.get_raw_wstring(L"server_version", this->version, count_of(version))) break;
+	//	if (false == json_file.get_boolean(L"enable_nagle_opt", this->enable_nagle_opt)) break;
+	//	if (false == json_file.get_boolean(L"enable_keep_alive_opt", this->enable_keep_alive_opt)) break;
+	//	if (false == json_file.get_uint64(L"concurrent_thread_count", this->concurrent_thread_count)) break;
+	//	if (false == json_file.get_uint16(L"server_port", this->port)) break;
+	//	if (false == json_file.get_raw_wstring(L"server_ip", this->ip, count_of(ip))) break;
+	//	if (false == json_file.get_uint16(L"capacity", this->capacity)) break;
+	//	if (false == json_file.get_uint16(L"maximum_listening_count", this->maximum_listening_count)) break;
+	//	if (false == json_file.get_uint16(L"maximum_accept_count", this->maximum_accpet_count)) break;
+	//} while (false);
+	//
+
+
 
 	if (false == json_file.load_json(file_name))
 		c2::util::crash_assert();

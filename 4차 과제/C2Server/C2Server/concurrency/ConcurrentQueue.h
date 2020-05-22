@@ -3,6 +3,8 @@
 #include <cstdint>  
 #include <Windows.h>  
 
+#include "BackOff.h"
+
 //#include "CoucurrentQueueObjectPool.h"
 #include "MemoryPool_Queue.h"
 //#include "MemoryPool_Stack.h"
@@ -83,21 +85,24 @@ namespace c2::concurrency
 		// 결국 두번째 녀석이 계속 밀어줌
 		void push(T src)
 		{
-			Node* node		= node_pool->alloc();
-			node->next		= nullptr;
-			node->data		= src;
+			Node* node					= node_pool->alloc();
+			node->next					= nullptr;
+			node->data					= src;
+			c2::concurrency::BackOff	backoff{ c2::concurrency::BackOff::min_delay};
+
+			//c2::concurrency::BackOff backoff	{ 0 };
 
 			for (;;)
 			{
 				EndNode local_tail{ tail->node, tail->id }; // 캡처
 
-				if (nullptr == local_tail.node->next)		// 비었으면?
+				if (nullptr == local_tail.node->next)		// first test 비었으면?
 				{
-					if (NULL == InterlockedCompareExchange64((int64_t*)&this->tail->node->next, (int64_t)node, NULL)) // 꼬리에 붙이기.
+					if (NULL == InterlockedCompareExchange64((int64_t*)&this->tail->node->next, (int64_t)node, NULL)) // second test  꼬리에 붙이기.
 					{
 						InterlockedIncrement64(&this->size);		// 카운트 
 
-						if (tail->node->next != nullptr)			// 와 고새 누가 밀어줌 개굴따리ㅋㅋ 비싼 연산 안해도 됨.. 
+						if (tail->node->next != nullptr)			// 와 고새 누가 밀어줌 개굴ㅋㅋ 비싼 연산 안해도 됨.. 
 						{
 							InterlockedCompareExchange128((int64_t*)tail, local_tail.id + 1, (int64_t)local_tail.node->next, (int64_t*)&local_tail); 
 						}
@@ -109,14 +114,17 @@ namespace c2::concurrency
 				{
 					if (local_tail.node->next != nullptr) // 제발 누가 밀었어라;;.
 					{
-						InterlockedCompareExchange128((int64_t*)tail, local_tail.id + 1, (int64_t)local_tail.node->next, (int64_t*)&local_tail);
+						if (0 == InterlockedCompareExchange128((int64_t*)tail, local_tail.id + 1, (int64_t)local_tail.node->next, (int64_t*)&local_tail))
+						{
+							backoff.do_backoff();
+						}
 					}
 				}
 			}
 		}
 
 
-		bool pop(Out T& dest)
+		bool try_pop(Out T& dest)
 		{
 			//// node 갯수가 0개면 return
 			// count를 안하면 문제가 생김.
@@ -130,6 +138,7 @@ namespace c2::concurrency
 			alignas(16) EndNode		local_head;
 			alignas(16) EndNode		local_tail;
 			Node*		next_node;
+			c2::concurrency::BackOff	backoff{ c2::concurrency::BackOff::min_delay };
 
 			for (;;)
 			{
@@ -147,8 +156,10 @@ namespace c2::concurrency
 					}
 					else if (local_tail.node->next != nullptr) 
 					{
-						InterlockedCompareExchange128((int64_t*)tail, local_tail.id + 1, (int64_t)local_tail.node->next, (int64_t*)&local_tail);
-						//InterlockedCompareExchange128((int64_t*)&tail, local_tail.id + 1, (int64_t)local_tail.node->next, (int64_t*)& local_tail);
+						if (0 == InterlockedCompareExchange128((int64_t*)tail, local_tail.id + 1, (int64_t)local_tail.node->next, (int64_t*)&local_tail))
+						{
+							backoff.do_backoff();
+						}
 						continue;
 					}
 				}
@@ -156,7 +167,7 @@ namespace c2::concurrency
 				{
 					dest = next_node->data;
 
-					if (InterlockedCompareExchange128((int64_t*)this->head, (int64_t)(local_head.id + 1)
+					if (1 == InterlockedCompareExchange128((int64_t*)this->head, (int64_t)(local_head.id + 1)
 						, (int64_t)local_head.node->next, (int64_t*)& local_head))
 					{
 						//InterlockedDecrement64(&this->size);
@@ -164,6 +175,10 @@ namespace c2::concurrency
 						node_pool->free(local_head.node);
 
 						return true;
+					}
+					else
+					{
+						backoff.do_backoff();
 					}
 				}
 			}

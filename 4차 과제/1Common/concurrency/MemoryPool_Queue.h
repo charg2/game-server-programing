@@ -1,7 +1,7 @@
 #pragma once
 
 #include "concurrency.h"
-#include "exception.h"
+#include "../exception.h"
 
 namespace c2::concurrency
 {
