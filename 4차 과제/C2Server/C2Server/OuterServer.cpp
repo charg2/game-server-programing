@@ -435,8 +435,8 @@ void OuterServer::on_create_sessions(size_t n)
 	
 	for (size_t i = 0; i < n; ++i)
 	{
-		sessions[n] = sessions_ptr;
-		new(sessions[n]) Session();
+		sessions[i] = sessions_ptr;
+		new(sessions[i]) Session();
 	}
 
 	//return reinterpret_cast<Session*>(new Session[n]);

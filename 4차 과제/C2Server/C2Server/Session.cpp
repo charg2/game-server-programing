@@ -144,7 +144,7 @@ void Session::post_send()
 		WSABUF	wsa_bufs[c2::constant::MAX_CONCURRENT_SEND_COUNT];
 		DWORD	flag{};
 
-		for (; (send_packet_count < c2::constant::MAX_CONCURRENT_SEND_COUNT) && this->send_buffer.pop(this->sent_packets[send_packet_count]) ; ++send_packet_count)
+		for (; (send_packet_count < c2::constant::MAX_CONCURRENT_SEND_COUNT) && this->send_buffer.try_pop(this->sent_packets[send_packet_count]) ; ++send_packet_count)
 		{
 			wsa_bufs[send_packet_count].buf = sent_packets[send_packet_count]->get_buffer();
 			wsa_bufs[send_packet_count].len = sent_packets[send_packet_count]->size();

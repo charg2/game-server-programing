@@ -108,6 +108,9 @@
     <ClInclude Include="enviroment.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
+    <ClInclude Include="concurrency\MPSCQueue.h">
+      <Filter>소스 파일\lib\concurrency</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="concurrency\MemoryPoolTLS.cpp">

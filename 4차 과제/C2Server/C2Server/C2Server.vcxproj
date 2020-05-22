@@ -27,6 +27,7 @@
     <ClInclude Include="concurrency\MemoryPoolTLS.h" />
     <ClInclude Include="concurrency\MemoryPool_Queue.h" />
     <ClInclude Include="concurrency\MemoryPool_Stack.h" />
+    <ClInclude Include="concurrency\MPSCQueue.h" />
     <ClInclude Include="concurrency\tls.h" />
     <ClInclude Include="enviroment.h" />
     <ClInclude Include="IOContext.h" />
