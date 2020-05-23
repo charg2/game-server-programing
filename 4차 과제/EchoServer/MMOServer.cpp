@@ -20,10 +20,11 @@ void MMOServer::on_create_sessions(size_t capacity)
 	for (size_t i = 0; i < capacity; ++i) 
 	{ 
 		sessions[i] = &EchoSession_ptr[i]; 
-		printf("%d : %p \n", i, &EchoSession_ptr[i]);
+		//printf("%d : %p \n", i, &EchoSession_ptr[i]);
 		new(sessions[i]) MMOSession();
 	} 
 	//session_mapping_helper(MMOSession);
+
 }
 
 void MMOServer::on_connect(uint64_t session_id){}

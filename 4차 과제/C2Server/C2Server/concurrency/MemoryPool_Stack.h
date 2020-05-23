@@ -40,7 +40,9 @@ namespace c2::concurrency
 				c2::util::crash_assert();
 
 			top = (TopNode*)HeapAlloc(heap_handle, HEAP_GENERATE_EXCEPTIONS, sizeof(TopNode));
+
 			top->node = (BlockNode*)HeapAlloc(heap_handle, HEAP_GENERATE_EXCEPTIONS, sizeof(BlockNode) * Capacity);
+
 			//printf("%s  total size : %d  \n block size : %d  block count : %d \n-------------------\n", "ConcurrentStackMPool", sizeof(BlockNode)* Capacity, sizeof(BlockNode), Capacity);
 			top->stamp = 1984;
 
@@ -68,6 +70,10 @@ namespace c2::concurrency
 			//printf("\n block count : %d   last address : %p \n", this->freeBlock_count, (void*)( (size_t)top->node + (size_t)(sizeof(BlockNode) * Capacity)));
 
 			newBlock->next_block = nullptr;
+			if (0 == HeapValidate(heap_handle, 0, NULL))
+			{
+				printf("------------------\n %s \n total size : %d  \n block size : %d  block count : %d \n-------------------\n", __FILE__, sizeof(BlockNode) * Capacity, sizeof(BlockNode), Capacity);
+			}
 		}
 		
 		~ConcurrentStackMemoryPool()
@@ -89,6 +95,7 @@ namespace c2::concurrency
 					// ÇÒ´çÇØ¼­ ÁÜ;
 					//new_block = new BlockNode; //(BlockNode*)HeapAlloc(heap_handle, NULL, sizeof(BlockNode));
 					new_block = (BlockNode*)HeapAlloc(heap_handle, HEAP_GENERATE_EXCEPTIONS, sizeof(BlockNode));
+
 					new_block->next_block =  nullptr;
 					new_block->magic_number = kDeadBeef;
 					//new(new_block) BlockNode;

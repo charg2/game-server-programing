@@ -144,6 +144,7 @@ bool OuterServer::init_sessions()
 	// 배열 생성.
 	
 	sessions = (Session**)HeapAlloc(session_heap, HEAP_GENERATE_EXCEPTIONS | HEAP_ZERO_MEMORY, sizeof(Session*) * this->capacity);
+
 	for (int n = 0; n < this->capacity; ++n)
 	{
 		id_pool.push(n);
@@ -217,6 +218,29 @@ void OuterServer::accepter_procedure(uint64_t idx)
 	const uint16_t	maximum_accept_waiting_count = this->maximum_accpet_count;
 	size_t			accpet_waiting_count = 0;
 	size_t			id = 0;
+
+
+	size_t invalid_heap_count = 0;
+
+	unsigned long  heap_count = GetProcessHeaps(0, NULL);
+	HANDLE* heaps = new HANDLE[heap_count];
+	GetProcessHeaps(heap_count, heaps);
+	PROCESS_HEAP_ENTRY heapEntry;
+	long long sizeSum = 0;
+	printf("------------------- %d ------------\n", heap_count);
+
+	for (unsigned long i = 0; i < heap_count; i++)
+	{
+		HANDLE heap = heaps[i];
+		if (0 == HeapValidate(heap, 0, NULL))
+		{
+			printf("-------------------  ------------\n");
+			invalid_heap_count += 1;
+		}
+	}
+	delete[] heaps;
+
+
 
 	// session 꺼내서 
 	for (;;)
@@ -412,7 +436,6 @@ void OuterServer::on_update()
 void OuterServer::on_create_sessions(size_t n)
 {
 	Session* sessions_ptr = (Session*)HeapAlloc(session_heap, HEAP_GENERATE_EXCEPTIONS, sizeof(Session) * n);
-	
 	for (size_t i = 0; i < n; ++i)
 	{
 		sessions[i] = sessions_ptr;

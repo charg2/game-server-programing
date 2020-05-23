@@ -30,7 +30,10 @@ public:
 	~CircularBuffer()
 	{
 		if (buffer != nullptr)
-			delete[] buffer;
+		{
+			//delete[] buffer;
+			HeapFree(buffer_heap, 0, buffer);
+		}
 	}
 
 	// 현재 사용 중인 버퍼의 크기.

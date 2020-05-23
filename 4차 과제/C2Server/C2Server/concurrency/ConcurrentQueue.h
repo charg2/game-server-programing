@@ -40,13 +40,12 @@ namespace c2::concurrency
 			uint64_t id;
 		};
 
+		EndNode*	head;
+		EndNode*	tail;
+		int64_t		size;
 		c2::concurrency::\
 			//ConcurrentQueueMemoryPool<Node, 4096, false>* node_pool;
 		ConcurrentQueueMemoryPool<Node, 4096, false>* node_pool;
-		EndNode*	head;
-		EndNode*	tail;
-		char		chcae_line_pad1[64- ( sizeof(void*) *3 )];
-		int64_t		size;
 		char		chcae_line_pad2[64 - (sizeof(int64_t)) ];
 
 
