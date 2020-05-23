@@ -149,6 +149,9 @@
     <ClInclude Include="..\C2Server\C2Server\util\exception.h">
       <Filter>lib\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\CircularBuffer.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\C2Server\C2Server\config.json">

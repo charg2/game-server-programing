@@ -11,6 +11,7 @@
 namespace c2
 {
 	constexpr size_t kMaximumSegmentSize = 1460;
+	//constexpr size_t kMaximumSegmentSize = 1024;
 
 	class Packet
 	{
@@ -321,5 +322,6 @@ namespace c2
 		int64_t release_flag;*/
 
 		static inline c2::concurrency::MemoryPoolTLS<Packet> packet_pool{};
+		static inline HANDLE heap_handle{ INVALID_HANDLE_VALUE };
 	};
 }

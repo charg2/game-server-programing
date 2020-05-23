@@ -163,6 +163,7 @@
     <ClCompile Include="packet_handler_echo.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\C2Server\C2Server\CircularBuffer.h" />
     <ClInclude Include="..\C2Server\C2Server\concurrency\BackOff.h" />
     <ClInclude Include="..\C2Server\C2Server\concurrency\concurrency.h" />
     <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentQueue.h" />
