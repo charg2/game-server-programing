@@ -2,16 +2,10 @@
 
 #include <cstdint>  
 #include <Windows.h>  
-
 #include "BackOff.h"
-
 //#include "CoucurrentQueueObjectPool.h"
 #include "MemoryPool_Queue.h"
 //#include "MemoryPool_Stack.h"
-
-
-//#define MT_PROFILE_ON
-// 캐시라인 
 
 #ifdef MT_PROFILE_ON
 

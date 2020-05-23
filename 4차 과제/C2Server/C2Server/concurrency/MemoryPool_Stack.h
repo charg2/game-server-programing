@@ -1,10 +1,6 @@
 #pragma once
 #include "BackOff.h"
-
 #include "concurrency.h"
-
-//#include "BackOff.h"
-#include "../util/exception.h"
 
 
 // Lock - Free ConcurrentStackMemoryPool
@@ -15,6 +11,8 @@ namespace c2::concurrency
 	template <typename Type, size_t Capacity = kDefaultCapacity, bool PlacementNew = true>
 	class ConcurrentStackMemoryPool
 	{
+		enum Config : size_t { DEAD = 0xDDEEAADDDDEEAADD };
+
 		struct BlockNode   // aal
 		{
 			BlockNode() : next_block{ nullptr }, magic_number{ kDeadBeef }
@@ -36,8 +34,11 @@ namespace c2::concurrency
 		ConcurrentStackMemoryPool() : top{ nullptr }, heap_handle { INVALID_HANDLE_VALUE }
 		{
 			heap_handle = HeapCreate( /* HEAP_ZERO_MEMORY */ HEAP_GENERATE_EXCEPTIONS, 0, NULL);
-			if (NULL == heap_handle)
-				c2::util::crash_assert();
+			if (INVALID_HANDLE_VALUE == heap_handle)
+			{
+				int* invliad_ptr{};
+				*invliad_ptr = Config::DEAD;
+			}
 			
 			top				= (TopNode*)HeapAlloc(heap_handle, HEAP_GENERATE_EXCEPTIONS, sizeof(TopNode));
 			top->node		= (BlockNode*)HeapAlloc(heap_handle , HEAP_GENERATE_EXCEPTIONS, sizeof(BlockNode) * Capacity);
@@ -157,11 +158,9 @@ namespace c2::concurrency
 
 
 	private:
+		TopNode*	top;
 		HANDLE		heap_handle;
-		TopNode*	top; 
-		char		cache_line_pad1[64 - sizeof(TopNode*) - sizeof(HANDLE)];
 		int64_t		freeBlock_count;
-		char		cache_line_pad2[64 - sizeof(int64_t)];
 	};
 
 }

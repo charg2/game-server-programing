@@ -18,7 +18,7 @@ bool KeyManager::key_down( int virtualKey )
 {
 	if (GetAsyncKeyState(virtualKey) & 0x8000)	// 눌린 상태에서 
 	{
-		if (false == is_key_down[virtualKey])		// 기존에 눌르지 않앗다면?
+		if (false == is_key_down[virtualKey])	// 기존에 눌르지 않앗다면?
 		{
 			is_key_down[virtualKey] = true;		// 누름 처리.
 			return true;

@@ -1,7 +1,5 @@
 #pragma once
-
 #include "concurrency.h"
-#include "../util/exception.h"
 
 namespace c2::concurrency
 {
@@ -40,7 +38,10 @@ namespace c2::concurrency
 
 			heap_handle = HeapCreate( /* HEAP_ZERO_MEMORY */ NULL, Capacity * sizeof(BlockNode) * 2, NULL);            // 최대크기(자동 증가)
 			if (INVALID_HANDLE_VALUE == heap_handle)
-				c2::util::crash_assert();
+			{
+				size_t* invalid_ptr{};
+				*invalid_ptr = 0xDDAAEEDDDDAAEEDD;
+			}
 
 			head.node = (BlockNode*)HeapAlloc(heap_handle, 0, sizeof(BlockNode) * Capacity);
 
@@ -139,7 +140,10 @@ namespace c2::concurrency
 			node->next = nullptr;
 
 			if (node->magic_number != kDeadBeef)  // magicNumber Check
-				c2::util::crash_assert();
+			{
+				size_t* invalid_ptr{};
+				*invalid_ptr = 0xDDAAEEDDDDAAEEDD;
+			}
 
 			if (PlacementNew) // 필요하다면 소멸자 호출.
 				node->data.~Type();

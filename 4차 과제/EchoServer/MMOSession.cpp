@@ -1,10 +1,10 @@
 #include "main.h"
 #include "MMOSession.h"
 
-EchoSession::EchoSession()
+MMOSession::MMOSession()
 {
 }
 
-EchoSession::~EchoSession()
+MMOSession::~MMOSession()
 {
 }

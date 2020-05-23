@@ -1,9 +1,7 @@
 
 namespace c2::concurrency
 {
-
 #include <Windows.h>
-#include <vector>
 
 	template<class T>
 	class MPSCQueue
@@ -56,30 +54,6 @@ namespace c2::concurrency
 			}
 		}
 
-
-		//// 한번에 다 끓어내...
-		size_t try_pop_all_using_vector(std::vector<T>& dest_vector)
-		{
-			for (;;)
-			{
-				Node* dummy_next = head->next;  // [] - []  
-
-				if (nullptr == dummy_next)
-				{
-					return dest_vector.size();
-				}
-				else
-				{
-					dest_vector.push_back(dummy_next->data);
-
-					Node* head_ptr = head;
-
-					head = dummy_next;
-
-					delete head_ptr;
-				}
-			}
-		}
 
 		const bool empty() const
 		{

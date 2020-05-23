@@ -21,9 +21,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="..\C2Server\C2Server\OuterServer.cpp">
       <Filter>lib</Filter>
     </ClCompile>
@@ -51,9 +48,6 @@
     <ClCompile Include="..\C2Server\C2Server\IO\KeyManager.cpp">
       <Filter>lib\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\C2Server\C2Server\network\Packet.cpp">
-      <Filter>lib\common</Filter>
-    </ClCompile>
     <ClCompile Include="..\C2Server\C2Server\network\SocketAddress.cpp">
       <Filter>lib\common</Filter>
     </ClCompile>
@@ -70,6 +64,21 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="MMOServer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>헤더 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MMOActor.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MMOSimulator.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MMOZone.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MMOSector.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -146,11 +155,29 @@
     <ClInclude Include="..\C2Server\C2Server\protocol.h">
       <Filter>lib</Filter>
     </ClInclude>
-    <ClInclude Include="MMOServer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="MMOSession.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOActor.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOServer.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOSimulator.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOSector.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOZone.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOMessage.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\concurrency\MPSCQueue.h">
+      <Filter>lib\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

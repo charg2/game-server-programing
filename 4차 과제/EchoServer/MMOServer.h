@@ -3,12 +3,12 @@
 #include "../C2Server/C2Server/OuterServer.h"
 #include "MMOSession.h"
 
-class EchoServer final : public OuterServer
+class MMOServer final : public OuterServer
 {
 public:
 	// OuterServer을(를) 통해 상속됨
-	EchoServer();
-	virtual ~EchoServer();
+	MMOServer();
+	virtual ~MMOServer();
 
 	virtual void on_create_sessions(size_t n)		override final;
 	virtual void on_connect(uint64_t session_id)	override final;
