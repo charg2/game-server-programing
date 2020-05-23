@@ -8,7 +8,7 @@ namespace c2::concurrency
 	template <typename Type, size_t Capacity = kDefaultCapacity, bool PlacementNew = true>
 	class ConcurrentQueueMemoryPool
 	{
-		struct alignas(16) BlockNode
+		struct BlockNode
 		{
 			BlockNode() : next{ nullptr }, magic_number{ kDeadBeef }//, data{ }
 			{
@@ -20,22 +20,17 @@ namespace c2::concurrency
 			Type			data;
 		};
 
-		struct alignas(16) EndNode
+		struct alignas(64) EndNode
 		{
 			BlockNode*	node;
 			uint64_t	id;
 		};
 
 	private:
-		HANDLE		heap_handle;			// almost read-only
-		char		chche_line_pad1[64- sizeof(heap_handle)];
 		EndNode		tail;
-		char		chche_line_pad2[64 - sizeof(tail)];
 		EndNode		head;
-		char		chche_line_pad3[64 - sizeof(head)];
 		int64_t		size;
-		char		chche_line_pad4[64 - sizeof(size)];
-
+		HANDLE		heap_handle;			// almost read-only
 
 	public:
 		ConcurrentQueueMemoryPool() : heap_handle{ INVALID_HANDLE_VALUE }, head{ nullptr, 1984 }, tail{ nullptr, 0x198A }

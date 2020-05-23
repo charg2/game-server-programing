@@ -8,6 +8,6 @@
 
 namespace c2::diagnostics
 {
-	LONG WINAPI ExceptionFilter(EXCEPTION_POINTERS* exceptionInfo);
+	LONG WINAPI exception_filter(EXCEPTION_POINTERS* exceptionInfo);
 }
 #endif

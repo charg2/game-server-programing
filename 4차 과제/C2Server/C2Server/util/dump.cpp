@@ -25,7 +25,7 @@ namespace c2::diagnostics
 		c2::util::assert_if_false(false);
 	}
 
-	LONG WINAPI ExceptionFilter(EXCEPTION_POINTERS* e)
+	LONG WINAPI exception_filter(EXCEPTION_POINTERS* e)
 	{
 		printf("Exception : 0x%08X\r\n",
 			e->ExceptionRecord->ExceptionCode);

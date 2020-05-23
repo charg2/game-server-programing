@@ -142,10 +142,9 @@ bool OuterServer::init_sessions()
 	}
 
 	// 배열 생성.
-	sessions = (Session**)HeapAlloc(session_heap, HEAP_GENERATE_EXCEPTIONS, sizeof(Session*) * this->capacity);
+	sessions = (Session**)HeapAlloc(session_heap, HEAP_GENERATE_EXCEPTIONS | HEAP_ZERO_MEMORY, sizeof(Session*) * this->capacity);
 	for (int n = 0; n < this->capacity; ++n)
 	{
-		sessions[n] = nullptr;
 		id_pool.push(n);
 	}
 
