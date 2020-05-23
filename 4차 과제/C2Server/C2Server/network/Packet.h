@@ -74,9 +74,9 @@ namespace c2
 		size_t capacity() const noexcept
 		{
 #ifdef PROFILE_ON
-				PROFILE_FUNC;
+			PROFILE_FUNC;
 #endif
-				return payload_capacity;
+			return payload_capacity;
 		}
 
 
@@ -311,7 +311,7 @@ namespace c2
 
 
 	private:
-		char*	buffer;
+		char* buffer;
 		size_t	payload_capacity;
 
 		size_t	write_head;

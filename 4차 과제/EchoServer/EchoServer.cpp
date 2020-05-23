@@ -40,10 +40,10 @@ void EchoServer::on_update()
 	if (count > 100)
 	{
 		printf("total send count : %lld \n total recv count : %lld \n total send bute : %lld \n total recv byte : %lld \n "\
-			, get_total_sent_count()
-			, get_total_recv_count()
-			, get_total_sent_bytes()
-			, get_total_recv_bytes() );
+			, total_sent_count
+			, total_recv_count
+			, total_sent_bytes
+			, total_recv_bytes );
 
 		count = 0;
 	}
