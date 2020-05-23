@@ -66,8 +66,12 @@ public:
 
 	void								set_custom_last_error(c2::enumeration::ErrorCode err_code);
 
+	void								setup_dump();
+
 	size_t								get_total_recv_bytes();
 	size_t								get_total_sent_bytes();
+	size_t								get_total_recv_count();
+	size_t								get_total_sent_count();
 
 protected:
 	void					accepter_procedure(uint64_t idx);

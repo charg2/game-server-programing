@@ -188,28 +188,27 @@ void OuterServer::start()
 	// session 꺼내서 
 	for (;;)
 	{
-		////  대기인수보다 적게 대기 하고 있거나  +  stack 비어있지 않을때
-		//while (accpet_waiting_count - this->current_accepted_count < maximum_accept_waiting_count)
+		//size_t invalid_heap_count = 0;
+
+		//unsigned long  heap_count = GetProcessHeaps(0, NULL);
+		//HANDLE* heaps = new HANDLE[heap_count];
+		//GetProcessHeaps(heap_count, heaps);
+		//PROCESS_HEAP_ENTRY heapEntry;
+		//long long sizeSum = 0;
+
+		//for (unsigned long i = 0; i < heap_count; i++)
 		//{
-		//	if (id_pool.try_pop(id))
+		//	if (0 == HeapValidate(heaps[i], 0, NULL))
 		//	{
-		//		Session* session = this->acquire_session_ownership(id);
-
-		//		session->post_accept();
-
-		//		accpet_waiting_count += 1;
-
-		//		release_session_ownership(id);
-		//	}
-		//	else
-		//	{
-		//		break;
+		//		invalid_heap_count += 1;
 		//	}
 		//}
+		//delete[] heaps;
 
-		//on_update();
+		//printf("----------------%d-----------", invalid_heap_count);
+		on_update();
 
-		Sleep(30);
+		Sleep(50);
 	}
 }
 
@@ -539,6 +538,11 @@ void OuterServer::set_custom_last_error(c2::enumeration::ErrorCode err_code)
 	this->custom_last_os_error = err_code;
 }
 
+void OuterServer::setup_dump()
+{
+	SetUnhandledExceptionFilter(c2::diagnostics::exception_filter);
+}
+
 Session* OuterServer::acquire_session_ownership(int64_t index)
 {
 	Session* session = sessions[(uint16_t)index];
@@ -590,7 +594,7 @@ void OuterServer::release_session_ownership(int64_t session_id)
 
 size_t OuterServer::get_total_recv_bytes()
 {
-	return this->total_recv_bytes;
+	return  InterlockedExchange64(&this->total_recv_bytes, 0);
 	//size_t total = 0;
 
 	//for (size_t n = 0; n < this->concurrent_thread_count; ++n)
@@ -607,7 +611,7 @@ size_t OuterServer::get_total_recv_bytes()
 size_t OuterServer::get_total_sent_bytes()
 {
 	//size_t total = 0;
-	return this->total_sent_bytes;
+	return  InterlockedExchange64(&this->total_sent_bytes, 0);
 	/*for (size_t n = 0; n < this->concurrent_thread_count; ++n)
 	{
 		if (total_sent_bytes[n] != nullptr)
@@ -617,6 +621,17 @@ size_t OuterServer::get_total_sent_bytes()
 	}*/
 
 	//return total;
+}
+
+size_t OuterServer::get_total_recv_count()
+{
+	return  InterlockedExchange64(&this->total_recv_count, 0);
+
+}
+
+size_t OuterServer::get_total_sent_count()
+{
+	return  InterlockedExchange64(&this->total_sent_count, 0);
 }
 
 constexpr size_t OuterServer::get_ccu() const

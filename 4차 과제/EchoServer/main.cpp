@@ -5,8 +5,7 @@ void main()
 {
 	EchoServer server;
 	
-	SetUnhandledExceptionFilter(c2::diagnostics::exception_filter);
-	//SetUnhandledExceptionFilter(UnhandledExceptionHandler);
+	server.setup_dump();
 
 	server.load_config_using_json(L"config.json");
 

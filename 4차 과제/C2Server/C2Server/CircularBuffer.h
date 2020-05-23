@@ -1,6 +1,4 @@
-#ifndef CHARG2_CIRCULAR_BUFFER_H
-#define CHARG2_CIRCULAR_BUFFER_H
-
+#pragma once
 #include <vcruntime_string.h>
 #include <windows.h>
 #define OUT
@@ -14,15 +12,30 @@ class CircularBuffer
 {
 public:
 	CircularBuffer(void)
-		: buffer{ new char[Capacity] {} }/*, bufferEnd{ buffer + Capacity - 1 }*/, front{ 0 }, rear{ 0 }//, size{ 0 }
+		: buffer{ }/*, bufferEnd{ buffer + Capacity - 1 }*/, front{ 0 }, rear{ 0 }//, size{ 0 }
 	{
 		static_assert(Capacity >= 2, "Capacity must be greater than 2.");
+
+		if (INVALID_HANDLE_VALUE == CircularBuffer::buffer_heap)
+		{
+			CircularBuffer::buffer_heap = HeapCreate( /* HEAP_ZERO_MEMORY */ HEAP_GENERATE_EXCEPTIONS, 0, NULL);
+			if (INVALID_HANDLE_VALUE == CircularBuffer::buffer_heap)
+			{
+				c2::util::crash_assert();
+			}
+		}
+
+		//buffer = new char[Capacity];
+		buffer = (char*)HeapAlloc(buffer_heap, HEAP_GENERATE_EXCEPTIONS, Capacity);
 	}
 
 	~CircularBuffer()
 	{
 		if (buffer != nullptr)
-			delete[] buffer;
+		{
+			//delete[] buffer;
+			HeapFree(buffer_heap, 0, buffer);
+		}
 	}
 
 	// 현재 사용 중인 버퍼의 크기.
@@ -65,7 +78,7 @@ public:
 	size_t	peek(char* dest, size_t size)
 	{
 		size_t tempFront = this->front;
-		size_t tempRear = this->rear;  
+		size_t tempRear = this->rear;
 
 		size_t useSize = tempFront >= tempRear ? tempFront - tempRear : Capacity - tempRear + tempFront;
 
@@ -87,7 +100,7 @@ public:
 
 	size_t	dequeue(char* dest, size_t size)
 	{
-		size_t tempRear = this->rear; 
+		size_t tempRear = this->rear;
 		size_t tempFront = this->front;
 
 		size_t useSize = tempFront >= tempRear ? tempFront - tempRear : Capacity - tempRear + tempFront;//
@@ -116,14 +129,14 @@ public:
 	// 주의 사항 세부 크기 +1 -1 아직 안봄.
 	size_t	enqueue(char* data, size_t size)
 	{
-//CRITICAL_SECTION///////////////////////
+		//CRITICAL_SECTION///////////////////////
 		size_t tempRear = this->rear;  //
 		size_t tempFront = this->front;//
 //CRITICAL_SECTION///////////////////////
 
 		size_t useSize = tempFront >= tempRear ? tempFront - tempRear : Capacity - tempRear + tempFront;
 		size_t freeSize = Capacity - useSize - 1;
-	
+
 		if (freeSize == 0)
 			return 0;
 
@@ -197,8 +210,8 @@ private:
 	size_t rear;
 
 	char* buffer;
-	//char* bufferEnd;
+
+	static inline HANDLE buffer_heap{ INVALID_HANDLE_VALUE };
 };
 
 
-#endif
