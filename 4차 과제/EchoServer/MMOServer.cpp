@@ -3,7 +3,7 @@
 
 #include "main.h"
 #include "../C2Server/C2Server/OuterServer.h"
-#include "EchoServer.h"
+#include "MMOServer.h"
 
 EchoServer::EchoServer() : OuterServer{}
 {
@@ -31,7 +31,6 @@ bool EchoServer::on_accept(Session* session) { return true; }
 void EchoServer::on_wake_io_thread(){}
 void EchoServer::on_sleep_io_thread(){}
 void EchoServer::custom_precedure(uint64_t idx) {}
-
 void EchoServer::on_update()
 {
 	static size_t count = 0;

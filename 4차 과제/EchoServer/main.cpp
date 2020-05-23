@@ -1,9 +1,9 @@
 #include "main.h"
-#include "EchoServer.h"
+#include "MMOServer.h"
 
 void main()
 {
-	EchoServer server;
+	MMOServer server;
 	
 	server.setup_dump();
 

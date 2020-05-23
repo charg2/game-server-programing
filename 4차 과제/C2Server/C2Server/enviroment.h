@@ -11,6 +11,15 @@ namespace c2
 		constexpr inline size_t ASYNC_ACCEPT_SIGN = 5003U;
 		constexpr inline size_t MAX_CONCURRENT_SEND_COUNT = 256U;
 		constexpr inline size_t CACHE_LINE = 64U;
+
+
+		constexpr unsigned char D_UP = 0;
+		constexpr unsigned char D_DOWN = 1;
+		constexpr unsigned char D_LEFT = 2;
+		constexpr unsigned char D_RIGHT = 3;
+		constexpr int MAX_ID_LEN = 50;
+		constexpr int MAX_STR_LEN = 255;
+
 	}
 
 	namespace enumeration

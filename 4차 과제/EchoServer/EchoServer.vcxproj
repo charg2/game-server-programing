@@ -157,10 +157,10 @@
     <ClCompile Include="..\C2Server\C2Server\Session.cpp" />
     <ClCompile Include="..\C2Server\C2Server\util\dump.cpp" />
     <ClCompile Include="..\C2Server\C2Server\util\JsonParser.cpp" />
-    <ClCompile Include="EchoServer.cpp" />
-    <ClCompile Include="EchoSession.cpp" />
+    <ClCompile Include="MMOServer.cpp" />
+    <ClCompile Include="MMOSession.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="packet_handler_echo.cpp" />
+    <ClCompile Include="packet_handler_mmo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\C2Server\C2Server\concurrency\BackOff.h" />
@@ -180,13 +180,14 @@
     <ClInclude Include="..\C2Server\C2Server\OuterServer.h" />
     <ClInclude Include="..\C2Server\C2Server\packet_handler.h" />
     <ClInclude Include="..\C2Server\C2Server\pre_compile.h" />
+    <ClInclude Include="..\C2Server\C2Server\protocol.h" />
     <ClInclude Include="..\C2Server\C2Server\Session.h" />
     <ClInclude Include="..\C2Server\C2Server\util\dump.h" />
     <ClInclude Include="..\C2Server\C2Server\util\exception.h" />
     <ClInclude Include="..\C2Server\C2Server\util\JsonParser.h" />
     <ClInclude Include="..\Common\protocol.h" />
-    <ClInclude Include="EchoServer.h" />
-    <ClInclude Include="EchoSession.h" />
+    <ClInclude Include="MMOServer.h" />
+    <ClInclude Include="MMOSession.h" />
     <ClInclude Include="main.h" />
   </ItemGroup>
   <ItemGroup>

@@ -200,8 +200,8 @@ void Session::recv_completion(size_t transfered_bytes)
 		return;
 	}
 
-	//this->parse_packet();
-	this->parse_packet_echo();
+	this->parse_packet();
+	//this->parse_packet_echo();
 
 	InterlockedAdd64(&server->total_recv_bytes, transfered_bytes);
 
@@ -303,49 +303,49 @@ void Session::parse_packet()
 	}
 }
 
-void Session::parse_packet_echo()
-{
-	using namespace c2::enumeration;
-
-	c2::Packet* local_packet = &recv_packet;
-	local_packet->clear();
-	PacketHeader temp{};
-	uint16_t header{};
-
-	for (;;)
-	{
-		size_t payload_length = recv_buffer.get_use_size();
-		if (sizeof(uint16_t) > payload_length)
-		{
-			return;
-		}
-
-		recv_buffer.peek( (char*)&header, sizeof(uint16_t) );
-		if ( ( header + sizeof(header)) > payload_length)
-		{
-			return;
-		}
-
-		header += sizeof(header);
-
-		size_t direct_deque_size = recv_buffer.direct_dequeue_size();
-		if (direct_deque_size >= header)
-		{
-			local_packet->write(recv_buffer.get_rear_buffer(), header);
-		}
-		else
-		{
-			local_packet->write(recv_buffer.get_rear_buffer(), direct_deque_size);
-			local_packet->write(recv_buffer.get_buffer(),  header - direct_deque_size);
-		}
-
-		handler_table[c2::enumeration::PacketType::PT_CS_ECHO](this, temp, *local_packet);
-
-		local_packet->clear();
-
-		recv_buffer.move_rear(header);
-	}
-}
+//void Session::parse_packet_echo()
+//{
+//	using namespace c2::enumeration;
+//
+//	c2::Packet* local_packet = &recv_packet;
+//	local_packet->clear();
+//	PacketHeader temp{};
+//	uint16_t header{};
+//
+//	for (;;)
+//	{
+//		size_t payload_length = recv_buffer.get_use_size();
+//		if (sizeof(uint16_t) > payload_length)
+//		{
+//			return;
+//		}
+//
+//		recv_buffer.peek( (char*)&header, sizeof(uint16_t) );
+//		if ( ( header + sizeof(header)) > payload_length)
+//		{
+//			return;
+//		}
+//
+//		header += sizeof(header);
+//
+//		size_t direct_deque_size = recv_buffer.direct_dequeue_size();
+//		if (direct_deque_size >= header)
+//		{
+//			local_packet->write(recv_buffer.get_rear_buffer(), header);
+//		}
+//		else
+//		{
+//			local_packet->write(recv_buffer.get_rear_buffer(), direct_deque_size);
+//			local_packet->write(recv_buffer.get_buffer(),  header - direct_deque_size);
+//		}
+//
+//		handler_table[c2::enumeration::PacketType::PT_CS_ECHO](this, temp, *local_packet);
+//
+//		local_packet->clear();
+//
+//		recv_buffer.move_rear(header);
+//	}
+//}
 
 
 void Session::reset()

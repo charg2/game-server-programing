@@ -21,13 +21,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="EchoServer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="EchoSession.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="..\C2Server\C2Server\OuterServer.cpp">
@@ -69,17 +63,17 @@
     <ClCompile Include="..\C2Server\C2Server\util\dump.cpp">
       <Filter>lib\common</Filter>
     </ClCompile>
-    <ClCompile Include="packet_handler_echo.cpp">
+    <ClCompile Include="packet_handler_mmo.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MMOSession.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MMOServer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EchoServer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="EchoSession.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="main.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -148,6 +142,15 @@
     </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\util\exception.h">
       <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\protocol.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOServer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOSession.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

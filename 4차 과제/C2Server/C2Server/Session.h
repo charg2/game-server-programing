@@ -64,7 +64,7 @@ public:
 	void disconnect_completion();
 
 	void parse_packet();
-	void parse_packet_echo();
+	//void parse_packet_echo();
 	void reset();
 
 	void increase_refer();

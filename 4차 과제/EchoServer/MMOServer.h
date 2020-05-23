@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../C2Server/C2Server/OuterServer.h"
-#include "EchoSession.h"
+#include "MMOSession.h"
 
 class EchoServer final : public OuterServer
 {

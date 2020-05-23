@@ -251,7 +251,6 @@ void OuterServer::accepter_procedure(uint64_t idx)
 
 				accpet_waiting_count += 1;
 
-				printf("id : %d \n", session->session_id);
 				release_session_ownership(id);
 			}
 			else
