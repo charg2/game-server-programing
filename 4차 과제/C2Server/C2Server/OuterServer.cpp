@@ -259,9 +259,7 @@ void OuterServer::accepter_procedure(uint64_t idx)
 			}
 		}
 
-		on_update();
-
-		Sleep(30);
+		Sleep(20);
 	}
 
 

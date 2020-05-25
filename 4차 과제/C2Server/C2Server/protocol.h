@@ -81,6 +81,7 @@ struct sc_packet_move
 
 	int id;
 	short x, y;
+	unsigned move_time;
 };
 
 struct sc_packet_enter
@@ -118,9 +119,10 @@ struct cs_packet_login
 
 
 struct cs_packet_move {
-	char	size;
-	char	type;
-	char	direction;
+	PacketHeader header;
+
+	char		direction;
+	unsigned	move_time;
 };
 
 

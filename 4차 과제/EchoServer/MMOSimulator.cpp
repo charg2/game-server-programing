@@ -74,6 +74,7 @@ void MMOSimulator::dispatch()
 
 				// id check
 				MMOActor* actor = msg.session->get_actor();
+				actor->set_move_time(in_payload.move_time);
 				actor->move(in_payload.direction);
 				break;
 			}

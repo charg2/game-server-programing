@@ -13,7 +13,7 @@ MMOActor::MMOActor(MMOSession* owner)
 	current_sector{}, prev_sector{},
 	zone{}, simulator{},
 	state{ ACS_NONE }, 
-	session{ owner }
+	session{ owner }, last_move_time{}
 {
 }
 
@@ -230,6 +230,7 @@ void MMOActor::simulate()
 		move_payload.x = this->x;
 		move_payload.y = this->y;
 		move_payload.id = this->get_id();
+		move_payload.move_time = this->last_move_time;
 		
 		// move 보낼 곳.
 		for (MMOSector* inter_sector : *intersection_sectors)
@@ -283,7 +284,7 @@ void MMOActor::simulate()
 
 		/// 마지막으로 sector 반영.
 		prev_sector = current_sector;
-
+		this->last_move_time = 0; 
 		return;
 	}
 }
@@ -334,6 +335,11 @@ int32_t MMOActor::get_y()
 	return y;
 }
 
+unsigned MMOActor::get_move_time()
+{
+	return last_move_time;
+}
+
 
 void MMOActor::set_zone(MMOZone* zone)
 {
@@ -343,6 +349,11 @@ void MMOActor::set_zone(MMOZone* zone)
 void MMOActor::set_name(char* name_ptr)
 {
 	memcpy(this->name, name_ptr, sizeof(cs_packet_login::name));
+}
+
+void MMOActor::set_move_time(unsigned time)
+{
+	this->last_move_time = time;
 }
 
 void MMOActor::set_state(c2::enumeration::MMOActorState state)

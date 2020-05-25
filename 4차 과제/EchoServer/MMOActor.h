@@ -29,6 +29,7 @@ public:
 	void set_prev_sector(MMOSector* sector);
 	void set_zone(MMOZone* zone);
 	void set_name(char* name_ptr);
+	void set_move_time(unsigned time);
 	void set_state(c2::enumeration::MMOActorState state);
 
 	uint64_t get_session_id();
@@ -37,6 +38,7 @@ public:
 	int16_t get_id();
 	int32_t get_x();
 	int32_t get_y();
+	unsigned get_move_time();
 
 	void get_login_packet_info(sc_packet_login_ok& out_packet);
 
@@ -51,7 +53,7 @@ private:
 	int8_t				direction;
 	MMOActorState		state;
 	uint64_t			session_id;
-
+	unsigned			last_move_time;
 	MMOSector*			current_sector; // in dispatch()
 	MMOSector*			prev_sector;	// in simulate()
 	MMOZone*			zone;
