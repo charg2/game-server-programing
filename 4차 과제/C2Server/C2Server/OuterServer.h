@@ -45,6 +45,7 @@ public:
 	virtual void		on_sleep_io_thread();
 	
 	virtual void		on_update();
+	virtual void		on_start();
 
 	virtual void		on_create_sessions(size_t n);
 	void				destroy_sessions();
@@ -109,7 +110,7 @@ protected:
 	alignas(c2::constant::CACHE_LINE)	int64_t		total_recv_count;			// 8
 	alignas(c2::constant::CACHE_LINE)	int64_t		total_sent_bytes;			// 8
 	alignas(c2::constant::CACHE_LINE)	int64_t		total_sent_count;			// 8
-	alignas(c2::constant::CACHE_LINE)	uint64_t	current_accepted_count;			// 8
+	alignas(c2::constant::CACHE_LINE)	uint64_t	current_accepted_count;		// 8
 
 private:
 	static inline LPFN_ACCEPTEX		accept_ex		{};

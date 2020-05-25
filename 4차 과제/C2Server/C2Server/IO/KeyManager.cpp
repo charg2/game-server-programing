@@ -1,8 +1,7 @@
 #include "KeyManager.h"
-
 #include <Windows.h>
 
-std::unique_ptr<KeyManager> g_key_manager	{ nullptr };
+//std::unique_ptr<KeyManager> g_key_manager	{ nullptr };
 
 KeyManager::KeyManager() : is_key_down { }, is_key_up { }
 {

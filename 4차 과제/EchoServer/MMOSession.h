@@ -9,6 +9,8 @@ public :
 	MMOSession();
 	~MMOSession();
 
+	MMOActor* get_actor();
+
 private:
 	MMOActor actor;
 };

@@ -4,7 +4,6 @@
 #include "Session.h"
 #include "network/SocketAddress.h"
 #include "OuterServer.h"
-
 //LPFN_ACCEPTEX		OuterServer::accept_ex{  };
 //LPFN_DISCONNECTEX	OuterServer::disconnect_ex{  };
 //LPFN_CONNECTEX		OuterServer::connect_ex{  };
@@ -184,32 +183,33 @@ void OuterServer::start()
 	//const uint16_t	maximum_accept_waiting_count = this->maximum_accpet_count;
 	//size_t			accpet_waiting_count = 0;
 	//size_t			id = 0;
-
+	
 	// session 꺼내서 
-	for (;;)
-	{
-		//size_t invalid_heap_count = 0;
+	//for (;;)
+	//{
+	//	//size_t invalid_heap_count = 0;
 
-		//unsigned long  heap_count = GetProcessHeaps(0, NULL);
-		//HANDLE* heaps = new HANDLE[heap_count];
-		//GetProcessHeaps(heap_count, heaps);
-		//PROCESS_HEAP_ENTRY heapEntry;
-		//long long sizeSum = 0;
+	//	//unsigned long  heap_count = GetProcessHeaps(0, NULL);
+	//	//HANDLE* heaps = new HANDLE[heap_count];
+	//	//GetProcessHeaps(heap_count, heaps);
+	//	//PROCESS_HEAP_ENTRY heapEntry;
+	//	//long long sizeSum = 0;
 
-		//for (unsigned long i = 0; i < heap_count; i++)
-		//{
-		//	if (0 == HeapValidate(heaps[i], 0, NULL))
-		//	{
-		//		invalid_heap_count += 1;
-		//	}
-		//}
-		//delete[] heaps;
+	//	//for (unsigned long i = 0; i < heap_count; i++)
+	//	//{
+	//	//	if (0 == HeapValidate(heaps[i], 0, NULL))
+	//	//	{
+	//	//		invalid_heap_count += 1;
+	//	//	}
+	//	//}
+	//	//delete[] heaps;
 
-		//printf("----------------%d-----------", invalid_heap_count);
-		on_update();
+	//	//printf("----------------%d-----------", invalid_heap_count);
+	//	on_update();
 
-		Sleep(50);
-	}
+	//	Sleep(50);
+	//}
+	on_start();
 }
 
 void OuterServer::accepter_procedure(uint64_t idx)
@@ -296,7 +296,7 @@ void OuterServer::io_service_procedure(uint64_t custom_thread_id)
 			Session* session = (Session*)context_ptr->session;
 			
 			session->accept_completion();
-
+			on_accept(session);
 			continue;
 		}
 
@@ -330,6 +330,7 @@ void OuterServer::io_service_procedure(uint64_t custom_thread_id)
 
 		case IO_DISCONNECT:
 			session->disconnect_completion();
+			on_disconnect(session->session_id);
 			break;
 
 		case IO_ACCEPT:
@@ -426,6 +427,10 @@ void OuterServer::on_update()
 {
 }
 
+void OuterServer::on_start()
+{
+}
+
 void OuterServer::on_create_sessions(size_t n)
 {
 	Session* sessions_ptr = (Session*)HeapAlloc(session_heap, 0, sizeof(Session) * n);
@@ -450,7 +455,7 @@ void OuterServer::destroy_sessions()
 void OuterServer::request_disconnection(uint64_t session_id, c2::enumeration::DisconnectReason dr)
 {
 	Session* session = acquire_session_ownership(session_id);
-	if (session != nullptr)
+	if (session == nullptr)
 		return;
 
 	if (session->release_flag != 1)
@@ -463,9 +468,10 @@ void OuterServer::request_disconnection(uint64_t session_id, c2::enumeration::Di
 	session->discon_context.overalpped.Internal = 0;
 	session->discon_context.overalpped.InternalHigh = 0;
 
-	InterlockedIncrement64(&session->refer_count);
+	//InterlockedIncrement64(&session->refer_count);
 
 	// session에서 하고 
+
 	if (FALSE == OuterServer::disconnect_ex(session->sock, &session->discon_context.overalpped, TF_REUSE_SOCKET, 0))
 	{
 		DWORD error_code = GetLastError();
@@ -475,7 +481,7 @@ void OuterServer::request_disconnection(uint64_t session_id, c2::enumeration::Di
 			return;
 
 		case WSAENOTCONN: // 이미 종료된 소켓 
-			release_session_ownership(session_id);
+			//release_session_ownership(session_id);
 			InterlockedDecrement64(&session->refer_count);
 			release_session(session);
 			return;
@@ -496,7 +502,7 @@ void OuterServer::release_session(Session* session)
 {
 	for (int n = 0; n < session->packet_sent_count; ++n)
 	{
-		c2::Packet::free(session->sent_packets[n]);
+		c2::Packet::release(session->sent_packets[n]);
 	}
 
 	session->reset();
@@ -514,7 +520,14 @@ void OuterServer::disconnect_after_sending_packet(uint64_t session_id, c2::Packe
 void OuterServer::send_packet(uint64_t session_id, c2::Packet* out_packet)
 {
 	Session* session = this->acquire_session_ownership(session_id);
+	if (nullptr == session)
+	{
+		c2::Packet::release(out_packet);
 
+		this->release_session_ownership(session_id);
+
+		return;
+	}
 	// packet이 들어옴.
 	// concurrent_queue에 넣음.
 	session->send_buffer.push(out_packet);
@@ -561,7 +574,6 @@ Session* OuterServer::acquire_session_ownership(int64_t index)
 		return nullptr;
 	}
 
-	// disconnectEx를 걸어야 하나;
 	return session;
 }
 
@@ -570,21 +582,22 @@ void OuterServer::release_session_ownership(int64_t session_id)
 	Session* session = sessions[(uint16_t)session_id];
 	uint64_t ret_val = InterlockedDecrement64(&session->refer_count);
 
-	if (0 >= ret_val)
+	if (1 > ret_val)
 	{
-		if (0 == ret_val)
-		{
-			if (0 != InterlockedExchange(&session->release_flag, 1))
+		//if (0 == ret_val)
+		//{
+			if (0 == InterlockedExchange(&session->release_flag, 1))
 			{
 				request_disconnection(session->session_id, c2::enumeration::DisconnectReason::DR_NONE);
 			}
 
 			return;
-		}
-		else
-		{
-			c2::util::crash_assert();
-		}
+		//}
+		// else
+		//{
+		//	c2::util::crash_assert();
+		//}*/
+
 	}
 }
 

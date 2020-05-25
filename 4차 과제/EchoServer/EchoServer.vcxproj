@@ -23,6 +23,7 @@
     <ProjectGuid>{F4D3B027-ABC0-4970-A83B-ED1A2CE018DD}</ProjectGuid>
     <RootNamespace>EchoServer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>MMOServer</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -189,7 +190,7 @@
     <ClInclude Include="..\C2Server\C2Server\util\dump.h" />
     <ClInclude Include="..\C2Server\C2Server\util\exception.h" />
     <ClInclude Include="..\C2Server\C2Server\util\JsonParser.h" />
-    <ClInclude Include="..\Common\protocol.h" />
+    <ClInclude Include="function.h" />
     <ClInclude Include="MMOMessage.h" />
     <ClInclude Include="MMOActor.h" />
     <ClInclude Include="MMOSector.h" />
@@ -198,6 +199,7 @@
     <ClInclude Include="main.h" />
     <ClInclude Include="MMOSimulator.h" />
     <ClInclude Include="MMOZone.h" />
+    <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\C2Server\C2Server\concurrency\spin_wait.asm" />

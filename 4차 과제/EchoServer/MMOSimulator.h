@@ -1,10 +1,10 @@
 #pragma once
-#include "MMOZone.h"
+#include "MMOMessage.h"
 #include "../C2Server/C2Server/concurrency/MPSCQueue.h"
 
 using namespace c2::concurrency;
-
-class MMOMessage;
+class MMOZone;
+class MMOServer;
 class MMOSimulator
 {
 	MMOSimulator();
@@ -17,9 +17,11 @@ public:
 	void dispatch();
 	void simulate();
 	void put_message(MMOMessage* message);
+	void set_server(MMOServer* server);
 
 private:
-	MMOZone					zones;// []
-	MPSCQueue<MMOMessage*>	message_queue;
+	MMOZone*				zones;// []
+	MPSCQueue<MMOMessage>*	message_queue;
+	MMOServer*				server;
 };
 

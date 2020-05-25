@@ -107,9 +107,6 @@
     <ClInclude Include="..\C2Server\C2Server\Session.h">
       <Filter>lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\Common\protocol.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\concurrency\BackOff.h">
       <Filter>lib\common</Filter>
     </ClInclude>
@@ -178,6 +175,12 @@
     </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\concurrency\MPSCQueue.h">
       <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="function.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

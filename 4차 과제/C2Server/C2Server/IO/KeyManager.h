@@ -32,6 +32,6 @@ private:
 	bool is_key_up[kKeyMax];
 };
 
-extern std::unique_ptr<KeyManager> g_key_manager;
+//extern std::unique_ptr<KeyManager> g_key_manager;
 
 #endif 

@@ -21,8 +21,6 @@ static char global_buffer[sizeof sockaddr_in * 2 + 32];
 
 void Session::post_accept()
 {
-	printf("session::post_accpet() : %d\n", session_id);
-
 	this->increase_refer();
 
 	DWORD bytes = 0;
@@ -85,17 +83,18 @@ void Session::post_recv()
 		{
 			//debug_code( printf("[ERROR] %s, %s, %s : %d \n", __FILE__, __LINE__ , __FUNCSIG__, local_last_error) );
 			
-			int64_t ret_val = InterlockedDecrement64(&this->refer_count);
-
-			if (1 == InterlockedExchange(&this->io_cancled, 1) )
+			if (1 > InterlockedDecrement64(&this->refer_count))
 			{
-				request_disconnection();
-			}
-			else
-			{
-				CancelIoEx(reinterpret_cast<HANDLE>(sock), NULL);
-			}
 
+				if (1 == InterlockedExchange(&this->io_cancled, 1))
+				{
+					request_disconnection();
+				}
+				else
+				{
+					CancelIoEx(reinterpret_cast<HANDLE>(sock), NULL);
+				}
+			}
 			return;
 		}
 	}
@@ -129,10 +128,8 @@ void Session::post_send()
 		if ( send_buffer.unsafe_size() == 0 )
 		{
 			// send_packet()이 호출되면 post_send()중인걸로 감지 PQCS를 실행 안함.
-			
 			send_flag = 0;
 			// 이 위에 들어온다면... send_packet() 패킷 감지를 못함... 
-
 			// 여기 이후 send packet이 호출되면 문제가없기 때문에 다시 확인함.
 			if (send_buffer.unsafe_size() > 0)
 				continue;
@@ -166,19 +163,19 @@ void Session::post_send()
 			if (WSA_IO_PENDING != local_last_error)
 			{
 				//debug_console(printf("ret_val of WSASend() is not IO_PENDING  : %d \n", local_last_error));
-
-				InterlockedDecrement64(&this->refer_count);
-
-				//this->decrease_refer();
-				if (1 == InterlockedExchange(&this->io_cancled, 1))
+				printf("WSASend() failure : %d \n", session_id);
+				if ( 1 > InterlockedDecrement64(&this->refer_count)) // 
 				{
-					request_disconnection();
+					//this->decrease_refer();
+					if (1 == InterlockedExchange(&this->io_cancled, 1))
+					{
+						request_disconnection();
+					}
+					else
+					{
+						CancelIoEx(reinterpret_cast<HANDLE>(sock), NULL);
+					}
 				}
-				else
-				{
-					CancelIoEx(reinterpret_cast<HANDLE>(sock), NULL);
-				}
-
 				return;
 			}
 		}
@@ -189,8 +186,7 @@ void Session::post_send()
 void Session::recv_completion(size_t transfered_bytes)
 {
 	this->recv_buffer.move_front(transfered_bytes);
-	//printf("recv_completion : %d, free size : %d \n", transfered_bytes, recv_buffer.get_free_size());
-	if (0 == this->recv_buffer.get_free_size())
+	if (0 == transfered_bytes)
 	{
 		if (0 == InterlockedDecrement64(&this->refer_count))
 		{
@@ -199,6 +195,17 @@ void Session::recv_completion(size_t transfered_bytes)
 
 		return;
 	}
+
+	if (0 == this->recv_buffer.get_free_size() )
+	{
+		if (0 == InterlockedDecrement64(&this->refer_count))
+		{
+			server->request_disconnection(this->session_id, DR_RECV_BUFFER_FULL);
+		}
+
+		return;
+	}
+
 
 	this->parse_packet();
 	//this->parse_packet_echo();
@@ -215,7 +222,7 @@ void Session::send_completion(size_t transfered_bytes)
 	//server->total_sent_bytes[server->local_storage_accessor] += transfered_bytes;
 	uint64_t temp_packet_count = this->packet_sent_count;
 	for (size_t n = 0; n < temp_packet_count; ++n)
-		c2::Packet::free(sent_packets[n]);
+		c2::Packet::release(sent_packets[n]);
 
 	this->packet_sent_count = 0;
 
@@ -232,7 +239,6 @@ void Session::send_completion(size_t transfered_bytes)
 
 void Session::accept_completion()
 {
-	//printf("accept_acompletion id : %d \n", session_id);
 	HANDLE returned_hanlde = CreateIoCompletionPort((HANDLE)this->sock, server->completion_port, session_id, 0);
 	if(returned_hanlde == NULL ||  returned_hanlde != server->completion_port)
 	{
@@ -251,17 +257,20 @@ void Session::accept_completion()
 	InterlockedIncrement(&server->current_accepted_count); 
 	
 	// 인터락 증감을 하지 않고 대로 사용함.
+	
+
 	this->post_recv();
 }
 
 void Session::disconnect_completion()
 {
+	// 컨텐츠 통지
+	server->on_disconnect(this->session_id); // 
+
 	// io 정리 완료된 상태.
-	// 컨텐츠는 당연;;;
-	// 마지막으로 서버에 사용안하는 스택에 들어가서 대기함.
+	
+
 	// session에서 하고 
-
-
 	decrease_refer();
 }
 
@@ -373,22 +382,11 @@ void Session::increase_refer()
 void Session::decrease_refer()
 {
 	uint64_t ret_val = InterlockedIncrement64(&refer_count);
-	if (0 >= ret_val)
+	if (1 > ret_val)
 	{
-		if ( 0 == ret_val)
+		if (0 == InterlockedExchange(&this->release_flag, 1))
 		{
-			if (0 != InterlockedExchange(&this->release_flag, 1))
-			{
-				this->request_disconnection(); // 정상 종료.
-			}
-			else
-			{ 
-				
-			}
-		}
-		else
-		{
-			c2::util::crash_assert();
+			this->request_disconnection(); // 정상 종료.
 		}
 	}
 }

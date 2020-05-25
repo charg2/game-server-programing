@@ -1,8 +1,7 @@
 
+#include <Windows.h>
 namespace c2::concurrency
 {
-#include <Windows.h>
-
 	template<class T>
 	class MPSCQueue
 	{

@@ -2,7 +2,7 @@
 #include "../util/exception.h"
 
 
-//c2::concurrency::MemoryPoolTLS<Packet> Packet::packet_pool;
+//c2::concurrency::ThreadLocalMemoryPool<Packet> Packet::packet_pool;
 
 namespace c2
 {

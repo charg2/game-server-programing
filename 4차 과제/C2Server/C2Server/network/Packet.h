@@ -302,7 +302,7 @@ namespace c2
 		{
 			return packet_pool.alloc();
 		}
-		static void free(Packet* packet)
+		static void release(Packet* packet)
 		{
 			packet_pool.free(packet);
 		}
@@ -320,6 +320,6 @@ namespace c2
 		/*int64_t ref_count;
 		int64_t release_flag;*/
 
-		static inline c2::concurrency::MemoryPoolTLS<Packet> packet_pool{};
+		static inline c2::concurrency::ThreadLocalMemoryPool<Packet> packet_pool{};
 	};
 }

@@ -6,18 +6,30 @@
 
 REGISTER_HANDLER(C2S_LOGIN)
 {
-	MMOSimulator& simulator = MMOSimulator::get_instance();
-	//simulator.
+	MMOSimulator* simulator = &MMOSimulator::get_instance();
 
+	MMOMessage message;
+	message.in_packet = c2::Packet::alloc();
+	message.session = (MMOSession*)session;
+	message.session_id = session->session_id;
+	message.type = C2S_LOGIN;
+
+	message.in_packet->write(in_packet.get_buffer(), in_packet.size());
+
+	simulator->put_message(&message);
 }
 
 REGISTER_HANDLER(C2S_MOVE)
 {
-	MMOSession* echo_session = (MMOSession*)session;
+	static MMOSimulator& simulator = MMOSimulator::get_instance();
 
-	auto out_packet = c2::Packet::alloc();
+	MMOMessage message;
+	message.in_packet = c2::Packet::alloc();
+	message.session = (MMOSession*)session;
+	message.session_id = session->session_id;
+	message.type = C2S_MOVE;
 
-	out_packet->write(in_packet.get_buffer(), in_packet.size());
+	message.in_packet->write(in_packet.get_buffer(), in_packet.size());
 
-	echo_session->server->send_packet(echo_session->session_id, out_packet);
+	simulator.put_message(&message);
 }

@@ -1,9 +1,10 @@
 #pragma once
 #include "MMOSector.h"
-#include "../C2Server/C2Server/concurrency/MPSCQueue.h"
+#include <map>
+#include <vector>
 
-using namespace c2::concurrency;
-class MMOZone
+class MMOACtor; 
+class MMOZone //
 {
 public:
 	MMOZone();
@@ -11,18 +12,21 @@ public:
 	MMOZone(MMOZone&& other) = delete;
 	~MMOZone();
 
+	void accept_actor(MMOActor* actor);
+	void release_actor(MMOActor* actor);
+
 	void dispatch_network();
 	void simulate_interaction();
 
 	void broadcaset_all();
 	void broadcaset_nearby_others();
+	void add_garbage(int16_t id);
 
-private:
-	void process_packet();
-
-private:
-	MMOSector		 sectors[800][800];
-	MPSCQueue<void*> message_queue;
+	MMOSector* get_sector(int x, int y);
 	
+private:
+	MMOSector						sectors[400][400];
+	std::map<int16_t, MMOActor*>	actors;
+	std::vector<int16_t>			garbages;
 };
 

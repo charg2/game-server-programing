@@ -46,7 +46,7 @@
 //std::vector<std::thread> th_v2;
 //
 //test* alloc_table[countOfThread][numberOfTarget];
-//MemoryPoolTLS<test>* objPool;
+//ThreadLocalMemoryPool<test>* objPool;
 //
 //void native_new_delete(int idx)
 //{
@@ -96,7 +96,7 @@
 //			
 //			for (int n = 0; n < numberOfTarget; ++n)
 //			{
-//				objPool->free(alloc_table[idx][n]);
+//				objPool->release(alloc_table[idx][n]);
 //			}
 //		}
 //	}
@@ -109,7 +109,7 @@
 //{
 //	std::cout << __FILE__ << std::endl;
 //	SetUnhandledExceptionFilter(ExceptionFilter);
-//	objPool = new MemoryPoolTLS<test>;
+//	objPool = new ThreadLocalMemoryPool<test>;
 //	int k = 0;
 //
 //	std::cout << "defualt heap new / delete " << std::endl;
@@ -120,7 +120,7 @@
 //	for (auto&& th : th_v)
 //		th.join();
 //
-//	std::cout << "private heap mempool_tls alloc / free " << std::endl;
+//	std::cout << "private heap mempool_tls alloc / release " << std::endl;
 //
 //	for (int n = 0; n < 4; ++n)
 //		th_v2.push_back(std::thread(mem_pool_tls_alloc_free, k++));

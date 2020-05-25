@@ -8,61 +8,66 @@
 
 namespace c2::concurrency
 {
-	template <typename Type, size_t Capacity = kDefaultCapacity, bool PlacementNew = true>
+	template <typename Type, size_t Capacity = 1024, bool PlacementNew = true>
 	class ConcurrentStackMemoryPool
 	{
-		enum Config : size_t { DEAD = 0xDDEEAADDDDEEAADD };
+		enum Keyword : size_t
+		{
+			DEAD = 0xDDEEAADDDDEEAADD
+		};
 
 		struct BlockNode   // aal
 		{
-			BlockNode() : next_block{ nullptr }, magic_number{ kDeadBeef }
+			BlockNode() : next_block{ nullptr }, magic_number{ Keyword::DEAD }
 			{
 			}
 
 			Type			data;
 			size_t			magic_number;
-			BlockNode*		next_block;
+			BlockNode* next_block;
 		};
 
 		struct alignas(16) TopNode
 		{
-			BlockNode*	node;
+			BlockNode* node;
 			uint64_t	stamp;
 		};
 
 	public:
-		ConcurrentStackMemoryPool() : top{ nullptr }, heap_handle { INVALID_HANDLE_VALUE }
+		ConcurrentStackMemoryPool() : top{ nullptr }, heap_handle{ INVALID_HANDLE_VALUE }
 		{
 			heap_handle = HeapCreate( /* HEAP_ZERO_MEMORY */ HEAP_GENERATE_EXCEPTIONS, 0, NULL);
 			if (INVALID_HANDLE_VALUE == heap_handle)
 			{
-				int* invliad_ptr{};
-				*invliad_ptr = Config::DEAD;
+				size_t* invliad_ptr{};
+				*invliad_ptr = Keyword::DEAD;
 			}
-			
-			top				= (TopNode*)HeapAlloc(heap_handle, HEAP_GENERATE_EXCEPTIONS, sizeof(TopNode));
-			top->node		= (BlockNode*)HeapAlloc(heap_handle , HEAP_GENERATE_EXCEPTIONS, sizeof(BlockNode) * Capacity);
-			top->stamp		= 1984;
 
-			size_t block_size = sizeof(BlockNode);
-			size_t capacity_size = Capacity;
+			top = (TopNode*)HeapAlloc(heap_handle, HEAP_GENERATE_EXCEPTIONS, sizeof(TopNode));
+			top->node = (BlockNode*)HeapAlloc(heap_handle, HEAP_GENERATE_EXCEPTIONS, sizeof(BlockNode) * Capacity);
+			top->stamp = 1984;
 
-			for ( int n = 0 ; n < Capacity; ++n)
-				new(&top->node[n]) BlockNode;
-
-			top->node->next_block = &top->node[1];
-
-			BlockNode* newBlock = nullptr;
-
-			for (this->freeBlock_count = 1; this->freeBlock_count < Capacity; ++this->freeBlock_count)
+			int n = 0;
+			for (int n = 0; n < Capacity - 1; ++n)
 			{
-				newBlock = &top->node[freeBlock_count];
-				newBlock->next_block = &top->node[freeBlock_count + 1];
+				new(&top->node[n]) BlockNode;
+				top->node[n].next_block = &top->node[n + 1];
 			}
 
-			newBlock->next_block = nullptr;
+			new(&top->node[n]) BlockNode;
+			top->node[n].next_block = nullptr;
+
+			//top->node->next_block = &top->node[1];
+			//BlockNode* newBlock = nullptr;
+
+			//for (this->freeBlock_count = 1; this->freeBlock_count < Capacity; ++this->freeBlock_count)
+			//{
+				//newBlock = &top->node[freeBlock_count];
+				//newBlock->next_block = &top->node[freeBlock_count + 1];
+			//}
+			//newBlock->next_block = nullptr;
 		}
-		
+
 		~ConcurrentStackMemoryPool()
 		{
 			HeapDestroy(heap_handle);
@@ -70,9 +75,9 @@ namespace c2::concurrency
 
 		Type* alloc(void)
 		{
-			BlockNode*	temp		{ nullptr };
-			TopNode		local_top	{ this->top->node, this->top->stamp };
-			BlockNode*	new_block;
+			BlockNode* temp{ nullptr };
+			TopNode		local_top{ this->top->node, this->top->stamp };
+			BlockNode* new_block;
 			BackOff     backoff{ BackOff::min_delay };
 
 			for (;;)
@@ -82,8 +87,8 @@ namespace c2::concurrency
 					// 할당해서 줌;
 					//new_block = new BlockNode; //(BlockNode*)HeapAlloc(heap_handle, NULL, sizeof(BlockNode));
 					new_block = (BlockNode*)HeapAlloc(heap_handle, HEAP_GENERATE_EXCEPTIONS, sizeof(BlockNode));
-					new_block->next_block =  nullptr;
-					new_block->magic_number = kDeadBeef;
+					new_block->next_block = nullptr;
+					new_block->magic_number = Keyword::DEAD;
 					//new(new_block) BlockNode;
 
 					if (PlacementNew) // 생성자 킴.
@@ -96,15 +101,15 @@ namespace c2::concurrency
 				{
 					temp = this->top->node;
 
-					if ( 1 == InterlockedCompareExchange128((int64_t*)this->top, (LONG64)(local_top.stamp + 1), (LONG64)local_top.node->next_block, (LONG64*)& local_top))
+					if (1 == InterlockedCompareExchange128((int64_t*)this->top, (LONG64)(local_top.stamp + 1), (LONG64)local_top.node->next_block, (LONG64*)&local_top))
 						break;
 					else
 						backoff.do_backoff();
 				}
 				else // 시도 조차 안했따면 직접 갱신.
 				{
-					local_top.node	= top->node;
-					local_top.stamp	= top->stamp;
+					local_top.node = top->node;
+					local_top.stamp = top->stamp;
 				}
 			}
 
@@ -124,32 +129,35 @@ namespace c2::concurrency
 		//////////////////////////////////////////////////////////////////////////
 		void  free(Type* data)
 		{
-			if (((BlockNode*)data)->magic_number != kDeadBeef)  // magicNumber Check
+			BackOff     backoff{ BackOff::min_delay };
+
+			if (((BlockNode*)data)->magic_number != Keyword::DEAD)  // magicNumber Check
 			{
-				c2::util::crash_assert();
+				int* invliad_ptr{};
+				*invliad_ptr = Keyword::DEAD;
 			}
+
 
 			if (PlacementNew) // dtor / ctor  호출할지는정함.
 				((BlockNode*)data)->data.~Type();
 
 			TopNode local_top{ this->top->node, this->top->stamp };
 
-			for (;;) 
+			for (;;)
 			{
 				((BlockNode*)data)->next_block = top->node;
 
 				if (local_top.stamp == top->stamp)
 				{
-					if ( 1 == InterlockedCompareExchange128((int64_t*)this->top, (LONG64)(local_top.stamp + 1), (LONG64)data, (LONG64*)& local_top) )
+					if (1 == InterlockedCompareExchange128((int64_t*)this->top, (LONG64)(local_top.stamp + 1), (LONG64)data, (LONG64*)&local_top))
 						break;
-					//else
-					//	backoff.do_backoff();
-
+					else
+						backoff.do_backoff();
 				}
 				else
 				{
-					local_top.node	= top->node;
-					local_top.stamp	= top->stamp;
+					local_top.node = top->node;
+					local_top.stamp = top->stamp;
 				}
 			}
 
@@ -158,9 +166,9 @@ namespace c2::concurrency
 
 
 	private:
-		TopNode*	top;
-		HANDLE		heap_handle;
-		int64_t		freeBlock_count;
+		alignas(64) TopNode*	top;
+		alignas(64) int64_t		freeBlock_count;
+		HANDLE					heap_handle;
 	};
 
 }

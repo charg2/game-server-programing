@@ -19,11 +19,26 @@ namespace c2
 		constexpr unsigned char D_RIGHT = 3;
 		constexpr int MAX_ID_LEN = 50;
 		constexpr int MAX_STR_LEN = 255;
+		constexpr int FOV_WIDTH = 16;
+		constexpr int FOV_HEIGHT = 16;
+		constexpr int BROADCAST_HEIGHT = 11;
+		constexpr int BROADCAST_WIDTH = 11;
+		constexpr int MAP_WIDTH  = 400;
+		constexpr int MAP_HEIGHT = 400;
 
 	}
 
 	namespace enumeration
 	{
+		enum NearDirection
+		{
+			NEAR_RIGHT, 
+			NEAR_LEFT,
+			NEAR_UP,
+			NEAR_DOWN,
+			NEAR_MAX
+		};
+
 		enum IoType 
 		{
 			IO_RECV,
@@ -59,6 +74,14 @@ namespace c2
 
 		enum SessionState
 		{};
+
+		enum MMOActorState : unsigned char
+		{
+			ACS_NONE,
+			ACS_BEFORE_LOGIN,
+			ACS_AFTER_LOGIN,
+			ACS_PLAYING,
+		};
 
 		enum ThreadType
 		{

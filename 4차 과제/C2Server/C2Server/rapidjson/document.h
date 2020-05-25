@@ -905,7 +905,7 @@ public:
         return *this;
     }
 
-    //! free-standing swap function helper
+    //! release-standing swap function helper
     /*!
         Helper function to enable support for common swap implementation pattern based on \c std::swap:
         \code
@@ -2216,7 +2216,7 @@ public:
     // Refer to Effective C++ 3rd Edition/Item 33: Avoid hiding inherited names.
     using ValueType::Swap;
 
-    //! free-standing swap function helper
+    //! release-standing swap function helper
     /*!
         Helper function to enable support for common swap implementation pattern based on \c std::swap:
         \code

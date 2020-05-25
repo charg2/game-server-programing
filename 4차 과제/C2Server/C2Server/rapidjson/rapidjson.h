@@ -36,7 +36,7 @@
           different translation units of a single application.
  */
 
-#include <cstdlib>  // malloc(), realloc(), free(), size_t
+#include <cstdlib>  // malloc(), realloc(), release(), size_t
 #include <cstring>  // memset(), memcpy(), memmove(), memcmp()
 
 ///////////////////////////////////////////////////////////////////////////////
