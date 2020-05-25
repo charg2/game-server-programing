@@ -24,10 +24,10 @@ public:
 
 	void erase_session(uint64_t session_id);
 
-	MMOSector* get_sector(int x, int y);
-	
+	MMOSector* get_sector(int y, int x);
+	std::map<int16_t, MMOActor*>&	get_actors();
+
 private:
-	MMOSector						sectors[400][400];
 	std::map<int16_t, MMOActor*>	actors;
 	std::vector<int16_t>			garbages;
 };
