@@ -9,6 +9,7 @@ MMOSimulator::MMOSimulator() : zones{}
 {
 	zones = new MMOZone();
 	message_queue = new MPSCQueue<MMOMessage>();
+	disconnected_session_id = new MPSCQueue<uint64_t>();
 }
 
 MMOSimulator& MMOSimulator::get_instance()
@@ -20,6 +21,12 @@ MMOSimulator& MMOSimulator::get_instance()
 void MMOSimulator::dispatch()
 {
 	MMOMessage msg;
+	uint64_t session_id;
+
+	while (disconnected_session_id->try_pop(session_id))
+	{
+		zones->erase_session(session_id);
+	}
 
 	while (message_queue->try_pop(msg))
 	{
@@ -91,7 +98,17 @@ void MMOSimulator::put_message(MMOMessage* message)
 	message_queue->push(*message);
 }
 
+void MMOSimulator::put_disconnected_session(uint64_t session_id)
+{
+	disconnected_session_id->push(session_id);
+}
+
 void MMOSimulator::set_server(MMOServer* server)
 {
 	this->server = server;
+}
+
+MMOServer* MMOSimulator::get_server()
+{
+	return server;
 }

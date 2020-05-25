@@ -240,9 +240,10 @@ void Session::send_completion(size_t transfered_bytes)
 void Session::accept_completion()
 {
 	HANDLE returned_hanlde = CreateIoCompletionPort((HANDLE)this->sock, server->completion_port, session_id, 0);
+	printf("returned handle %d,  error : %d \n", returned_hanlde, GetLastError());
 	if(returned_hanlde == NULL ||  returned_hanlde != server->completion_port)
 	{
-		debug_code(printf("[ERROR] LanServer::bind() failed"););
+		debug_code(printf("[ERROR] OuterServer::CompletionPort Bind() failed"););
 
 		this->last_error = ER_ASSOCIATIVE_COMPLETION_PORT_FALIURE;
 	}
@@ -267,11 +268,13 @@ void Session::disconnect_completion()
 	// 컨텐츠 통지
 	server->on_disconnect(this->session_id); // 
 
-	// io 정리 완료된 상태.
-	
-
 	// session에서 하고 
 	decrease_refer();
+
+	// io 정리 완료된 상태.
+	//this->session_id = increase_session_stamp(session_id);
+
+	//server->id_pool.push(this->session_id);
 }
 
 void Session::parse_packet()

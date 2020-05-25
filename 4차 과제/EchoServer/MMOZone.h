@@ -22,6 +22,8 @@ public:
 	void broadcaset_nearby_others();
 	void add_garbage(int16_t id);
 
+	void erase_session(uint64_t session_id);
+
 	MMOSector* get_sector(int x, int y);
 	
 private:

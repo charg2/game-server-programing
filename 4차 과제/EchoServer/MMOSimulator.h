@@ -17,10 +17,13 @@ public:
 	void dispatch();
 	void simulate();
 	void put_message(MMOMessage* message);
+	void put_disconnected_session(uint64_t session_id);
 	void set_server(MMOServer* server);
+	MMOServer* get_server();
 
 private:
 	MMOZone*				zones;// []
+	MPSCQueue<uint64_t>*	disconnected_session_id;
 	MPSCQueue<MMOMessage>*	message_queue;
 	MMOServer*				server;
 };

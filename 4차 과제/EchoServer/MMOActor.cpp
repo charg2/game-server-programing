@@ -334,6 +334,7 @@ int32_t MMOActor::get_y()
 	return y;
 }
 
+
 void MMOActor::set_zone(MMOZone* zone)
 {
 	this->zone = zone;

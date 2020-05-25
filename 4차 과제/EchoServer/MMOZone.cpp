@@ -1,5 +1,7 @@
+#include "../C2Server/C2Server/pre_compile.h"
 #include "MMOActor.h"
 #include "MMOZone.h"
+#include "MMOServer.h"
 #include <algorithm>
 
 MMOZone::MMOZone()
@@ -8,7 +10,6 @@ MMOZone::MMOZone()
 	{
 		for (int x = 0; x < c2::constant::MAP_WIDTH; ++x)
 		{
-
 			sectors[y][x].set_position(y, x);
 			sectors[y][x].set_zone(this);
 			sectors[y][x].calculate_near_sectors(); // 존을 늘린다면 밖으로 뺴자;
@@ -20,11 +21,6 @@ MMOZone::MMOZone()
 	{
 		for (int x = 0; x < c2::constant::MAP_WIDTH; ++x)
 		{
-			if (y == 395 && x == 41)
-			{
-				int  n = 0;
-			}
-
 			std::vector<MMOSector*>& near_sectors = sectors[y][x].get_near_sectors(); 
 			
 			// 1 x + 1  right
@@ -36,46 +32,50 @@ MMOZone::MMOZone()
 				std::vector<MMOSector*>& new_difference_sectors		= sectors[y][x].get_new_difference_sectors(NEAR_RIGHT);
 				std::vector<MMOSector*>& intersection_sectors		= sectors[y][x].get_intersection_sectors(NEAR_RIGHT);
 
-				// 이동 후 - 기준
-				
-				new_difference_sectors.reserve(11);
-				auto iter = std::set_difference(right_near_sectors.begin(), right_near_sectors.end(), near_sectors.begin(), near_sectors.end(), new_difference_sectors.begin());
-				new_difference_sectors.erase(iter, new_difference_sectors.end());
-
-				// 기준 - 이동 후
-				old_difference_sectors.reserve(11);
-				iter = std::set_difference(near_sectors.begin(), near_sectors.end(), right_near_sectors.begin(), right_near_sectors.end(), old_difference_sectors.begin());
-				old_difference_sectors.erase(iter, old_difference_sectors.end());
 
 				// 교집합 이동 후  & 기준
 				intersection_sectors.reserve(110);
-				iter = std::set_intersection(near_sectors.begin(), near_sectors.end(), right_near_sectors.begin(), right_near_sectors.end(), intersection_sectors.begin());
-				intersection_sectors.erase(iter, intersection_sectors.end());
+				std::set_intersection(near_sectors.begin(), near_sectors.end(), right_near_sectors.begin(), right_near_sectors.end(), std::back_inserter(intersection_sectors));
+				intersection_sectors.shrink_to_fit();
+				std::sort(intersection_sectors.begin(), intersection_sectors.end());
+
+				// 이동 후 - 기준
+				new_difference_sectors.reserve(11);
+				std::set_difference(right_near_sectors.begin(), right_near_sectors.end(), intersection_sectors.begin(), intersection_sectors.end(), std::back_inserter( new_difference_sectors));
+				new_difference_sectors.shrink_to_fit();
+
+				// 기준 - 이동 후
+				old_difference_sectors.reserve(11);
+				std::set_difference(near_sectors.begin(), near_sectors.end(), intersection_sectors.begin(), intersection_sectors.end(), std::back_inserter(old_difference_sectors));
+				old_difference_sectors.shrink_to_fit();
 			}
 
 			// 1 x - 1  left
 			if ( 0 <= ( x - 1))
 			{
-				std::vector<MMOSector*>& left_near_sectors = sectors[y][x - 1].get_near_sectors();
+				std::vector<MMOSector*>& left_near_sectors			= sectors[y][x - 1].get_near_sectors();
 
 				std::vector<MMOSector*>& old_difference_sectors		= sectors[y][x].get_old_difference_sectors(NEAR_LEFT);
 				std::vector<MMOSector*>& new_difference_sectors		= sectors[y][x].get_new_difference_sectors(NEAR_LEFT);
 				std::vector<MMOSector*>& intersection_sectors		= sectors[y][x].get_intersection_sectors(NEAR_LEFT);
 
+				// 교집합 이동 후  & 기준
+				intersection_sectors.reserve(110);
+				std::set_intersection(near_sectors.begin(), near_sectors.end(), left_near_sectors.begin(), left_near_sectors.end(), std::back_inserter(intersection_sectors));
+				intersection_sectors.shrink_to_fit();
+				std::sort(intersection_sectors.begin(), intersection_sectors.end());
+
 				// 이동 후 - 기준
 				new_difference_sectors.reserve(11);
-				auto iter = std::set_difference(left_near_sectors.begin(), left_near_sectors.end(), near_sectors.begin(), near_sectors.end(), new_difference_sectors.begin());
-				new_difference_sectors.erase(iter, new_difference_sectors.end());
+				std::set_difference(left_near_sectors.begin(), left_near_sectors.end(), intersection_sectors.begin(), intersection_sectors.end(), std::back_inserter(new_difference_sectors));
+				new_difference_sectors.shrink_to_fit();
 
 				// 기준 - 이동 후
 				old_difference_sectors.reserve(11);
-				iter = std::set_difference(near_sectors.begin(), near_sectors.end(), left_near_sectors.begin(), left_near_sectors.end(), old_difference_sectors.begin());
-				old_difference_sectors.erase(iter, old_difference_sectors.end());
+				std::set_difference(near_sectors.begin(), near_sectors.end(), intersection_sectors.begin(), intersection_sectors.end(), std::back_inserter(old_difference_sectors));
+				old_difference_sectors.shrink_to_fit();
 
-				// 교집합 이동 후  & 기준
-				intersection_sectors.reserve(110);
-				iter = std::set_intersection(near_sectors.begin(), near_sectors.end(), left_near_sectors.begin(), left_near_sectors.end(), intersection_sectors.begin());
-				intersection_sectors.erase(iter, intersection_sectors.end());
+
 			}
 
 
@@ -88,20 +88,19 @@ MMOZone::MMOZone()
 				std::vector<MMOSector*>& new_difference_sectors		= sectors[y][x].get_new_difference_sectors(NEAR_DOWN);
 				std::vector<MMOSector*>& intersection_sectors		= sectors[y][x].get_intersection_sectors(NEAR_DOWN);
 
-				// 이동 후 - 기준
-				new_difference_sectors.reserve(11);
-				auto iter = std::set_difference(down_near_sectors.begin(), down_near_sectors.end(), near_sectors.begin(), near_sectors.end(), new_difference_sectors.begin());
-				new_difference_sectors.erase(iter, new_difference_sectors.end());
-
-				// 기준 - 이동 후
-				old_difference_sectors.reserve(11);
-				iter =std::set_difference(near_sectors.begin(), near_sectors.end(), down_near_sectors.begin(), down_near_sectors.end(), old_difference_sectors.begin());
-				old_difference_sectors.erase(iter, old_difference_sectors.end());
-
 				// 교집합 이동 후  & 기준
 				intersection_sectors.reserve(110);
-				iter = std::set_intersection(near_sectors.begin(), near_sectors.end(), down_near_sectors.begin(), down_near_sectors.end(), intersection_sectors.begin());
-				intersection_sectors.erase(iter, intersection_sectors.end());
+				std::set_intersection(near_sectors.begin(), near_sectors.end(), down_near_sectors.begin(), down_near_sectors.end(), std::back_inserter(intersection_sectors));
+				intersection_sectors.shrink_to_fit();
+				std::sort(intersection_sectors.begin(), intersection_sectors.end());
+
+				new_difference_sectors.reserve(11);
+				std::set_difference(down_near_sectors.begin(), down_near_sectors.end(), intersection_sectors.begin(), intersection_sectors.end(), std::back_inserter(new_difference_sectors));
+				new_difference_sectors.shrink_to_fit();
+				// 기준 - 이동 후
+				old_difference_sectors.reserve(11);
+				std::set_difference(near_sectors.begin(), near_sectors.end(), intersection_sectors.begin(), intersection_sectors.end(), std::back_inserter(old_difference_sectors));
+				old_difference_sectors.shrink_to_fit();
 
 			}
 
@@ -115,20 +114,21 @@ MMOZone::MMOZone()
 				std::vector<MMOSector*>& new_difference_sectors		= sectors[y][x].get_new_difference_sectors(NEAR_UP);
 				std::vector<MMOSector*>& intersection_sectors		= sectors[y][x].get_intersection_sectors(NEAR_UP);
 
-				// 이동 후 - 기준
+				// 교집합 이동 후  & 기준
+				intersection_sectors.reserve(110);
+				std::set_intersection(near_sectors.begin(), near_sectors.end(), up_near_sectors.begin(), up_near_sectors.end(), std::back_inserter(intersection_sectors));
+				intersection_sectors.shrink_to_fit();
+				std::sort(intersection_sectors.begin(), intersection_sectors.end());
+
+				// 이동 후 - 교집합
 				new_difference_sectors.reserve(11);
-				auto iter = std::set_difference(up_near_sectors.begin(), up_near_sectors.end(), near_sectors.begin(), near_sectors.end(), new_difference_sectors.begin());
-				new_difference_sectors.erase(iter, new_difference_sectors.end());
+				std::set_difference(up_near_sectors.begin(), up_near_sectors.end(), intersection_sectors.begin(), intersection_sectors.end(), std::back_inserter(new_difference_sectors));
+				new_difference_sectors.shrink_to_fit();
 
 				// 기준 - 이동 후
 				old_difference_sectors.reserve(11);
-				iter = std::set_difference(near_sectors.begin(), near_sectors.end(), up_near_sectors.begin(), up_near_sectors.end(), old_difference_sectors.begin());
-				old_difference_sectors.erase(iter, old_difference_sectors.end());
-
-				// 교집합 이동 후  & 기준
-				intersection_sectors.reserve(110);
-				iter =std::set_intersection(near_sectors.begin(), near_sectors.end(), up_near_sectors.begin(), up_near_sectors.end(), intersection_sectors.begin());
-				intersection_sectors.erase(iter, intersection_sectors.end());
+				std::set_difference(near_sectors.begin(), near_sectors.end(), intersection_sectors.begin(), intersection_sectors.end(), std::back_inserter(old_difference_sectors));
+				old_difference_sectors.shrink_to_fit();
 			}
 		}
 	}
@@ -192,13 +192,53 @@ void MMOZone::broadcaset_nearby_others()
 {
 }
 
-MMOSector* MMOZone::get_sector(int x, int y)
+MMOSector* MMOZone::get_sector(int y, int x)
 {
-	return &sectors[x][y];
+	return &sectors[y][x];
 }
 
 void MMOZone::add_garbage(int16_t id)
 {
 	garbages.push_back(id);
+}
+
+void MMOZone::erase_session(uint64_t session_id)
+{
+	MMOActor* actor = actors[(int16_t)session_id];
+	size_t ret = actors.erase((int16_t)session_id);
+	if (nullptr == actor )
+	{
+		return;
+	}
+	if (ret == 0)
+	{
+		return;
+	}
+
+	MMOServer* server = MMOSimulator::get_instance().get_server();
+
+	sc_packet_leave leave_payload;
+	leave_payload.header.length = sizeof(sc_packet_leave);
+	leave_payload.header.type = S2C_LEAVE;
+	leave_payload.id = actor->get_id();
+
+
+	MMOSector* current_sector = actor->get_current_sector();
+	std::vector<MMOSector*>& near_sectors = current_sector->get_near_sectors();
+	for (MMOSector* sector : near_sectors)
+	{
+		auto actors = sector->get_actors();
+		for( auto& it : actors )
+		{
+			MMOActor* other = it.second;
+			
+			c2::Packet* leave_packet =  c2::Packet::alloc();
+			leave_packet->write(&leave_payload, sizeof(sc_packet_leave));
+			server->send_packet(other->get_session_id(), leave_packet);
+		}
+	}
+
+
+
 }
 

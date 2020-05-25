@@ -29,8 +29,7 @@ void MMOServer::on_create_sessions(size_t capacity)
 void MMOServer::on_connect(uint64_t session_id){}
 void MMOServer::on_disconnect(uint64_t session_id) 
 {
-	printf("deaccept() : %d \n", session_id);
-
+	simulator->put_disconnected_session(session_id);
 }
 bool MMOServer::on_accept(Session* session) 
 { 

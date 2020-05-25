@@ -40,11 +40,11 @@ void MMOSector::calculate_near_sectors()
 {
 	// x 범위 구해주고
 	int16_t min_x = max(0, this->position_x - (c2::constant::BROADCAST_WIDTH / 2));
-	int16_t max_x = min(c2::constant::MAP_WIDTH, this->position_x + (c2::constant::BROADCAST_WIDTH / 2));
+	int16_t max_x = min(c2::constant::MAP_WIDTH - 1, this->position_x + (c2::constant::BROADCAST_WIDTH / 2));
 
 	// y 범위 구해주고
 	int16_t min_y = max(0, this->position_y - (c2::constant::BROADCAST_HEIGHT / 2));
-	int16_t max_y = min(c2::constant::MAP_HEIGHT, this->position_y + (c2::constant::BROADCAST_HEIGHT / 2));
+	int16_t max_y = min(c2::constant::MAP_HEIGHT - 1, this->position_y + (c2::constant::BROADCAST_HEIGHT / 2));
 
 	for (int y = min_y; y <= max_y; ++y)
 	{
@@ -60,6 +60,7 @@ void MMOSector::calculate_near_sectors()
 	near_sectors.shrink_to_fit();
 
 	std::sort(near_sectors.begin(), near_sectors.end());
+
 }
 
 bool MMOSector::get_has_obstacle()
