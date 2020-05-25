@@ -127,10 +127,8 @@ void Session::post_send()
 		// 패킷 감지를 못함.
 		if ( send_buffer.unsafe_size() == 0 )
 		{
-			// send_packet()이 호출되면 post_send()중인걸로 감지 PQCS를 실행 안함.
 			send_flag = 0;
-			// 이 위에 들어온다면... send_packet() 패킷 감지를 못함... 
-			// 여기 이후 send packet이 호출되면 문제가없기 때문에 다시 확인함.
+
 			if (send_buffer.unsafe_size() > 0)
 				continue;
 
