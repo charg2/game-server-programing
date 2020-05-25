@@ -240,7 +240,6 @@ void Session::send_completion(size_t transfered_bytes)
 void Session::accept_completion()
 {
 	HANDLE returned_hanlde = CreateIoCompletionPort((HANDLE)this->sock, server->completion_port, session_id, 0);
-	printf("returned handle %d,  error : %d \n", returned_hanlde, GetLastError());
 	if(returned_hanlde == NULL ||  returned_hanlde != server->completion_port)
 	{
 		debug_code(printf("[ERROR] OuterServer::CompletionPort Bind() failed"););

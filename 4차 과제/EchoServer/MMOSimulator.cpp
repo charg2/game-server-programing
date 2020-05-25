@@ -34,8 +34,6 @@ void MMOSimulator::dispatch()
 		{
 			case c2::enumeration::C2S_LOGIN:
 			{
-				printf(" c2s_login \n");
-
 				cs_packet_login		in_payload;
 				sc_packet_login_ok	out_payload;
 

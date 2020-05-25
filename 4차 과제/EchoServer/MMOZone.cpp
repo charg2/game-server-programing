@@ -133,7 +133,8 @@ MMOZone::MMOZone()
 		}
 	}
 
-	printf("init map...Ok\n ");
+	printf("init map... Ok\n ");
+	printf("MMOSimulator Ready... Ok\n ");
 }
 
 MMOZone::~MMOZone()
