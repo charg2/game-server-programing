@@ -33,7 +33,7 @@ void MMOServer::on_disconnect(uint64_t session_id)
 }
 bool MMOServer::on_accept(Session* session) 
 { 
-	printf("accept() : %d \n", session->session_id);
+	printf( "accept() : %d \n", session->session_id );
 
 	return true; 
 }

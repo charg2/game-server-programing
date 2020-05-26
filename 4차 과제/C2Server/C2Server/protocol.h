@@ -39,6 +39,7 @@ namespace c2::enumeration
 
 		C2S_LOGIN = 1,
 		C2S_MOVE,
+		C2S_CHAT,
 
 		S2C_LOGIN_OK = 1,
 		S2C_MOVE,
@@ -117,13 +118,20 @@ struct cs_packet_login
 };
 
 
-
-struct cs_packet_move {
+struct cs_packet_move 
+{
 	PacketHeader header;
 
 	char		direction;
 	unsigned	move_time;
 };
 
+struct cs_packet_chat
+{
+	PacketHeader header;
+
+	int	 id;
+	char chat[100];
+};
 
 #pragma pack(pop)

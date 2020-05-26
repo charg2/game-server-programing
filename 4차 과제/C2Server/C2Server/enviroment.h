@@ -26,6 +26,8 @@ namespace c2
 		constexpr int MAP_WIDTH  = 400;
 		constexpr int MAP_HEIGHT = 400;
 
+		constexpr int INITIAL_HP = 200;
+		constexpr int LEVEL_MAXIMUM_EXP = 200;  // level * LEVLE_MAXIMUM_EXPÇÏ¸é µÊ.
 	}
 
 	namespace enumeration

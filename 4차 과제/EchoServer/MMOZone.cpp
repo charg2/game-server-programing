@@ -74,8 +74,6 @@ MMOZone::MMOZone()
 				old_difference_sectors.reserve(11);
 				std::set_difference(near_sectors.begin(), near_sectors.end(), intersection_sectors.begin(), intersection_sectors.end(), std::back_inserter(old_difference_sectors));
 				old_difference_sectors.shrink_to_fit();
-
-
 			}
 
 

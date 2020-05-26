@@ -34,6 +34,7 @@ void MMOSimulator::dispatch()
 		{
 			case c2::enumeration::C2S_LOGIN:
 			{
+				printf("c2s_login");
 				cs_packet_login		in_payload;
 				sc_packet_login_ok	out_payload;
 
@@ -74,6 +75,30 @@ void MMOSimulator::dispatch()
 				MMOActor* actor = msg.session->get_actor();
 				actor->set_move_time(in_payload.move_time);
 				actor->move(in_payload.direction);
+				break;
+			}
+
+			case c2::enumeration::C2S_CHAT:
+			{
+				//cs_packet_chat chat_payload;
+				//msg.in_packet->read(&chat_payload, sizeof(cs_packet_chat));
+
+				//// id check
+				//MMOActor* actor = msg.session->get_actor();
+				//MMOSector* sector = actor->get_current_sector();
+				//std::vector<MMOSector*>& near_sectors =sector->get_near_sectors();
+				//for ( MMOSector* n_sector : near_sectors)
+				//{
+				//	auto& actors = n_sector->get_actors();
+				//	for (auto& iter : actors)
+				//	{
+				//		MMOActor* neighbor = iter.second;
+				//		c2::Packet* out_packet =  c2::Packet::alloc();
+				//		out_packet->write(&chat_payload, sizeof(cs_packet_chat));
+				//		server->send_packet(neighbor->get_session_id(), out_packet);
+				//	}
+				//}
+
 				break;
 			}
 			default:

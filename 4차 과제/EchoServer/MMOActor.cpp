@@ -124,7 +124,6 @@ void MMOActor::get_login_packet_info(sc_packet_login_ok& out_payload)
 	
 	out_payload.hp = this->hp;
 	out_payload.exp = this->current_exp;
-
 	out_payload.level = this->level;
 }
 
@@ -291,7 +290,7 @@ void MMOActor::simulate()
 
 void MMOActor::attack()
 {
-
+	// 주변 범위를 공격함.
 }
 
 

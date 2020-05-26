@@ -43,7 +43,6 @@ public:
 	void get_login_packet_info(sc_packet_login_ok& out_packet);
 
 private:
-	// actor_state
 	int32_t				x, y;
 	char				name[50];
 	int16_t				hp;
