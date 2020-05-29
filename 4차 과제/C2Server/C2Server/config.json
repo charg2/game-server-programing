@@ -6,7 +6,7 @@
   "concurrent_thread_count": 6,
   "server_port": 9000,
   "server_ip": "127.0.0.1",
-  "capacity": 5000,
+  "capacity": 10000,
   "maximum_listening_count": 500,
   "maximum_accept_count": 200
 } 

@@ -144,6 +144,10 @@ void MMOActor::simulate()
 		my_info_payload.x = this->x; my_info_payload.y = this->y;
 
 
+		c2::Packet* my_info_packet = c2::Packet::alloc();
+		c2::Packet*	other_info_packet = c2::Packet::alloc();
+		my_info_packet->write(&my_info_payload, sizeof(sc_packet_enter));// 내정보 타인한테 보내기
+
 		//  주변 섹터 구해서 
 		auto near_sectors = current_sector->get_near_sectors();
 		for (MMOSector* sector  : near_sectors)
@@ -154,8 +158,6 @@ void MMOActor::simulate()
 			// 주변 인원들에게 내 정보 페킷 만들어서 발사.
 			for ( auto& it : near_actors)
 			{
-				c2::Packet*		out_packet1 = c2::Packet::alloc();
-				c2::Packet*		out_packet2 = c2::Packet::alloc();
 				MMOActor*		other		= it.second;
 
 				// 타인 정보
@@ -167,15 +169,17 @@ void MMOActor::simulate()
 				other_info_payload.x = other->get_x();
 				other_info_payload.y = other->get_y();
 				
-				// 내정보 타인한테 보내기
-				out_packet1->write(&my_info_payload, sizeof(sc_packet_enter));
-				// 타인정보 나한테 보내기
-				out_packet2->write(&other_info_payload, sizeof(sc_packet_enter));
 
-				server->send_packet( other->get_session_id(), out_packet1); // 내정보 남한테 보내기
-				server->send_packet( this->get_session_id(), out_packet2); // 타인정보 나한테 보내기
+				// 타인정보 나한테 보내기
+				other_info_packet->write(&other_info_payload, sizeof(sc_packet_enter));
+
+				my_info_packet->increase_ref_count();
+				server->send_packet( other->get_session_id(), my_info_packet); // 내정보 남한테 보내기
 			}
 		}
+
+		server->send_packet( this->get_session_id(), other_info_packet); // 타인정보 나한테 보내기
+		my_info_packet->decrease_ref_count();
 
 		/// 마지막으로 sector 반영.
 		prev_sector = current_sector;
@@ -197,6 +201,11 @@ void MMOActor::simulate()
 		my_leave_payload.id = this->get_id();
 
 		// leave 보낼 곳.
+
+		c2::Packet* my_leave_packet = c2::Packet::alloc();
+		my_leave_packet->write(&my_leave_payload, sizeof(sc_packet_leave));
+		c2::Packet* other_leave_packet = c2::Packet::alloc();
+
 		for (MMOSector* old_sector : *old_difference_sectors)
 		{
 			std::map<uint16_t, MMOActor*>& old_actors = old_sector->get_actors();
@@ -209,18 +218,16 @@ void MMOActor::simulate()
 				other_leave_payload.header.length = sizeof(sc_packet_leave);
 				other_leave_payload.header.type = S2C_LEAVE;
 				other_leave_payload.id = other->get_id();
-
-				c2::Packet* my_leave_packet = c2::Packet::alloc();
-				c2::Packet* other_leave_packet = c2::Packet::alloc();
-
-				my_leave_packet->write(&my_leave_payload, sizeof(sc_packet_leave));
+				
 				other_leave_packet->write(&other_leave_payload, sizeof(sc_packet_leave));
 
+				my_leave_packet->increase_ref_count();
 				server->send_packet(other->get_session_id(), my_leave_packet); // 타인정보 나한테 보내기
-				server->send_packet(this->get_session_id(), other_leave_packet); // 타인정보 나한테 보내기
 			}
 		}
 
+		server->send_packet(this->get_session_id(), other_leave_packet); // 타인정보 나한테 보내기
+		my_leave_packet->decrease_ref_count();
 
 
 		sc_packet_move move_payload;
@@ -231,6 +238,9 @@ void MMOActor::simulate()
 		move_payload.id = this->get_id();
 		move_payload.move_time = this->last_move_time;
 		
+		c2::Packet* out_packet = c2::Packet::alloc();
+		out_packet->write(&move_payload, sizeof(sc_packet_move));
+
 		// move 보낼 곳.
 		for (MMOSector* inter_sector : *intersection_sectors)
 		{
@@ -238,12 +248,14 @@ void MMOActor::simulate()
 
 			for (auto& it : inter_actors)
 			{
-				c2::Packet* out_packet = c2::Packet::alloc();
-				out_packet->write(&move_payload, sizeof(sc_packet_move));
+				out_packet->increase_ref_count();
 				server->send_packet(it.second->get_session_id(), out_packet); // 타인정보 나한테 보내기
 			}
 
 		}
+		out_packet->decrease_ref_count();
+
+
 
 		// 내정보 타인한테 보내기.
 		sc_packet_enter my_enter_payload;
@@ -253,6 +265,10 @@ void MMOActor::simulate()
 		memcpy(my_enter_payload.name, this->name, sizeof(sc_packet_enter::name));
 		my_enter_payload.x = x;
 		my_enter_payload.y = y;
+
+		c2::Packet* my_enter_packet = c2::Packet::alloc();
+		my_enter_packet->write(&my_enter_payload, sizeof(sc_packet_enter));
+		c2::Packet* other_enter_packet = c2::Packet::alloc();
 
 		// enter 보낼 곳.
 		for (MMOSector* new_sector : *new_difference_sectors)
@@ -271,16 +287,15 @@ void MMOActor::simulate()
 				other_enter_payload.y = other->get_y();
 
 
-				c2::Packet* my_enter_packet = c2::Packet::alloc();
-				c2::Packet* other_enter_packet = c2::Packet::alloc();
-				my_enter_packet->write(&my_enter_payload, sizeof(sc_packet_enter));
+				my_enter_packet->increase_ref_count();
+				
 				other_enter_packet->write(&other_enter_payload, sizeof(sc_packet_enter));
 
 				server->send_packet(other->get_session_id(), my_enter_packet); // 타인정보 나한테 보내기
-				server->send_packet(this->get_session_id(), other_enter_packet); // 타인정보 나한테 보내기
 			}
 		}
-
+		server->send_packet(this->get_session_id(), other_enter_packet); // 타인정보 나한테 보내기
+		my_enter_packet->decrease_ref_count();
 		/// 마지막으로 sector 반영.
 		prev_sector = current_sector;
 		this->last_move_time = 0; 

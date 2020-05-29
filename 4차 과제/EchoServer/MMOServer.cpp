@@ -63,24 +63,24 @@ void MMOServer::on_start()
 	simulator = &MMOSimulator::get_instance();
 	simulator->set_server(this);
 
-	c2::util::LowPresicionTimer timer;
-	float elapsed_game_time = 0.0f;
-	float minimum_update_interval = 0.0f;
+	//c2::util::LowPresicionTimer timer;
+	//float elapsed_game_time = 0.0f;
+	//float minimum_update_interval = 0.0f;
 
 	for (;;)
 	{
-		timer.update();
+		//timer.update();
 
-		elapsed_game_time += timer.get_delta_time_signle();
+		//elapsed_game_time += timer.get_delta_time_signle();
 
-		if (elapsed_game_time >= minimum_update_interval)
-		{
+		//if (elapsed_game_time >= minimum_update_interval)
+		//{
 			simulator->dispatch();
 
 			simulator->simulate();
 
-			elapsed_game_time = 0.0f;
-		}
+			//elapsed_game_time = 0.0f;
+		//}
 	}
 }
 

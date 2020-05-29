@@ -7,7 +7,6 @@
 
 #define Out
 
-
 namespace c2
 {
 	constexpr size_t kMaximumSegmentSize = 1460;
@@ -18,6 +17,8 @@ namespace c2
 		Packet() : buffer{ nullptr }, payload_capacity{ kMaximumSegmentSize }, write_head{ 0 }, read_head{ 0 }//, ref_count{ 0 }
 		{
 			buffer = new char[kMaximumSegmentSize];
+
+			ref_count = 1;
 		}
 		//Packet(const Packet& other);
 		//Packet(Packet&& other) noexcept;
@@ -163,14 +164,10 @@ namespace c2
 
 		void read(Out void* data, size_t size)
 		{
-			//#ifdef PROFILE_ON
-			//		PROFILE_FUNC;
-			//#endif
 			if (read_head + size > write_head) // idx니깐 같아져도 문제가 생김.
 			{
-				// 이건 무족너 문제 있는 것.
-				// error handling... 
-				c2::util::assert_if_false(false);
+				// 이건 문제가 있는 상황.
+				size_t* invliad_ptr{}; *invliad_ptr = 0xDEADDEAD;
 			}
 
 
@@ -302,12 +299,36 @@ namespace c2
 		{
 			return packet_pool.alloc();
 		}
+
 		static void release(Packet* packet)
 		{
 			packet_pool.free(packet);
 		}
 
 
+		void increase_ref_count()
+		{
+			InterlockedIncrement64(&this->ref_count);
+		}
+
+		void add_ref(size_t n)
+		{
+			InterlockedAdd64(&this->ref_count, n);
+		}
+
+		void decrease_ref_count()
+		{
+			if (0 == InterlockedDecrement64(&this->ref_count))
+			{
+				packet_pool.free(this);
+			}
+		}
+
+		size_t allocated_chunk_count()
+		{
+			//return packet_pool.;
+			return 0;
+		}
 
 
 	private:
@@ -317,8 +338,7 @@ namespace c2
 		size_t	write_head;
 		size_t	read_head;
 
-		/*int64_t ref_count;
-		int64_t release_flag;*/
+		int64_t ref_count;
 
 		static inline c2::concurrency::ThreadLocalMemoryPool<Packet> packet_pool{};
 	};
