@@ -29,6 +29,8 @@ void main()
 
 	server.load_config_using_json(L"config.json");
 
+	server.init_simulator();
+
 	server.initialize();
 
 	server.start();

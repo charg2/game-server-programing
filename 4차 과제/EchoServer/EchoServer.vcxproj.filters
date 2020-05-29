@@ -170,9 +170,6 @@
     <ClInclude Include="MMOZone.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="MMOMessage.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\concurrency\MPSCQueue.h">
       <Filter>lib\common</Filter>
     </ClInclude>
@@ -181,6 +178,12 @@
     </ClInclude>
     <ClInclude Include="function.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="mmo_function.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MMONear.h">
+      <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

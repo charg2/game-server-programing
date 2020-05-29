@@ -4,29 +4,28 @@
 #include "MMOZone.h"
 
 MMOSector::MMOSector() 
- : position_x {}, position_y{},
+ : index_x {}, index_y{},
 has_obstacle{},
 f{}, g{}, h{}
 {
+
+	InitializeSRWLock(&lock);
 }
+
 
 MMOSector::~MMOSector()
 {
 }
 
-void MMOSector::simulate()
-{
-	for ( auto& it : actors)
-	{
-		it.second->simulate();
-	}
-}
 
 void MMOSector::accept_actor(uint64_t session_idx, MMOActor* in_actor)
 {
-	actors.insert(std::make_pair((uint16_t)session_idx, in_actor));
+	AcquireSRWLockExclusive( &lock );
 
-	in_actor->set_current_sector(this);
+	actors.insert(std::make_pair((uint16_t)session_idx, in_actor));
+	in_actor->current_sector =this;
+
+	ReleaseSRWLockExclusive(&lock);
 }
 
 bool MMOSector::leave_actor(uint64_t session_idx)
@@ -38,80 +37,79 @@ bool MMOSector::leave_actor(uint64_t session_idx)
 
 void MMOSector::calculate_near_sectors()
 {
-	// x 범위 구해주고
-	int16_t min_x = max(0, this->position_x - (c2::constant::BROADCAST_WIDTH / 2));
-	int16_t max_x = min(c2::constant::MAP_WIDTH - 1, this->position_x + (c2::constant::BROADCAST_WIDTH / 2));
+	using namespace c2::constant;
 
-	// y 범위 구해주고
-	int16_t min_y = max(0, this->position_y - (c2::constant::BROADCAST_HEIGHT / 2));
-	int16_t max_y = min(c2::constant::MAP_HEIGHT - 1, this->position_y + (c2::constant::BROADCAST_HEIGHT / 2));
-
-	for (int y = min_y; y <= max_y; ++y)
+	for (int y = index_y - 1; y <= index_y + 1; ++y)
 	{
-		for (int x = min_x; x <= max_x; ++x)
+		for (int x = index_x -1; x <= index_x + 1; ++x)
 		{
-			MMOSector* cur_zone = zone->get_sector(y, x);
-			
-			this->near_sectors.push_back(cur_zone);
+			MMOSector* cur_sector;
+			if (0 <= y && y <= index_y)
+			{
+				if (0 <= x && x <= index_x)
+				{
+					cur_sector = &zone->sectors[y][x];
+					this->near_sectors.push_back(cur_sector);
+				}
+			}
 		}
+	}
+
+	this->min_x = index_x * FOV_WIDTH;
+	this->max_x = min_x + (FOV_WIDTH - 1);
+	this->min_y = index_y * FOV_HEIGHT;
+	this->max_y = min_y + (FOV_HEIGHT - 1);
+
+	if (max_y > MAP_HEIGHT - 1)
+	{
+		max_y = MAP_HEIGHT - 1;
+	}
+	if (max_x > MAP_WIDTH - 1)
+	{
+		max_x = MAP_WIDTH - 1;
 	}
 
 	// 맨마지막에 추가.
 	near_sectors.shrink_to_fit();
 
-	std::sort(near_sectors.begin(), near_sectors.end());
+	//// 좌표가 들어오면 
+	//for (int y = min_y; y <= max_y; ++y)
+	//{
+	//	int count = 0;
+	//	for (int x = min_x; x <= max_x; ++x)
+	//	{
+	//		int l_min_y = max(y - FOV_HALF_HEIGHT, 0), l_min_x = max(x - FOV_HALF_WIDTH, 0);
+	//		int l_max_y = min(y + FOV_HALF_HEIGHT, FOV_HEIGHT - 1), l_max_x = min(x + FOV_HALF_WIDTH, FOV_HALF_WIDTH - 1);
+
+
+	//		MMOSector* l_sectors[4];
+	//		l_sectors[0] = zone->get_sector(l_max_y, l_max_x);
+	//		l_sectors[1] = zone->get_sector(l_max_y, l_min_x);
+	//		l_sectors[2] = zone->get_sector(l_min_y, l_max_x);
+	//		l_sectors[3] = zone->get_sector(l_min_y, l_min_x);
+
+	//		near_sector_table[y][x].count = 0;
+	//		for (int out = 0; out < 4; ++out)
+	//		{
+	//			for (int in = 0; in < out; ++in)
+	//			{
+	//				if ( l_sectors[out] == l_sectors[in] )
+	//				{
+
+	//				}
+	//				else
+	//				{
+
+	//				}
+	//			}
+
+	//		}
+	//	}
+	//}
+
+
 
 }
 
-bool MMOSector::get_has_obstacle()
-{
-	return has_obstacle;
-}
-
-void MMOSector::set_position(int y, int x)
-{
-	this->position_x = x;
-	this->position_y = y;
-}
-
-void MMOSector::set_zone(MMOZone* zone)
-{
-	this->zone = zone;
-}
-
-std::vector<MMOSector*>& MMOSector::get_near_sectors()
-{
-	return this->near_sectors;
-}
-
-std::map<uint16_t, MMOActor*>& MMOSector::get_actors()
-{
-	return actors;
-}
-
-int MMOSector::get_x()
-{
-	return position_x;
-}
-
-int MMOSector::get_y()
-{
-	return position_y;
-}
-
-std::vector<MMOSector*>& MMOSector::get_old_difference_sectors(c2::enumeration::NearDirection direction)
-{
-	return this->old_difference_sectors[direction];
-}
-
-std::vector<MMOSector*>& MMOSector::get_intersection_sectors(c2::enumeration::NearDirection direction)
-{
-	return this->intersection_sectors[direction];
-}
-
-std::vector<MMOSector*>& MMOSector::get_new_difference_sectors(c2::enumeration::NearDirection direction)
-{
-	return this->new_difference_sectors[direction];
-}
-
+void MMOSector::broadcaset() {}
 

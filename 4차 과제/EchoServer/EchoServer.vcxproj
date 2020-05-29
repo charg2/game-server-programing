@@ -191,7 +191,7 @@
     <ClInclude Include="..\C2Server\C2Server\util\exception.h" />
     <ClInclude Include="..\C2Server\C2Server\util\JsonParser.h" />
     <ClInclude Include="function.h" />
-    <ClInclude Include="MMOMessage.h" />
+    <ClInclude Include="MMONear.h" />
     <ClInclude Include="MMOActor.h" />
     <ClInclude Include="MMOSector.h" />
     <ClInclude Include="MMOServer.h" />
@@ -199,6 +199,7 @@
     <ClInclude Include="main.h" />
     <ClInclude Include="MMOSimulator.h" />
     <ClInclude Include="MMOZone.h" />
+    <ClInclude Include="mmo_function.hpp" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
