@@ -45,6 +45,7 @@ namespace c2::enumeration
 		S2C_MOVE,
 		S2C_ENTER,
 		S2C_LEAVE,
+		S2C_CHAT,
 
 		PT_MAX,
 	};
@@ -65,7 +66,7 @@ struct PacketHeader
 
 static_assert(sizeof(int32_t) == sizeof(int) && sizeof(uint32_t) == sizeof(unsigned int));
 
-struct sc_packet_login_ok
+struct sc_packet_login_ok // 2 4 4 2 2 4
 {
 	PacketHeader header;
 
@@ -107,7 +108,7 @@ struct sc_packet_chat
 	PacketHeader header;
 
 	int	 id;
-	char chat[100];
+	char chat[MAX_CHAT_LEN];
 };
 
 struct cs_packet_login
@@ -131,7 +132,7 @@ struct cs_packet_chat
 	PacketHeader header;
 
 	int	 id;
-	char chat[100];
+	char chat[MAX_CHAT_LEN];
 };
 
 #pragma pack(pop)

@@ -19,6 +19,7 @@ namespace c2
 		constexpr unsigned char D_RIGHT = 3;
 		constexpr int MAX_ID_LEN = 50;
 		constexpr int MAX_STR_LEN = 255;
+		constexpr int MAX_CHAT_LEN = 100;
 		constexpr int FOV_WIDTH = 16;
 		constexpr int FOV_HEIGHT = 16;
 		constexpr int BROADCAST_HEIGHT = 11;

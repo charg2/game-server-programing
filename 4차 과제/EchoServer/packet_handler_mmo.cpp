@@ -49,3 +49,4 @@ REGISTER_HANDLER(C2S_CHAT)
 
 	simulator.put_message(&message);
 }
+
