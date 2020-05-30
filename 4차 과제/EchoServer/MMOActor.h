@@ -4,12 +4,15 @@
 #include "../C2Server/C2Server/enviroment.h"
 #include "../C2Server/C2Server/protocol.h"
 #include <cstdint>
-#include <set>
+#include <atomic>
+#include <map>
 
-struct MMOZone;
-struct MMOSector;
-class MMOSession;
+struct	MMOZone;
+struct	MMOSector;
+class	MMOServer;
+class	MMOSession;
 
+enum ActorStatus { ST_FREE, ST_ALLOCATED, ST_ACTIVE };
 
 using namespace c2::enumeration;
 struct MMOActor
@@ -29,6 +32,12 @@ public:
 
 	int16_t get_id();
 
+	void send_enter_packet(MMOActor* other);
+	void send_move_packet(MMOActor* other);
+	void send_leave_packet(MMOActor* other);
+	void sned_chat_packet(MMOActor* other);
+	void send_login_ok_packet();
+
 public:
 	int32_t				x, y;
 	char				name[50];
@@ -38,15 +47,19 @@ public:
 	int32_t				levelup_exp;
 	int8_t				direction;
 
+	std::atomic<ActorStatus> status = ST_FREE;
+
 	uint64_t			session_id;
 	unsigned			last_move_time;
 	MMOSession* const	session;
 	MMOZone*			zone;
 
-	int32_t				sector_x, sector_y;
-	MMOSector*			current_sector; 
 
-	std::set<int16_t>	view_list;
+	MMOServer*			server;
+	int32_t				sector_x, sector_y;
+	//MMOSector*			current_sector; 
+
+	std::map<int32_t, MMOActor*>	view_list;
 	SRWLOCK				lock;
 };
 

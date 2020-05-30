@@ -21,19 +21,20 @@
 - 메시지 창 ( 채팅 가능 )
 - 알림 창
 */
+#include <memory>
 void main()
 {
-	MMOServer server;
+	std::unique_ptr<MMOServer> server{ std::make_unique<MMOServer>() };
 	
-	server.setup_dump();
+	server->setup_dump();
 
-	server.load_config_using_json(L"config.json");
+	server->load_config_using_json(L"config.json");
 
-	server.init_simulator();
+	server->init_simulator();
 
-	server.initialize();
+	server->initialize();
 
-	server.start();
+	server->start();
 	
-	server.finalize();
+	server->finalize();
 }

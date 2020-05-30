@@ -8,18 +8,18 @@ MMOZone::MMOZone()
 	InitializeSRWLock(&lock);
 
 	// position to idx table
-	int idx_y, idx_x = 0;
+	int idx_y = 0, idx_x = 0;
 	for (int y = 0; y < c2::constant::MAP_HEIGHT; y += 1)
 	{
-		if (y % c2::constant::BROADCAST_HEIGHT == 0 && y != 0)
+		if (y % c2::constant::SECTOR_HEIGHT == 0 && y != 0)
 			idx_y += 1;
 
-		postion_width_mapling_table[y] = idx_y;
+		postion_height_mapling_table[y] = idx_y;
 	}
 	
 	for (int x = 0; x < c2::constant::MAP_WIDTH; x += 1)
 	{
-		if (x % c2::constant::BROADCAST_WIDTH == 0 && x != 0)
+		if (x % c2::constant::SECTOR_WIDTH == 0 && x != 0)
 			idx_x += 1;
 
 		postion_width_mapling_table[x] = idx_x;
@@ -34,7 +34,7 @@ MMOZone::MMOZone()
 			sectors[y][x].index_y = y;
 			sectors[y][x].index_x = x;
 			sectors[y][x].zone = this;
-			sectors[y][x].calculate_near_sectors(); // 존을 늘린다면 밖으로 뺴자;
+			sectors[y][x].calculate_serctor_idx(); // 존을 늘린다면 밖으로 뺴자;
 		}
 	}
 
@@ -49,16 +49,16 @@ MMOZone::~MMOZone()
 
 void MMOZone::accept_actor(MMOActor* actor)
 {
-	this->actors.insert(std::make_pair(actor->get_id(), actor));
-	actor->zone = this;
+	//this->actors.insert(std::make_pair(actor->get_id(), actor));
+	//actor->zone = this;
 
-	MMOSector* dest_sector = &sectors[actor->y][actor->x];
-	dest_sector->accept_actor(actor->session_id, actor);
+	//MMOSector* dest_sector = &sectors[actor->y][actor->x];
+	//dest_sector->accept_actor(actor->session_id, actor);
 }
 
 void MMOZone::release_actor(MMOActor* actor)
 {
-	this->actors.erase(actor->get_id());
+	//this->actors.erase(actor->get_id());
 }
 
 
@@ -88,7 +88,7 @@ MMOSector* MMOZone::calc_near_sector(int32_t y, int32_t x)
 
 void MMOZone::erase_session(uint64_t session_id)
 {
-	MMOActor* actor = actors[(int16_t)session_id];
+	/*MMOActor* actor = actors[(int16_t)session_id];
 	size_t ret = actors.erase((int16_t)session_id);
 	if (nullptr == actor )
 	{
@@ -106,19 +106,19 @@ void MMOZone::erase_session(uint64_t session_id)
 	leave_payload.id = actor->get_id();
 
 
-	MMOSector* current_sector = actor->current_sector;
-	std::vector<MMOSector*>& near_sectors = current_sector->near_sectors;
-	for (MMOSector* sector : near_sectors)
-	{
-		auto actors = sector->actors;
-		for( auto& it : actors )
-		{
-			MMOActor* other = it.second;
-			
-			c2::Packet* leave_packet =  c2::Packet::alloc();
-			leave_packet->write(&leave_payload, sizeof(sc_packet_leave));
-			server->send_packet(other->session_id, leave_packet);
-		}
-	}
+	MMOSector* current_sector = actor->current_sector;*/
+	//std::vector<MMOSector*>& near_sectors = current_sector->near_sectors;
+	//for (MMOSector* sector : near_sectors)
+	//{
+	//	auto actors = sector->actors;
+	//	for( auto& it : actors )
+	//	{
+	//		MMOActor* other = it.second;
+	//		
+	//		c2::Packet* leave_packet =  c2::Packet::alloc();
+	//		leave_packet->write(&leave_payload, sizeof(sc_packet_leave));
+	//		server->send_packet(other->session_id, leave_packet);
+	//	}
+	//}
 }
 

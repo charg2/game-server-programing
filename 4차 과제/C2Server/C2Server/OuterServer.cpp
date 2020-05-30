@@ -427,6 +427,7 @@ void OuterServer::on_update()
 
 void OuterServer::on_start()
 {
+
 }
 
 void OuterServer::on_create_sessions(size_t n)

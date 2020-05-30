@@ -25,8 +25,9 @@ public:
 
 public:
 	MMOSector						sectors[c2::constant::MAP_HEIGHT][c2::constant::MAP_WIDTH];
+
 	short							postion_height_mapling_table[c2::constant::MAP_HEIGHT]; // only read after init
-	std::map<int16_t, MMOActor*>	actors;
+	//std::map<int16_t, MMOActor*>	actors;
 	short							postion_width_mapling_table[c2::constant::MAP_WIDTH]; // only read after init
 	MMOServer*						server;// only read after init
 	SRWLOCK							lock;

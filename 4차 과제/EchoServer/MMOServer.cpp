@@ -8,6 +8,7 @@
 
 MMOServer::MMOServer() : OuterServer{}, zone{}
 {
+	zone = new MMOZone{};
 }
 
 MMOServer::~MMOServer()
@@ -43,22 +44,29 @@ void MMOServer::on_sleep_io_thread(){}
 void MMOServer::custom_precedure(uint64_t idx) {}
 void MMOServer::on_update()
 {
-	//static size_t count = 0;
-	//count += 1;
-	//if (count > 100)
-	//{
-	//	printf("total send count : %lld \n total recv count : %lld \n total send bute : %lld \n total recv byte : %lld \n "\
-	//		, total_sent_count
-	//		, total_recv_count
-	//		, total_sent_bytes
-	//		, total_recv_bytes );
 
-	//	count = 0;
-	//}
 }
 
+#include "../C2Server/C2Server/IO/KeyManager.h"
 void MMOServer::on_start()
 {
+	KeyManager km;
+
+	for (;;)
+	{
+		if (km.key_down(VK_RETURN))
+		{
+			printf("hi\n");
+		}
+
+		Sleep(30);
+	}
+
 	return;
+}
+
+MMOZone* MMOServer::get_zone()
+{
+	return zone;
 }
 

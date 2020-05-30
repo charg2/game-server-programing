@@ -24,7 +24,9 @@ public:
 	virtual void on_update()						override final;
 	virtual void on_start()							override final;
 
+
+	MMOZone* get_zone();
 private:
-	MMOZone zone;
+	MMOZone* zone;
 };
 
