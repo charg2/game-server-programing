@@ -3,8 +3,11 @@
 #include <map>
 #include <vector>
 
-class MMOACtor; 
-class MMOZone //
+using namespace c2::constant;
+
+struct	MMOACtor;
+class	MMOServer;
+struct MMOZone //
 {
 public:
 	MMOZone();
@@ -24,10 +27,15 @@ public:
 
 	void erase_session(uint64_t session_id);
 
-	MMOSector* get_sector(int x, int y);
+	MMOSector* get_sector(int32_t y, int32_t x);
 	
-private:
-	MMOSector						sectors[400][400];
+public:
+	MMOServer*						server;
+	MMOSector						sectors[MAP_NAX_HEIGHT_INDEX][MAP_NAX_WIDTH_INDEX];
+	int								index_y, index_x;
+	short							postion_height_mapling_table[c2::constant::MAP_HEIGHT]; 
+	short							postion_width_mapling_table[c2::constant::MAP_WIDTH]; 
+
 	std::map<int16_t, MMOActor*>	actors;
 	std::vector<int16_t>			garbages;
 };

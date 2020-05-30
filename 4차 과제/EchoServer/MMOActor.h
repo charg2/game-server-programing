@@ -4,21 +4,20 @@
 #include "../C2Server/C2Server/enviroment.h"
 #include "../C2Server/C2Server/protocol.h"
 #include <cstdint>
-class MMOZone;
+#include <unordered_map>
+struct MMOZone;
 class MMOSimulator;
-class MMOSector;
+struct MMOSector;
 class MMOSession;
 
 
 using namespace c2::enumeration;
-class MMOActor
+struct MMOActor
 {
 public:
 	MMOActor(MMOSession* owner);
 	~MMOActor();
 
-	void enter_sector(int32_t x, int32_t y);
-	void move_to(int32_t dest_x, int32_t dest_y);
 	void move(int8_t direction);
 
 	void simulate();
@@ -32,6 +31,8 @@ public:
 	void set_move_time(unsigned time);
 	void set_state(c2::enumeration::MMOActorState state);
 
+	bool is_near(MMOActor* actor);
+
 	uint64_t get_session_id();
 	MMOSector* get_current_sector();
 	MMOSector* get_prev_sector();
@@ -42,7 +43,7 @@ public:
 
 	void get_login_packet_info(sc_packet_login_ok& out_packet);
 
-private:
+public:
 	int32_t				x, y;
 	char				name[50];
 	int16_t				hp;
@@ -58,5 +59,7 @@ private:
 	MMOZone*			zone;
 	MMOSimulator*		simulator;
 	MMOSession* const	session;
+	
+	std::unordered_map<int32_t, MMOActor*> view_list;
 };
 

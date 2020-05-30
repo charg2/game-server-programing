@@ -5,7 +5,7 @@
 
 struct MMOMessage
 {
-	c2::Packet* in_packet;
+	c2::Packet* lonin_ok_packet;
 	uint64_t	session_id;
 	MMOSession* session;
 	char		type;

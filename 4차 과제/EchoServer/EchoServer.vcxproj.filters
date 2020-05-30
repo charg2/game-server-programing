@@ -182,6 +182,12 @@
     <ClInclude Include="function.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="mmo_function.hpp">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MMONear.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\C2Server\C2Server\config.json">

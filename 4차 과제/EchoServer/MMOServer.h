@@ -21,6 +21,7 @@ public:
 	virtual void on_update()						override final;
 	virtual void on_start()							override final;
 
+	MMOActor* get_actor(int16_t actor_id);
 private:
 	MMOSimulator* simulator;
 };

@@ -193,12 +193,14 @@
     <ClInclude Include="function.h" />
     <ClInclude Include="MMOMessage.h" />
     <ClInclude Include="MMOActor.h" />
+    <ClInclude Include="MMONear.h" />
     <ClInclude Include="MMOSector.h" />
     <ClInclude Include="MMOServer.h" />
     <ClInclude Include="MMOSession.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="MMOSimulator.h" />
     <ClInclude Include="MMOZone.h" />
+    <ClInclude Include="mmo_function.hpp" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>

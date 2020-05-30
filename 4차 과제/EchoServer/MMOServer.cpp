@@ -76,12 +76,14 @@ void MMOServer::on_start()
 		//if (elapsed_game_time >= minimum_update_interval)
 		//{
 			simulator->dispatch();
-
-			simulator->simulate();
-
 			//elapsed_game_time = 0.0f;
 		//}
 	}
+}
+
+MMOActor* MMOServer::get_actor(int16_t actor_id)
+{
+	return ((MMOSession*)&sessions[actor_id])->get_actor();
 }
 
 //void EchoServer::on_update()

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../EchoServer/mmo_function.hpp"
 
 namespace c2
 {
@@ -20,12 +21,25 @@ namespace c2
 		constexpr int MAX_ID_LEN = 50;
 		constexpr int MAX_STR_LEN = 255;
 		constexpr int MAX_CHAT_LEN = 100;
-		constexpr int FOV_WIDTH = 16;
-		constexpr int FOV_HEIGHT = 16;
+		
+		constexpr int FOV_WIDTH = 11;
+		constexpr int FOV_HEIGHT = 11;
+
 		constexpr int BROADCAST_HEIGHT = 11;
 		constexpr int BROADCAST_WIDTH = 11;
+		
+		constexpr int SECTOR_WIDTH = FOV_WIDTH * 2;
+		constexpr int SECTOR_HEIGHT = FOV_HEIGHT * 2;
+		
+		constexpr int FOV_HALF_WIDTH = 11 / 2;
+		constexpr int FOV_HALF_HEIGHT = 11 / 2;
+
+	
 		constexpr int MAP_WIDTH  = 400;
 		constexpr int MAP_HEIGHT = 400;
+
+		constexpr int MAP_NAX_HEIGHT_INDEX = calc_static_map_index<MAP_HEIGHT, SECTOR_HEIGHT>(); // µü µé¾î¸ÂÀ¸¸é + 1
+		constexpr int MAP_NAX_WIDTH_INDEX = calc_static_map_index<MAP_WIDTH, SECTOR_WIDTH>();
 
 		constexpr int INITIAL_HP = 200;
 		constexpr int LEVEL_MAXIMUM_EXP = 200;  // level * LEVLE_MAXIMUM_EXPÇÏ¸é µÊ.

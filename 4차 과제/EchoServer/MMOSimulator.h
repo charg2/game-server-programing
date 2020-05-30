@@ -15,7 +15,6 @@ public:
 	static MMOSimulator& get_instance();
 	
 	void dispatch();
-	void simulate();
 	void put_message(MMOMessage* message);
 	void put_disconnected_session(uint64_t session_id);
 	void set_server(MMOServer* server);
