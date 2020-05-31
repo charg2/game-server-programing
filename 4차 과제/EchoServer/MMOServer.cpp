@@ -28,10 +28,7 @@ void MMOServer::on_create_sessions(size_t capacity)
 void MMOServer::on_connect(uint64_t session_id){}
 void MMOServer::on_disconnect(uint64_t session_id) 
 {
-//	while (disconnected_session_id->try_pop(session_id))
-//	{
-//		zones->erase_session(session_id);
-//	}
+	
 
 }
 bool MMOServer::on_accept(Session* session) 
@@ -63,6 +60,11 @@ void MMOServer::on_start()
 	}
 
 	return;
+}
+
+MMOActor* MMOServer::getActor(uint64_t session_id)
+{
+	return ((MMOSession*)sessions[(uint16_t)session_id])->get_actor();
 }
 
 MMOZone* MMOServer::get_zone()

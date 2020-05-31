@@ -24,7 +24,7 @@ public:
 	virtual void on_update()						override final;
 	virtual void on_start()							override final;
 
-
+	MMOActor* getActor(uint64_t session_id);
 	MMOZone* get_zone();
 private:
 	MMOZone* zone;

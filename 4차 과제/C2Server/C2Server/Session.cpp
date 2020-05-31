@@ -220,7 +220,7 @@ void Session::send_completion(size_t transfered_bytes)
 	//server->total_sent_bytes[server->local_storage_accessor] += transfered_bytes;
 	uint64_t temp_packet_count = this->packet_sent_count;
 	for (size_t n = 0; n < temp_packet_count; ++n)
-		c2::Packet::release(sent_packets[n]);
+		sent_packets[n]->decrease_ref_count();
 
 	this->packet_sent_count = 0;
 

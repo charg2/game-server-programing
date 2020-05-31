@@ -1,6 +1,5 @@
 #pragma once
 #include "BackOff.h"
-#include "concurrency.h"
 
 
 // Lock - Free ConcurrentStackMemoryPool
@@ -13,7 +12,7 @@ namespace c2::concurrency
 	{
 		enum Keyword : size_t
 		{
-			DEAD = 0xDDEEAADDDDEEAADD
+			DEAD = 0xD0D0E0E0A0AD0D0
 		};
 
 		struct BlockNode   // aal
@@ -22,14 +21,18 @@ namespace c2::concurrency
 			{
 			}
 
+			~BlockNode()
+			{
+			}
+
 			Type			data;
 			size_t			magic_number;
-			BlockNode* next_block;
+			BlockNode*		next_block;
 		};
 
 		struct alignas(16) TopNode
 		{
-			BlockNode* node;
+			BlockNode*	node;
 			uint64_t	stamp;
 		};
 
@@ -44,18 +47,19 @@ namespace c2::concurrency
 			}
 
 			top = (TopNode*)HeapAlloc(heap_handle, HEAP_GENERATE_EXCEPTIONS, sizeof(TopNode));
-			top->node = (BlockNode*)HeapAlloc(heap_handle, HEAP_GENERATE_EXCEPTIONS, sizeof(BlockNode) * Capacity);
+			BlockNode* blocks = (BlockNode*)HeapAlloc(heap_handle, HEAP_GENERATE_EXCEPTIONS, sizeof(BlockNode) * Capacity);
+			top->node = blocks;
 			top->stamp = 1984;
 
 			int n = 0;
 			for (int n = 0; n < Capacity - 1; ++n)
 			{
-				new(&top->node[n]) BlockNode;
-				top->node[n].next_block = &top->node[n + 1];
+				new(&blocks[n]) BlockNode;
+				blocks[n].next_block = &top->node[n + 1];
 			}
 
-			new(&top->node[n]) BlockNode;
-			top->node[n].next_block = nullptr;
+			new(&blocks[n]) BlockNode;
+			blocks[n].next_block = nullptr;
 
 			//top->node->next_block = &top->node[1];
 			//BlockNode* newBlock = nullptr;
@@ -92,7 +96,7 @@ namespace c2::concurrency
 					//new(new_block) BlockNode;
 
 					if (PlacementNew) // 持失切 鉄.
-						new(&new_block->data) Type;
+						new(&new_block->data) Type();
 
 					return &new_block->data;
 				}
@@ -116,7 +120,7 @@ namespace c2::concurrency
 			InterlockedDecrement64(&this->freeBlock_count);
 
 			if (PlacementNew) // 持失切 鉄.
-				new(&temp->data) Type;
+				new(&temp->data) Type();
 
 			return &temp->data;
 		}

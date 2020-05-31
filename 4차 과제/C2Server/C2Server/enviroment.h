@@ -17,14 +17,18 @@ namespace c2
 		constexpr unsigned char D_DOWN = 1;
 		constexpr unsigned char D_LEFT = 2;
 		constexpr unsigned char D_RIGHT = 3;
+
 		constexpr int MAX_ID_LEN = 50;
 		constexpr int MAX_STR_LEN = 255;
 		constexpr int MAX_CHAT_LEN = 100;
+
 		constexpr int FOV_WIDTH = 11;
 		constexpr int FOV_HEIGHT = 11;
+
 		constexpr int SECTOR_WIDTH = FOV_WIDTH * 2;
 		constexpr int SECTOR_HEIGHT = FOV_HEIGHT * 2;
-		constexpr int FOV_HALF_WIDTH = 11 / 2;
+
+		constexpr int FOV_HALF_WIDTH = 11 / 2 ;
 		constexpr int FOV_HALF_HEIGHT = 11 / 2;
 
 		constexpr int BROADCAST_HEIGHT = 11;

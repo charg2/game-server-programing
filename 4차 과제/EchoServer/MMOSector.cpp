@@ -151,7 +151,6 @@ void MMOSector::calculate_serctor_idx()
 			}
 		}
 	}
-
 }
 
 void MMOSector::broadcaset() {}

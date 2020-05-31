@@ -47,14 +47,21 @@ void MMOActor::reset()
 	sector_x =  sector_y = 0;
 	direction = NEAR_MAX;
 
-	static int n = 0;
+	static int g_seed = 2;
 
-	/*x = rand() % c2::constant::MAP_WIDTH;
-	y = rand() % c2::constant::MAP_HEIGHT;
-	*/
+	g_seed = (214013 * g_seed + 2531011);
+	size_t ret = ((g_seed >> 16) & 0x7FFF);
 
-	x = n;
-	y = n++;
+	x = ret % c2::constant::MAP_WIDTH;
+
+	g_seed = (214013 * g_seed + 2531011);
+	ret = ((g_seed >> 16) & 0x7FFF);
+
+	y = ret % c2::constant::MAP_HEIGHT;
+	
+
+	//x = n;
+	//y = n++;
 
 
 	name[0] = NULL;
@@ -72,7 +79,7 @@ void MMOActor::exit()
 
 bool MMOActor::is_near(MMOActor* other)
 {
-	if (abs(this->x - other->x) > FOV_WIDTH) return false;
+	if (abs(this->x - other->x) > FOV_HALF_WIDTH) return false;
 	if (abs(this->y - other->y) > FOV_HALF_HEIGHT) return false;
 
 	return true;
@@ -101,6 +108,7 @@ int16_t MMOActor::get_id()
 	return int16_t(session_id);
 }
 
+// 내 뷰리스트에 상대를 추가하고, 정보도 보냄. 
 void MMOActor::send_enter_packet(MMOActor* other)
 {
 	sc_packet_enter payload;
@@ -112,14 +120,16 @@ void MMOActor::send_enter_packet(MMOActor* other)
 	strcpy_s(payload.name, other->name);
 	payload.o_type = 0;
 
-	AcquireSRWLockExclusive(&other->lock);
-	other->view_list.emplace(this->get_id(), this);
-	ReleaseSRWLockExclusive(&other->lock);
+	AcquireSRWLockExclusive(&this->lock);
+	this->view_list.emplace(other->get_id(), other);
+	ReleaseSRWLockExclusive(&this->lock);
 
 	c2::Packet* enter_packet = c2::Packet::alloc();
 	enter_packet->write(&payload, sizeof(sc_packet_enter));
 
-	server->send_packet(other->session_id, enter_packet);
+	server->send_packet(this->session_id, enter_packet);
+
+	//printf("send_enter_packet() my id : %llu  other id : %llu  \n", this->session_id, payload.id);
 }
 
 void MMOActor::send_login_ok_packet()
@@ -133,6 +143,7 @@ void MMOActor::send_login_ok_packet()
 	login_ok_packet->write(&p, sizeof(sc_packet_login_ok));
 
 	server->send_packet(this->session_id, login_ok_packet);
+	//printf("send_login_ok_packet() id : %llu \n", this->session_id);
 }
 
 void MMOActor::send_move_packet(MMOActor* other)
@@ -148,9 +159,11 @@ void MMOActor::send_move_packet(MMOActor* other)
 	
 	c2::Packet* move_packet =  c2::Packet::alloc();
 
-	move_packet->write(&payload, sizeof(cs_packet_move));
+	move_packet->write(&payload, sizeof(sc_packet_move));
 
-	server->send_packet( other->session_id, move_packet);
+	server->send_packet( this->session_id, move_packet);
+
+	//printf("send_move_packet() my id : %llu  other id : %llu  \n", this->session_id, payload.id);
 }
 
 void MMOActor::send_leave_packet(MMOActor* other)
@@ -161,15 +174,17 @@ void MMOActor::send_leave_packet(MMOActor* other)
 	payload.header.type = S2C_LEAVE;
 
 
-	AcquireSRWLockExclusive(&other->lock);
-	other->view_list.erase(this->get_id());
-	ReleaseSRWLockExclusive(&other->lock);
+	AcquireSRWLockExclusive(&this->lock);
+	this->view_list.erase(other->get_id());
+	ReleaseSRWLockExclusive(&this->lock);
 
 
 	c2::Packet* leave_packet = c2::Packet::alloc();
 	leave_packet->write(&payload, sizeof(sc_packet_leave));
 
-	server->send_packet(other->session_id, leave_packet);
+	server->send_packet(this->session_id, leave_packet);
+
+	//printf("send_leave_packet() my id : %llu  other id : %llu  \n", this->session_id, payload.id);
 }
 
 void MMOActor::sned_chat_packet(MMOActor* other)

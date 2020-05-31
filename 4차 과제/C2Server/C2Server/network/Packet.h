@@ -14,7 +14,7 @@ namespace c2
 	class Packet
 	{
 	public:
-		Packet() : buffer{ nullptr }, payload_capacity{ kMaximumSegmentSize }, write_head{ 0 }, read_head{ 0 }//, ref_count{ 0 }
+		Packet() : buffer{ nullptr }, payload_capacity{ kMaximumSegmentSize }, write_head{ 0 }, read_head{ 0 }, ref_count{ 1 }
 		{
 			buffer = new char[kMaximumSegmentSize];
 		}
@@ -295,11 +295,15 @@ namespace c2
 
 		static Packet* alloc()
 		{
-			return packet_pool.alloc();
+			c2::Packet* packet = packet_pool.alloc();
+
+			return packet;
 		}
 
 		static void release(Packet* packet)
 		{
+			packet->clear();
+
 			packet_pool.free(packet);
 		}
 
@@ -313,6 +317,7 @@ namespace c2
 		{
 			InterlockedAdd64(&this->ref_count, n);
 		}
+
 		void decrease_ref_count()
 		{
 			if (0 == InterlockedDecrement64(&this->ref_count))
@@ -337,6 +342,6 @@ namespace c2
 
 		int64_t ref_count;
 
-		static inline c2::concurrency::ThreadLocalMemoryPool<Packet> packet_pool{};
+		static inline c2::concurrency::ThreadLocalMemoryPool<Packet, 1024, true> packet_pool{};
 	};
 }

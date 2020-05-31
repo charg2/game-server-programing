@@ -501,7 +501,7 @@ void OuterServer::release_session(Session* session)
 {
 	for (int n = 0; n < session->packet_sent_count; ++n)
 	{
-		c2::Packet::release(session->sent_packets[n]);
+		session->sent_packets[n]->decrease_ref_count();
 	}
 
 	session->reset();
@@ -521,7 +521,7 @@ void OuterServer::send_packet(uint64_t session_id, c2::Packet* out_packet)
 	Session* session = this->acquire_session_ownership(session_id);
 	if (nullptr == session)
 	{
-		c2::Packet::release(out_packet);
+		out_packet->decrease_ref_count();
 
 		this->release_session_ownership(session_id);
 

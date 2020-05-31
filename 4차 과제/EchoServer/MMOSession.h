@@ -10,6 +10,7 @@ public :
 	~MMOSession();
 
 	MMOActor* get_actor();
+	void response_loginok();
 
 private:
 	MMOActor actor;

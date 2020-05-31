@@ -69,6 +69,11 @@ void MMOZone::broadcaset()
 
 }
 
+MMOSector* MMOZone::get_sector(MMOActor* actor)
+{
+	return &this->sectors[postion_width_mapling_table[actor->y]][postion_width_mapling_table[actor->x]];
+}
+
 MMOSector* MMOZone::get_sector(int32_t y, int32_t x)
 {
 	return &this->sectors[postion_width_mapling_table[y]][postion_width_mapling_table[x]];

@@ -20,11 +20,12 @@ public:
 
 	void broadcaset();
 	MMOSector* get_sector(int32_t y, int32_t x);
+	MMOSector* get_sector(MMOActor* actor);
 	MMOSector* calc_near_sector(int32_t y, int32_t x);
 
 
 public:
-	MMOSector						sectors[c2::constant::MAP_HEIGHT][c2::constant::MAP_WIDTH];
+	MMOSector						sectors[c2::constant::MAP_NAX_HEIGHT_INDEX][c2::constant::MAP_NAX_WIDTH_INDEX];
 
 	short							postion_height_mapling_table[c2::constant::MAP_HEIGHT]; // only read after init
 	//std::map<int16_t, MMOActor*>	actors;

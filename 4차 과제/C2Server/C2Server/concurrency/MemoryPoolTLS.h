@@ -25,22 +25,24 @@ namespace c2::concurrency
 		};
 
 		struct Chunk;
-		struct alignas(16)  Block
+		typedef struct alignas(16) Block
 		{
 			Type	data;   // 순서 변경시 오프셋 계산 다시 
-			Chunk* chunk;  // 
+			Chunk*	chunk;  // 
 		};
 
 		typedef struct Chunk
 		{
-			Chunk() : allocated_count{ -1 }, released_count{ -1 }//,	//sequential_block{ },  
+			Chunk() : sequential_block {}, allocated_count { -1}, released_count{ -1 }//,	//sequential_block{ },  
 			{																					// 
 				for (size_t i = 0; i < Config::NumberOfBlockInChunk; ++i)							// 
 					sequential_block[i].chunk = this;// 
 			}
 
 			~Chunk()
-			{}
+			{
+			
+			}
 
 			Type* alloc()
 			{
@@ -48,10 +50,15 @@ namespace c2::concurrency
 				//if (count_of_release >= count_of_alloc)
 				//	c2::util::crash_assert(false);
 
-				if (allocated_count == Config::MaxBlockIndex)
+				if (allocated_count == Config::NumberOfBlockInChunk)
 					reset_tls(owner->pool_tls_idx);
 
 				//sequential_block[count_of_alloc].chunk = this;
+
+				//if (allocated_count == 255 || allocated_count == 254 || allocated_count == 256)
+				//{
+				//	printf("%d :: alocated count %d\n", allocated_count);
+				//}
 
 				return &sequential_block[allocated_count].data;
 			}
@@ -63,7 +70,7 @@ namespace c2::concurrency
 			}
 
 			Block					sequential_block[Config::NumberOfBlockInChunk];
-			ThreadLocalMemoryPool* owner;
+			ThreadLocalMemoryPool*	owner;
 			int64_t					released_count;
 			int64_t					allocated_count;
 		};
@@ -105,7 +112,6 @@ namespace c2::concurrency
 			}
 
 			// Chunk::alloc();
-			//size_t chunk_allocated_count = current_chunk->allocated_count += 1;
 			size_t chunk_allocated_count = current_chunk->allocated_count += 1;
 			if (chunk_allocated_count == Config::MaxBlockIndex)
 				reset_tls(current_chunk->owner->pool_tls_idx);

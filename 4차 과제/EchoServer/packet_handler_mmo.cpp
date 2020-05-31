@@ -10,8 +10,8 @@ REGISTER_HANDLER(C2S_LOGIN)
 	MMOSession* mmo_session		= (MMOSession*)session;
 	MMOActor*	mmo_actor		= mmo_session->get_actor();
 	MMOServer*	mmo_server		= (MMOServer*)session->server;
-	mmo_actor->zone = mmo_server->get_zone();
-	mmo_actor->server = mmo_server;
+	mmo_actor->zone				= mmo_server->get_zone();
+	mmo_actor->server			= mmo_server;
 	MMOZone*	mmo_zone		= (MMOZone*)mmo_actor->zone;
 
 
@@ -21,46 +21,44 @@ REGISTER_HANDLER(C2S_LOGIN)
 	mmo_actor->reset();
 	mmo_actor->status = ST_ACTIVE;
 	memcpy(mmo_actor->name, login_payload.name, c2::constant::MAX_ID_LEN);
+
+
 	if (mmo_session->get_actor()->get_id() != (uint16_t)session->session_id) // 이미 나갔다 들어온 녀석.
 	{
 		return;
 	}
 
+	mmo_session->response_loginok();		// 로그인 처리 및 응답
 
 
-////////////////////////////////////// 접속 허용을 클라에게 알림.
-	sc_packet_login_ok loginok_payload; 									// 주변에 보내기 위한 내정보 // 나중엔 DB 요청으로 변경.... break;
-	mmo_actor->get_login_packet_info(loginok_payload);						// db처리로 비동기로 바꿔야 함;
-	c2::Packet* loginok_packet = c2::Packet::alloc();						//
-	loginok_packet->write(&loginok_payload, sizeof(sc_packet_login_ok));	//
-	mmo_server->send_packet(mmo_actor->session_id, loginok_packet);			// 클라에게 통지 알려줌 접속을
 
-																			//////////////////////// view_list 긁어오기.
-	MMOSector* current_sector = mmo_zone->get_sector(mmo_actor->y, mmo_actor->x);
-	AcquireSRWLockExclusive(&current_sector->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
+
+
+
+	MMOSector* current_sector = mmo_zone->get_sector(mmo_actor);			// view_list 긁어오기.
+	AcquireSRWLockExclusive(&current_sector->lock);							//내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
+	mmo_actor->current_sector = current_sector;
 	current_sector->actors.emplace(mmo_actor->get_id(), mmo_actor );
 	ReleaseSRWLockExclusive(&current_sector->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 
-	//InterlockedExchangePointer((void* volatile*)mmo_actor->current_sector, current_sector);
+
 
 	const MMONear* nears = current_sector->get_near(mmo_actor->y, mmo_actor->x); // 주벽 섹터들.
-
-
 	int near_cnt = nears->count;
+
 	AcquireSRWLockExclusive(&mmo_actor->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 	for (int n = 0; n < near_cnt; ++n)
 	{
-		AcquireSRWLockShared(&nears->sectors[n]->lock); //sector에 읽기 위해서 락을 얻고 
 
-		for (auto& actor_iter : nears->sectors[n]->actors)
+		AcquireSRWLockShared(&nears->sectors[n]->lock); //sector에 읽기 위해서 락을 얻고 
+		for (auto& other_iter : nears->sectors[n]->actors)
 		{
-			if (actor_iter.second == mmo_actor)
+			if (other_iter.second == mmo_actor)
 				continue;
 
-			if (mmo_actor->is_near(actor_iter.second) == true) // 근처가 맞다면 넣음.
-				mmo_actor->view_list.insert(actor_iter);
+			if (mmo_actor->is_near(other_iter.second) == true) // 근처가 맞다면 넣음.
+				mmo_actor->view_list.insert(other_iter);
 		}
-
 		ReleaseSRWLockShared(&nears->sectors[n]->lock);
 	}
 	ReleaseSRWLockExclusive(&mmo_actor->lock);
@@ -68,24 +66,32 @@ REGISTER_HANDLER(C2S_LOGIN)
 
 
 ////////// 내정보를 상대방에 보내고 나는 상대방 정보를 받는다. 
-	c2::Packet* myinfo_packet = c2::Packet::alloc();				// 주변에 보내기 위한 내정보 
-	sc_packet_enter my_info_payload;								
-	my_info_payload.header.length = sizeof(sc_packet_enter);
-	my_info_payload.header.type = S2C_ENTER;
-	my_info_payload.id = (int16_t)mmo_session->session_id;
-	memcpy(my_info_payload.name, mmo_actor->name, 50);				//my_info_payload.o_type;
-	my_info_payload.x = mmo_actor->x;
-	my_info_payload.y = mmo_actor->y;
-	myinfo_packet->write(&my_info_payload, sizeof(sc_packet_enter));
+	c2::Packet* my_info_packet = c2::Packet::alloc();				// 주변에 보내기 위한 내정보 
+	sc_packet_enter my_info_payload{ {sizeof(sc_packet_enter), S2C_ENTER}, (int16_t)mmo_session->session_id, {}, 0, mmo_actor->x , mmo_actor->y};
+	memcpy(my_info_payload.name, mmo_actor->name, 50);				
+	//my_info_payload.o_type;
+	//my_info_payload.header.length = sizeof(sc_packet_enter);
+	//my_info_payload.header.type = S2C_ENTER;
+	//my_info_payload.id = (int16_t)mmo_session->session_id;
+	//my_info_payload.x = mmo_actor->x;
+	//my_info_payload.y = mmo_actor->y;
+	my_info_packet->write(&my_info_payload, sizeof(sc_packet_enter));
+
+
 
 	sc_packet_enter other_info_payload;								// 고정된 타인 정보
 	other_info_payload.header.length = sizeof(sc_packet_enter);
 	other_info_payload.header.type = S2C_ENTER;
 
+
+
 	AcquireSRWLockShared(&mmo_actor->lock);							//내 view_list 에 접근하기 읽기 위해서 락을 얻고 
-	myinfo_packet->add_ref( mmo_actor->view_list.size() );			// 락 밖에서 하면 언제  사이즈가 변경되어 있을지 모름.
+	my_info_packet->add_ref( mmo_actor->view_list.size() );			// 락 밖에서 하면 언제  사이즈가 변경되어 있을지 모름.
 	for ( auto& iter : mmo_actor->view_list )
 	{
+		if (iter.second == mmo_actor)
+			continue;
+		
 		MMOActor* other = iter.second;
 		
 		c2::Packet* other_info_packet = c2::Packet::alloc();						//
@@ -100,144 +106,175 @@ REGISTER_HANDLER(C2S_LOGIN)
 		ReleaseSRWLockExclusive(&other->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 
 		mmo_server->send_packet(mmo_actor->session_id, other_info_packet);			
-		mmo_server->send_packet(other->session_id, myinfo_packet);
+		mmo_server->send_packet(other->session_id, my_info_packet);
 	}
 	ReleaseSRWLockShared(&mmo_actor->lock); 
 
-	myinfo_packet->decrease_ref_count();						// packet 릴리즈용 
+	my_info_packet->decrease_ref_count();						// packet 릴리즈용 
 
 	return;
 }
+
+
 #include "function.h"
 
 REGISTER_HANDLER(C2S_MOVE)
 {
 	MMOSession* mmo_session = (MMOSession*)session;
-	MMOActor*	mmo_actor	= mmo_session->get_actor();
+	MMOActor*	my_actor	= mmo_session->get_actor();
 	MMOServer*	mmo_server	= (MMOServer*)session->server;
 	MMOZone*	mmo_zone	= mmo_server->get_zone();
+
 
 	cs_packet_move cs_move_payload;							//	들어온 이동정보.
 	in_packet.read(&cs_move_payload, sizeof(cs_packet_move));	// 
 
 
-	int y = mmo_actor->y, x = mmo_actor->x;
+	// 사본 만들기.
+	int local_y = my_actor->y;
+	int local_x = my_actor->x;
+	int local_actor_id = my_actor->get_id();
+
+
 	// 장애물 체크 등등.
 	switch (cs_move_payload.direction)
 	{
-	case c2::constant::D_DOWN:
-		y = clamp(0, y + 1, 399);
-		mmo_actor->direction = NEAR_DOWN;
+	case c2::constant::D_DOWN: 
+		if (local_y < MAP_HEIGHT -1)	local_y++; 
 		break;
 	case c2::constant::D_LEFT:
-		x = clamp(0, x - 1, 399);
-		mmo_actor->direction = NEAR_LEFT;
+		if (local_x > 0) local_x--;
 		break;
 	case c2::constant::D_RIGHT:
-		x = clamp(0, x + 1, 399);
-		mmo_actor->direction = NEAR_RIGHT;
+		if (local_x < MAP_WIDTH - 1) local_x++;
 		break;
 	case c2::constant::D_UP:
-		y = clamp(0, y - 1, 399);
-		mmo_actor->direction = NEAR_UP;
+		if (local_y > 0) local_y--;
+		break;
+	default:
+		size_t* invalid_ptr{}; *invalid_ptr = 0;
 		break;
 	}
 
-	mmo_actor->x = x;
-	mmo_actor->y = y;
-	
 
-	AcquireSRWLockShared(&mmo_actor->lock);
-	std::map<int32_t, MMOActor*> old_view_list = mmo_actor->view_list;
-	ReleaseSRWLockShared(&mmo_actor->lock);
+	my_actor->x = local_x;
+	my_actor->y = local_y;
+	MMOSector* prev_sector = my_actor->current_sector;					// view_list 긁어오기.
+	MMOSector* curent_sector = mmo_zone->get_sector(local_y, local_x);			// view_list 긁어오기.
+
+
+	if (prev_sector != curent_sector)
+	{
+		AcquireSRWLockExclusive(&curent_sector->lock);						//내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
+		my_actor->current_sector = curent_sector;
+		curent_sector->actors.emplace(my_actor->get_id(), my_actor);
+		ReleaseSRWLockExclusive(&curent_sector->lock);						//내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
+	}
+
+
+
+
+
+
+	AcquireSRWLockShared(&my_actor->lock);
+	std::map<int32_t, MMOActor*> local_old_view_list = my_actor->view_list;
+	ReleaseSRWLockShared(&my_actor->lock);
+
+
 
 	/// 섹터 구하기...
-	MMOSector* current_sector = mmo_zone->get_sector(y, x);
-	const MMONear* nears = current_sector->get_near(y, x);
-	int near_cnt = nears->count;
+	MMOSector*		current_sector	= curent_sector;
+	const MMONear*	nears			= current_sector->get_near(local_y, local_x);
+	int				near_cnt		= nears->count;
 
-	std::map<int32_t, MMOActor*> new_view_list;
 
-	for (int n = 0; n < near_cnt; ++n)
+
+	// 내 주변 정보를 긁어 모음.
+	std::map<int32_t, MMOActor*>	local_new_view_list;
+	for (int n = 0; n < near_cnt; ++n)					
 	{
-		AcquireSRWLockShared(&nears->sectors[n]->lock); //sector에 읽기 위해서 락을 얻고 
+		AcquireSRWLockShared(&nears->sectors[n]->lock); // sector에 읽기 위해서 락을 얻고 
 		for (auto& actor_iter : nears->sectors[n]->actors)
 		{
 			//if (actor_iter.second->status != ST_ACTIVE) 
 				//continue;
-			if (actor_iter.second == mmo_actor)
+			if (actor_iter.second == my_actor)
 				continue;
-			if (mmo_actor->is_near(actor_iter.second) == true) // 근처가 맞다면 넣음.
-				new_view_list.insert(actor_iter);
+			if (my_actor->is_near(actor_iter.second) == true) // 내 근처가 맞다면 넣음.
+				local_new_view_list.insert(actor_iter);
 		}
 		ReleaseSRWLockShared(&nears->sectors[n]->lock);
 	}
 	
+	
+	
+	c2::Packet*			my_move_packet = c2::Packet::alloc();
+	sc_packet_move		sc_move_payload{ {sizeof(sc_packet_move), S2C_MOVE}, local_actor_id, local_x, local_y, cs_move_payload.move_time };
+	//sc_move_payload.header.length = sizeof(sc_packet_move);
+	//sc_move_payload.header.type = S2C_MOVE;
+	//sc_move_payload.x = x;
+	//sc_move_payload.y = y;
+	//sc_move_payload.id = mmo_actor->get_id();
+	//sc_move_payload.move_time = cs_move_payload.move_time;
 
-	c2::Packet* my_move_packet = c2::Packet::alloc();
 
-	sc_packet_move sc_move_payload;
-	sc_move_payload.header.length = sizeof(sc_packet_move);
-	sc_move_payload.header.type = S2C_MOVE;
-	sc_move_payload.x = x;
-	sc_move_payload.y = y;
-	sc_move_payload.id = mmo_actor->get_id();
-	sc_move_payload.move_time = cs_move_payload.move_time;
 	my_move_packet->write(&sc_move_payload, sizeof(sc_packet_move));  // 나한테 내 이동전송.
-	mmo_server->send_packet(mmo_actor->session_id, my_move_packet);
+	mmo_server->send_packet(my_actor->session_id, my_move_packet);
 
-	for (auto& new_it : new_view_list)
+
+///////////////////
+	for (auto& new_actor : local_new_view_list)
 	{
-		if( 0 == old_view_list.count(new_it.first) ) // 이동후 새로 보이는 유저.
+		if( 0 == local_old_view_list.count(new_actor.first) ) // 이동후 새로 보이는 유저.
 		{
-			new_it.second->send_enter_packet(mmo_actor);		// 타인 정보를 나한테 보냄.
+			my_actor->send_enter_packet(new_actor.second);		// 타인 정보를 나한테 보냄.
 
-			AcquireSRWLockShared(&new_it.second->lock);							
-			if ( 0 == new_it.second->view_list.count(mmo_actor->get_id()) ) // 타 스레드에서 시야 처리 안 된경우.
+			AcquireSRWLockShared(&new_actor.second->lock);							
+			if ( 0 == new_actor.second->view_list.count(my_actor->get_id()) ) // 타 스레드에서 시야 처리 안 된경우.
 			{
-				ReleaseSRWLockShared(&new_it.second->lock);
+				ReleaseSRWLockShared(&new_actor.second->lock);
 
-				mmo_actor->send_enter_packet(new_it.second);
+				new_actor.second->send_enter_packet(my_actor);
 			}
 			else // 처리 된경우
 			{
-				ReleaseSRWLockShared(&new_it.second->lock);
+				ReleaseSRWLockShared(&new_actor.second->lock);
 
-				mmo_actor->send_move_packet(new_it.second);
+				new_actor.second->send_move_packet(my_actor);   // 상대 시야 리스트에 내가 있는 경우 뷰리스트만 업데이트 한다.
 			}
 		}
 		else  // 기존 뷰리스트에 있던 유저들 
 		{
-			AcquireSRWLockShared(&new_it.second->lock);							//
-			if (0 != new_it.second->view_list.count(mmo_actor->get_id()))	// 
+			AcquireSRWLockShared(&new_actor.second->lock);					//
+			if (0 != new_actor.second->view_list.count(my_actor->get_id()))	// 
 			{
-				ReleaseSRWLockShared(&new_it.second->lock);
+				ReleaseSRWLockShared(&new_actor.second->lock);
 
-				mmo_actor->send_move_packet(new_it.second);
+				new_actor.second->send_move_packet(my_actor);
 			}
 			else	// 이미 나간 경우.
 			{
-				ReleaseSRWLockShared(&new_it.second->lock);
+				ReleaseSRWLockShared(&new_actor.second->lock);
 
-				mmo_actor->send_enter_packet(new_it.second);
+				new_actor.second->send_enter_packet(my_actor);
 			}
 		}
 	}
 
 	//시야에서 벗어난 플레이어
-	for (auto& old_it : old_view_list)
+	for (auto& old_it : local_old_view_list)
 	{
-		if (0 == new_view_list.count(old_it.first))
+		if (0 == local_new_view_list.count(old_it.first))
 		{
-			old_it.second->send_leave_packet(mmo_actor);
+			my_actor->send_leave_packet(old_it.second);
 
 			AcquireSRWLockShared(&old_it.second->lock);
-			if (0 != old_it.second->view_list.count(mmo_actor->get_id()))
+			if (0 != old_it.second->view_list.count(my_actor->get_id()))
 			{
 				ReleaseSRWLockShared(&old_it.second->lock);
-				mmo_actor->send_leave_packet(old_it.second);
+				old_it.second->send_leave_packet(my_actor);
 			}
-			else
+			else	// 이미 다른 스레드에서 지워준 경우.
 			{
 				ReleaseSRWLockShared(&old_it.second->lock);
 			}

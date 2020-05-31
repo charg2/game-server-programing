@@ -57,7 +57,7 @@ public:
 
 	MMOServer*			server;
 	int32_t				sector_x, sector_y;
-	//MMOSector*			current_sector; 
+	MMOSector*			current_sector; 
 
 	std::map<int32_t, MMOActor*>	view_list;
 	SRWLOCK				lock;
