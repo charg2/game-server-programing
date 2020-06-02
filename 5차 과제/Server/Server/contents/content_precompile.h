@@ -1,7 +1,6 @@
 #pragma once
 
 #include "content_enviroment.h"
-
 #include "MMOActor.h"
 #include "MMONear.h"
 #include "MMONpc.h"

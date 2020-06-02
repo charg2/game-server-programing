@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <type_traits>
 #include "MemoryPool_Stack.h"
+//#include "ConcurrentQueueMemPool.hpp"
 //#include "ThreadLocalMemoryPool.h"
 
 #define Out
@@ -133,6 +134,7 @@ namespace c2::concurrency
 		TopNode									top;
 		size_t									element_count;
 		ConcurrentStackMemoryPool<Node, Reserve, false>	node_pool;
+		//ConcurrentQueueMemoryPool<Node, Reserve, false>	node_pool;
 		//ThreadLocalMemoryPool<Node, Reserve, false>	node_pool;
 		//char	cache_line[64 - sizeof(TopNode) - sizeof(size_t)];
 	};

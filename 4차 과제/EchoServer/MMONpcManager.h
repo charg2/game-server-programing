@@ -3,7 +3,7 @@
 #include "../C2Server/C2Server/enviroment.h"
 #include "MMONpc.h"
 
-class MMOZone;
+struct MMOZone;
 class MMOServer;
 struct MMONpcManager
 {
@@ -15,12 +15,12 @@ struct MMONpcManager
 	MMONpc* get_npc(uint64_t sever_id);
 
 public:
-	static MMONpcManager& instance();
 	void set_zone(MMOZone* zone);
 
 private:
-	MMONpc		npcs[c2::constant::MAX_NPC];
+	MMONpc*		npcs;
 	MMOServer*	server;
 	MMOZone*	zone;
 };
 
+extern MMONpcManager* g_npc_manager;

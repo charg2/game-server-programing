@@ -1,7 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include "../../EchoServer/mmo_function.hpp"
+#include "enviroment.h"
+//#include "../../EchoServer/mmo_function.hpp"
 
 
 namespace c2::enumeration

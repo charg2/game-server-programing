@@ -1,11 +1,11 @@
 #include "../C2Server/C2Server/pre_compile.h"
 #include "MMOSession.h"
-#include "MMONpc.h"
 #include "MMONpcManager.h"
 #include "MMOZone.h"
-#include "MMOServer.h"
 #include "MMOActor.h"
 #include "../C2Server/C2Server/util/TimeScheduler.h"
+#include "MMOServer.h"
+#include "MMONpc.h"
 
 MMOActor::MMOActor(MMOSession* owner)
 	: x{}, y{},
@@ -82,7 +82,7 @@ bool MMOActor::is_near(MMONpc* other)
 	if (abs(this->x - other->x) > FOV_HALF_WIDTH) return false;
 	if (abs(this->y - other->y) > FOV_HALF_HEIGHT) return false;
 
-	return false;
+	return true;
 }
 
 

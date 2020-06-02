@@ -28,7 +28,7 @@ struct MMOSector
 
 ///////////////////
 	std::map<int16_t, MMOActor*>	actors;
-	std::set<int16_t>				npcs;
+	std::set<int32_t>				npcs;
 	MMONear*						near_sector_table[SECTOR_HEIGHT][SECTOR_WIDTH];
 	MMOZone*						zone;
 	int								index_x, index_y;

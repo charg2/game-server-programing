@@ -1,9 +1,8 @@
 #pragma once
-#include "MMOSector.h"
 #include <map>
 #include <vector>
 
-
+#include "MMOSector.h"
 using namespace c2::enumeration;
 
 class MMOServer;

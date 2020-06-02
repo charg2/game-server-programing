@@ -3,17 +3,9 @@
 #include <cstdint>  
 #include <Windows.h>  
 #include "BackOff.h"
-//#include "CoucurrentQueueObjectPool.h"
-#include "MemoryPool_Queue.h"
+#include "ConcurrentQueueMemPool.hpp"
+
 //#include "MemoryPool_Stack.h"
-
-#ifdef MT_PROFILE_ON
-
-#include "Exception.h"
-#include "ThreadCallHistory.h"
-#include "CallHistory.h"
-
-#endif
 
 
 namespace c2::concurrency
@@ -34,14 +26,6 @@ namespace c2::concurrency
 			uint64_t id;
 		};
 
-		c2::concurrency::\
-			//ConcurrentQueueMemoryPool<Node, 4096, false>* node_pool;
-			ConcurrentQueueMemoryPool<Node, 4096, false>* node_pool;
-		EndNode* head;
-		EndNode* tail;
-		char		chcae_line_pad1[64 - (sizeof(void*) * 3)];
-		int64_t		size;
-		char		chcae_line_pad2[64 - (sizeof(int64_t))];
 
 
 	public:
@@ -53,6 +37,7 @@ namespace c2::concurrency
 		ConcurrentQueue() : head{ }, tail{ }, size{ 0 }
 		{
 			node_pool = new c2::concurrency::ConcurrentQueueMemoryPool<Node, 4096, false>;
+			//node_pool = new c2::concurrency::ConcurrentStackMemoryPool<Node, 4096, false>;
 
 			head = (EndNode*)_aligned_malloc(sizeof(EndNode), 64);
 			tail = (EndNode*)_aligned_malloc(sizeof(EndNode), 64);
@@ -190,6 +175,15 @@ namespace c2::concurrency
 			return this->size;
 		}
 
+		private:
+				//ConcurrentStackMemoryPool<Node, 4096, false>* node_pool;
+			ConcurrentQueueMemoryPool<Node, 4096, false>* node_pool;
+			EndNode* head;
+			EndNode* tail;
+			char		chcae_line_pad1[64 - (sizeof(void*) * 3)];
+			int64_t		size;
+			char		chcae_line_pad2[64 - (sizeof(int64_t))];
+			
 	};
-
+	
 }

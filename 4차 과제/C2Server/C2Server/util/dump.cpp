@@ -27,22 +27,22 @@ namespace c2::diagnostics
 
 	LONG WINAPI exception_filter(EXCEPTION_POINTERS* e)
 	{
-		size_t invalid_heap_count = 0;
+		//size_t invalid_heap_count = 0;
 
-		unsigned long  heap_count = GetProcessHeaps(0, NULL);
-		HANDLE heaps[200];
-		GetProcessHeaps(heap_count, heaps);
-		PROCESS_HEAP_ENTRY heapEntry;
-		long long sizeSum = 0;
+		//unsigned long  heap_count = GetProcessHeaps(0, NULL);
+		//HANDLE heaps[200];
+		//GetProcessHeaps(heap_count, heaps);
+		//PROCESS_HEAP_ENTRY heapEntry;
+		//long long sizeSum = 0;
 
-		for (unsigned long i = 0; i < heap_count; i++)
-		{
-			if (0 == HeapValidate(heaps[i], 0, NULL))
-			{
-				invalid_heap_count += 1;
-			}
-		}
-		printf(" invalid heap count : %d \n", invalid_heap_count);
+		//for (unsigned long i = 0; i < heap_count; i++)
+		//{
+		//	if (0 == HeapValidate(heaps[i], 0, NULL))
+		//	{
+		//		invalid_heap_count += 1;
+		//	}
+		//}
+		//printf(" invalid heap count : %d \n", invalid_heap_count);
 
 
 		printf("Exception : 0x%08X\r\n",

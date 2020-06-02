@@ -36,9 +36,6 @@
     <ClCompile Include="..\C2Server\C2Server\concurrency\BackOff.cpp">
       <Filter>lib\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\C2Server\C2Server\concurrency\ConcurrentStack.cpp">
-      <Filter>lib\common</Filter>
-    </ClCompile>
     <ClCompile Include="..\C2Server\C2Server\concurrency\MemoryPoolTLS.cpp">
       <Filter>lib\common</Filter>
     </ClCompile>
@@ -87,6 +84,9 @@
     <ClCompile Include="..\C2Server\C2Server\util\TimeScheduler.cpp">
       <Filter>lib\common</Filter>
     </ClCompile>
+    <ClCompile Include="function.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -120,9 +120,6 @@
       <Filter>lib\common</Filter>
     </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentStack.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPool_Queue.h">
       <Filter>lib\common</Filter>
     </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPool_Stack.h">
@@ -194,11 +191,8 @@
     <ClInclude Include="MMONpcManager.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="contents.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="content_enviroment.h">
-      <Filter>소스 파일</Filter>
+    <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentQueueMemPool.hpp">
+      <Filter>lib\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

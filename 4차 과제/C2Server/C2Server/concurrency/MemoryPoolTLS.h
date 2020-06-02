@@ -2,7 +2,6 @@
 
 
 #include "tls.h"
-#include "concurrency.h"
 #include "../util/dump.h"
 #include "../util/exception.h"
 
@@ -18,13 +17,14 @@ namespace c2::concurrency
 	template<typename Type, size_t Capacity = 1024, bool PlacementNew = true>
 	class ThreadLocalMemoryPool
 	{
+	public:
 		enum Config : size_t
 		{
 			NumberOfBlockInChunk = 256,
 			MaxBlockIndex		 = NumberOfBlockInChunk - 1
 		};
 
-		struct Chunk;
+		typedef struct Chunk;
 		typedef struct alignas(16) Block
 		{
 			Type	data;   // 순서 변경시 오프셋 계산 다시 
@@ -145,4 +145,5 @@ namespace c2::concurrency
 		//alignas(64) int64_t		count_of_alloc;
 		alignas(64) int64_t		count_of_free;
 	};
+	
 }

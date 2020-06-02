@@ -1,11 +1,14 @@
+
+#include "../C2Server/C2Server/pre_compile.h"
 #include "../C2Server/C2Server/enviroment.h"
-#include "../C2Server/C2Server/util/TimeScheduler.h"
 #include "function.h"
 #include "MMONpc.h"
 #include "MMOActor.h"
 #include "MMONpcManager.h"
 #include "MMOZone.h"
 #include "MMONear.h"
+
+//#include "../C2Server/C2Server/util/TimeScheduler.h"
 //#include "MMOActor.h"
 
 using namespace c2::constant;

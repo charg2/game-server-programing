@@ -1,8 +1,8 @@
 #pragma once
 
 // content
-#include "../C2Server/C2Server/pre_compile.h"
 #include "../C2Server/C2Server/enviroment.h"
+#include "../C2Server/C2Server/protocol.h"
 #include <cstdint>
 #include <atomic>
 #include <map>
@@ -12,7 +12,7 @@ struct	MMOZone;
 struct	MMOSector;
 class	MMOServer;
 class	MMOSession;
-class	MMONpc;
+struct	MMONpc;
 
 enum ActorStatus { ST_FREE, ST_ALLOCATED, ST_ACTIVE };
 

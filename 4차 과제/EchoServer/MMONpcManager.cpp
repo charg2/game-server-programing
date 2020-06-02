@@ -3,20 +3,33 @@
 
 #include <string>
 
+MMONpcManager* g_npc_manager{};
+
+MMONpcManager::MMONpcManager()
+{}
+
 void MMONpcManager::initilize()
 {
-	for (size_t n{}; n < c2::constant::MAX_NPC; ++n)
+	npcs = new MMONpc[100000]{};
+
+	for (size_t n{}; n < 100000; ++n)
 	{
 		npcs[n].current_sector = nullptr;
 		npcs[n].hp = 200;
 		npcs[n].id = n + c2::constant::NPC_ID_OFFSET;
 		npcs[n].max_hp = 200;
-		std::string str = "NPC_" + n;
-		strcpy_s(npcs[n].name, str.size() ,str.c_str());
+		
+
+		const char* tt = "NPC";
+		char ttt[10];
+		memcpy(npcs[n].name, tt, 4);
+
 		npcs[n].target = nullptr;
 		npcs[n].x = rand() % c2::constant::MAP_WIDTH;
 		npcs[n].y = rand() % c2::constant::MAP_HEIGHT;
 		npcs[n].zone = this->zone;
+		npcs[n].is_active = 0;
+		npcs[n].is_active = 0;
 	}
 }
 
@@ -24,7 +37,8 @@ void MMONpcManager::place_npc_in_zone()
 {
 	MMOZone* zone = this->zone;
 	
-	for (size_t n{}; n < c2::constant::MAX_NPC; ++n)
+	for (size_t n{}; n < 100000; ++n)
+		//for (size_t n{}; n < c2::constant::MAX_NPC; ++n)
 	{
 		MMOSector* sector =  zone->get_sector(npcs[n].y, npcs[n].x);
 		
@@ -40,11 +54,7 @@ MMONpc* MMONpcManager::get_npc(uint64_t server_id)
 }
 
 
-MMONpcManager& MMONpcManager::instance()
-{
-	static MMONpcManager inst{};
-	return inst;
-}
+
 
 void MMONpcManager::set_zone(MMOZone* zone)
 {

@@ -14,7 +14,7 @@ REGISTER_HANDLER(C2S_LOGIN)
 	mmo_actor->zone				= mmo_server->get_zone();
 	mmo_actor->server			= mmo_server;
 	MMOZone*	mmo_zone		= (MMOZone*)mmo_actor->zone;
-	MMONpcManager mmo_npc_mgr	= MMONpcManager::instance();
+	MMONpcManager* mmo_npc_mgr	= g_npc_manager;
 
 ////////////////////////////////// 들어온 정보로 클라이언트 업데이트.
 	cs_packet_login login_payload;
@@ -31,7 +31,7 @@ REGISTER_HANDLER(C2S_LOGIN)
 	mmo_zone->enter_actor(mmo_actor);
 	
 
-
+	
 
 	MMOSector* current_sector = mmo_zone->get_sector(mmo_actor);			// view_list 긁어오기.
 	const MMONear* nears = current_sector->get_near(mmo_actor->y, mmo_actor->x); // 주벽 섹터들.
@@ -52,7 +52,7 @@ REGISTER_HANDLER(C2S_LOGIN)
 		 //NPC 처리 로직.
 		for (auto other_iter : nears->sectors[n]->npcs) 
 		{
-			MMONpc* npc = mmo_npc_mgr.get_npc(other_iter);
+			MMONpc* npc = mmo_npc_mgr->get_npc(other_iter);
 			if (mmo_actor->is_near(npc) == true) // 근처가 맞다면 넣음.
 			{
 				mmo_actor->view_list_for_npc.insert(other_iter);			// 배 npc용 시야 리스트에 넣어줌.
@@ -105,7 +105,7 @@ REGISTER_HANDLER(C2S_LOGIN)
 
 	for (auto npc_id : mmo_actor->view_list_for_npc)
 	{
-		MMONpc* npc = mmo_npc_mgr.get_npc(npc_id);
+		MMONpc* npc = mmo_npc_mgr->get_npc(npc_id);
 		AcquireSRWLockExclusive(&npc->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 		npc->view_list.emplace(mmo_actor->get_id(), mmo_actor);		// 서로 시야 리스트에 넣어줌.
 		ReleaseSRWLockExclusive(&npc->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
@@ -134,6 +134,7 @@ REGISTER_HANDLER(C2S_MOVE)
 	MMOServer*	mmo_server	= (MMOServer*)session->server;
 	MMOZone*	mmo_zone	= mmo_server->get_zone();
 
+	MMONpcManager* mmo_npc_mgr = g_npc_manager;
 
 	cs_packet_move cs_move_payload;								//	들어온 이동정보.
 	in_packet.read(&cs_move_payload, sizeof(cs_packet_move));	// 
@@ -191,6 +192,7 @@ REGISTER_HANDLER(C2S_MOVE)
 
 	AcquireSRWLockShared(&my_actor->lock);
 	std::map<int32_t, MMOActor*> local_old_view_list = my_actor->view_list;
+	std::set<int32_t> local_old_view_list_for_npc = my_actor->view_list_for_npc;
 	ReleaseSRWLockShared(&my_actor->lock);
 
 
@@ -204,6 +206,7 @@ REGISTER_HANDLER(C2S_MOVE)
 
 	// 내 주변 정보를 긁어 모음.
 	std::map<int32_t, MMOActor*>	local_new_view_list;
+	std::set<int32_t>				local_new_view_list_for_npc;
 	for (int n = 0; n < near_cnt; ++n)					
 	{
 		AcquireSRWLockShared(&nears->sectors[n]->lock); // sector에 읽기 위해서 락을 얻고 
@@ -216,6 +219,15 @@ REGISTER_HANDLER(C2S_MOVE)
 
 			if (my_actor->is_near(actor_iter.second) == true) // 내 근처가 맞다면 넣음.
 				local_new_view_list.insert(actor_iter);
+		}
+
+		for (auto npc_id : nears->sectors[n]->npcs)
+		{
+			//if (actor_iter.second->status != ST_ACTIVE) 
+				//continue;
+			MMONpc* npc = mmo_npc_mgr->get_npc(npc_id);
+			if (my_actor->is_near(npc) == true) // 내 근처가 맞다면 넣음.
+				local_new_view_list_for_npc.insert(npc_id);
 		}
 		ReleaseSRWLockShared(&nears->sectors[n]->lock);
 	}
@@ -287,6 +299,34 @@ REGISTER_HANDLER(C2S_MOVE)
 			}
 		}
 	}
+
+
+// 유저가 npc한테 하는 동작 추가.
+	///////////////////
+	for (int32_t npc_id : local_new_view_list_for_npc)
+	{
+		if (0 == local_old_view_list_for_npc.count(npc_id)) // 이동후 새로 보이는 유저.
+		{
+			MMONpc* npc = mmo_npc_mgr->get_npc(npc_id);
+
+			my_actor->wake_up_npc(npc);
+			
+			AcquireSRWLockExclusive(&my_actor->lock);
+			my_actor->view_list_for_npc.insert(npc_id);
+			ReleaseSRWLockExclusive(&my_actor->lock);
+		}
+	}
+
+	for (int32_t old_npc_id : local_old_view_list_for_npc)
+	{
+		if (0 == local_new_view_list_for_npc.count(old_npc_id))
+		{
+			AcquireSRWLockExclusive(&my_actor->lock);
+			my_actor->view_list_for_npc.erase(old_npc_id);
+			ReleaseSRWLockExclusive(&my_actor->lock);
+		}
+	}
+
 }
 
 REGISTER_HANDLER(C2S_CHAT)

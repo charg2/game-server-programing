@@ -1,6 +1,6 @@
 #include "pre_compile.h"
-#include "Session.h"
 #include "OuterServer.h"
+#include "Session.h"
 
 using namespace c2::enumeration;
 

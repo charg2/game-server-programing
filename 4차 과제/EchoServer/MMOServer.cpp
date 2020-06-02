@@ -3,10 +3,11 @@
 
 #include "main.h"
 #include "../C2Server/C2Server/OuterServer.h"
-#include "../C2Server/C2Server/util/TimeScheduler.h"
 #include "MMOServer.h"
 #include "MMONpcManager.h"
-#include "Timer.h"
+#include "../C2Server/C2Server/util/TimeScheduler.h"
+#include "MMOZone.h"
+
 
 MMOServer::MMOServer() : OuterServer{}, zone{}
 {
@@ -19,9 +20,10 @@ MMOServer::~MMOServer()
 
 void MMOServer::init_npcs()
 {
-	MMONpcManager::instance().set_zone(zone);
-	MMONpcManager::instance().initilize();
-	MMONpcManager::instance().place_npc_in_zone();
+	g_npc_manager = new MMONpcManager();
+	g_npc_manager->set_zone(zone);
+	g_npc_manager->initilize();
+	g_npc_manager->place_npc_in_zone();
 }
 
 void MMOServer::on_create_sessions(size_t capacity)
@@ -98,7 +100,7 @@ void MMOServer::on_timer_service(const TimerTask& task)
 	{
 	case TTT_MOVE_NPC:
 	{
-		MMONpc* npc = MMONpcManager::instance().get_npc(task.server_id);
+		MMONpc* npc = g_npc_manager->get_npc(task.server_id);
 
 		npc->move();
 		

@@ -13,6 +13,6 @@ public :
 	void response_loginok();
 
 private:
-	MMOActor actor;
+	MMOActor	actor;
 };
 

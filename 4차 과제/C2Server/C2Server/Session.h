@@ -1,10 +1,12 @@
 #pragma once
-#include "IOContext.h"
+#include "pre_compile.h"
 #include "concurrency/ConcurrentQueue.h"
 #include "CircularBuffer.h"
+#include "IOContext.h"
 
 class OuterServer;
 class CircularBuffer;
+struct IoContext;
 
 #define inline_increase_refer(session) 		if ( 0 >= InterlockedIncrement64(&session->refer_count)) { c2::util::crash_assert(); }
 #define inline_decrease_refer(session, reason) 		\

@@ -1,10 +1,11 @@
 #include "pre_compile.h"
+#include "Session.h"
+#include "OuterServer.h"
+
+#include "network/SocketAddress.h"
 #include "IOContext.h"
 #include "util/JsonParser.h"
-#include "Session.h"
-#include "network/SocketAddress.h"
-#include "OuterServer.h"
-#include "util/TimeScheduler.h"
+
 
 //LPFN_ACCEPTEX		OuterServer::accept_ex{  };
 //LPFN_DISCONNECTEX	OuterServer::disconnect_ex{  };
@@ -363,18 +364,22 @@ void OuterServer::io_service_procedure(uint64_t custom_thread_id)
 
 void OuterServer::io_and_timer_service_procedure(uint64_t custom_thread_id)
 {
-	TimeTaskScheduler* local_timer_cpture = local_timer = new TimeTaskScheduler{};
-	local_timer_cpture->bind_server(this);
+	local_timer = new TimeTaskScheduler{};
+	//TimeTaskScheduler* local_timer_cpture = local_timer;
+	local_timer->bind_server(this);
+	//local_timer_cpture->bind_server(this);
 
+	printf("%d :: worker therad start !\n", GetCurrentThreadId());
 	OuterServer::local_storage_accessor = custom_thread_id;
-	//do_sync(0, [](uint64_t)  { printf("zz timer\n"); }  , 15);
+	//local_timer->push_timer_task(10000, TimerTaskType::TTT_MOVE_NPC, 10,  1);
 
 	HANDLE	local_completion_port{ this->completion_port };
 	int64_t	thread_id{ GetCurrentThreadId() };
 
+
 	for (;;)
 	{
-		local_timer_cpture->do_timer_job();
+		local_timer->do_timer_job();
 
 		DWORD			transfered_bytes{};
 		LPOVERLAPPED	overlapped_ptr{};
@@ -820,3 +825,5 @@ void OuterServer::load_config_using_json(const wchar_t* file_name)
 
 	return;
 }
+
+

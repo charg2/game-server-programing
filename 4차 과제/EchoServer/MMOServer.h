@@ -2,8 +2,10 @@
 
 #include "../C2Server/C2Server/OuterServer.h"
 #include "MMOSession.h"
-#include "MMOZone.h"
+//#include "MMOZone.h"
 
+
+struct MMOZone;
 class MMOServer final : public OuterServer
 {
 public:

@@ -79,9 +79,9 @@ namespace c2::concurrency
 
 		Type* alloc(void)
 		{
-			BlockNode* temp{ nullptr };
+			BlockNode*	temp{ nullptr };
 			TopNode		local_top{ this->top->node, this->top->stamp };
-			BlockNode* new_block;
+			BlockNode*	new_block;
 			BackOff     backoff{ BackOff::min_delay };
 
 			for (;;)
@@ -117,7 +117,7 @@ namespace c2::concurrency
 				}
 			}
 
-			InterlockedDecrement64(&this->freeBlock_count);
+			InterlockedDecrement64(&this->size);
 
 			if (PlacementNew) // »ý¼ºÀÚ Å´.
 				new(&temp->data) Type();
@@ -165,13 +165,13 @@ namespace c2::concurrency
 				}
 			}
 
-			InterlockedIncrement64(&this->freeBlock_count);
+			InterlockedIncrement64(&this->size);
 		}
 
 
 	private:
 		alignas(64) TopNode*	top;
-		alignas(64) int64_t		freeBlock_count;
+		alignas(64) int64_t		size;
 		HANDLE					heap_handle;
 	};
 

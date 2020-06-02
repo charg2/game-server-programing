@@ -87,7 +87,7 @@
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <Optimization>Disabled</Optimization>
@@ -146,7 +146,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\C2Server\C2Server\concurrency\BackOff.cpp" />
-    <ClCompile Include="..\C2Server\C2Server\concurrency\ConcurrentStack.cpp" />
     <ClCompile Include="..\C2Server\C2Server\concurrency\MemoryPoolTLS.cpp" />
     <ClCompile Include="..\C2Server\C2Server\concurrency\tls.cpp" />
     <ClCompile Include="..\C2Server\C2Server\IO\KeyManager.cpp" />
@@ -158,6 +157,7 @@
     <ClCompile Include="..\C2Server\C2Server\util\dump.cpp" />
     <ClCompile Include="..\C2Server\C2Server\util\JsonParser.cpp" />
     <ClCompile Include="..\C2Server\C2Server\util\TimeScheduler.cpp" />
+    <ClCompile Include="function.cpp" />
     <ClCompile Include="MMOActor.cpp" />
     <ClCompile Include="MMONpc.cpp" />
     <ClCompile Include="MMOSector.cpp" />
@@ -173,7 +173,7 @@
     <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentQueue.h" />
     <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentStack.h" />
     <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPoolTLS.h" />
-    <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPool_Queue.h" />
+    <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentQueueMemPool.hpp" />
     <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPool_Stack.h" />
     <ClInclude Include="..\C2Server\C2Server\concurrency\MPSCQueue.h" />
     <ClInclude Include="..\C2Server\C2Server\concurrency\tls.h" />
@@ -193,8 +193,6 @@
     <ClInclude Include="..\C2Server\C2Server\util\JsonParser.h" />
     <ClInclude Include="..\C2Server\C2Server\util\Timer.h" />
     <ClInclude Include="..\C2Server\C2Server\util\TimeScheduler.h" />
-    <ClInclude Include="contents.h" />
-    <ClInclude Include="content_enviroment.h" />
     <ClInclude Include="function.h" />
     <ClInclude Include="MMONear.h" />
     <ClInclude Include="MMOActor.h" />

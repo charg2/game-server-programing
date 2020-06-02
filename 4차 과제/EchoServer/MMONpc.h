@@ -9,9 +9,6 @@ struct MMOZone;
 struct MMONpc
 {
 
-	std::map<int32_t, MMOActor*>	view_list;
-	SRWLOCK							lock;
-
 	void update_entering_actor(MMOActor* actor);
 	void update_leaving_actor(MMOActor* actor);
 
@@ -35,9 +32,12 @@ struct MMONpc
 	int32_t		x, y;
 	char		name[50];
 	uint64_t	id;
-	MMOSector* current_sector;
-	MMOActor* target;
-	MMOZone* zone;
+	MMOSector*	current_sector;
+	MMOActor*	target;
+	MMOZone*		zone;
 	uint64_t	is_active;
+
+	std::map<int32_t, MMOActor*>	view_list;
+	SRWLOCK							lock;
 };
 

@@ -1,4 +1,5 @@
 #include "main.h"
+#include "MMOServer.h"
 
 /*
 ¼­¹ö

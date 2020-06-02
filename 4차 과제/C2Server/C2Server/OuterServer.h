@@ -1,6 +1,6 @@
 #pragma once
-
 #include <type_traits>
+#include "enviroment.h"
 #include "concurrency/ConcurrentStack.h"
 
 #define session_mapping_helper( session_class ) \
@@ -13,11 +13,8 @@ new(sessions[i]) session_class(); \
 } \
 
 class Session;
-class TimeTaskScheduler;
-class TimerTask;
 class OuterServer
 {
-
 	struct ThreadInfo
 	{
 		OuterServer*					server;
@@ -115,8 +112,6 @@ protected:
 	alignas(c2::constant::CACHE_LINE)	int64_t		total_sent_count;			// 8
 	alignas(c2::constant::CACHE_LINE)	uint64_t	current_accepted_count;		// 8
 
-	static inline thread_local TimeTaskScheduler* local_timer{};
-	
 private:
 	static inline LPFN_ACCEPTEX		accept_ex		{};
 	static inline LPFN_DISCONNECTEX	disconnect_ex	{};
