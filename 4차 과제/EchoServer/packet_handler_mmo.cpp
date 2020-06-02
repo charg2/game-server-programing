@@ -9,117 +9,107 @@
 REGISTER_HANDLER(C2S_LOGIN)
 {
 	MMOSession* mmo_session		= (MMOSession*)session;
-	MMOActor*	mmo_actor		= mmo_session->get_actor();
+	MMOActor*	my_actor		= mmo_session->get_actor();
 	MMOServer*	mmo_server		= (MMOServer*)session->server;
-	mmo_actor->zone				= mmo_server->get_zone();
-	mmo_actor->server			= mmo_server;
-	MMOZone*	mmo_zone		= (MMOZone*)mmo_actor->zone;
+	my_actor->zone				= mmo_server->get_zone();
+	my_actor->server			= mmo_server;
+	MMOZone*	mmo_zone		= (MMOZone*)my_actor->zone;
 	MMONpcManager* mmo_npc_mgr	= g_npc_manager;
 
 ////////////////////////////////// 들어온 정보로 클라이언트 업데이트.
 	cs_packet_login login_payload;
 	in_packet.read(&login_payload, sizeof(cs_packet_login));
 	
-	mmo_actor->reset();
-	memcpy(mmo_actor->name, login_payload.name, c2::constant::MAX_ID_LEN); // 어차피 여기서만 write 함. and 나갈 때;;
+	my_actor->reset();
+	memcpy(my_actor->name, login_payload.name, c2::constant::MAX_ID_LEN); // 어차피 여기서만 write 함. and 나갈 때;;
 	if (mmo_session->get_actor()->get_id() != (uint16_t)session->session_id) // 이미 나갔다 들어온 녀석.
 	{
 		return;
 	}
 
 	mmo_session->response_loginok();		// 로그인 처리 및 응답
-	mmo_zone->enter_actor(mmo_actor);
+	mmo_zone->enter_actor(my_actor);
 	
 
 	
 
-	MMOSector* current_sector = mmo_zone->get_sector(mmo_actor);			// view_list 긁어오기.
-	const MMONear* nears = current_sector->get_near(mmo_actor->y, mmo_actor->x); // 주벽 섹터들.
+	MMOSector* current_sector = mmo_zone->get_sector(my_actor);			// view_list 긁어오기.
+	const MMONear* nears = current_sector->get_near(my_actor->y, my_actor->x); // 주벽 섹터들.
 	int near_cnt = nears->count;
-	AcquireSRWLockExclusive(&mmo_actor->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
+
+
+	std::map<int32_t, MMOActor*>	local_view_list;
+	std::set<int32_t>				local_view_list_for_npc;
+
+
 	for (int n = 0; n < near_cnt; ++n)
 	{
 		AcquireSRWLockShared(&nears->sectors[n]->lock); //sector에 읽기 위해서 락을 얻고 
 		for (auto& other_iter : nears->sectors[n]->actors)
 		{
-			if (other_iter.second == mmo_actor)
+			if (other_iter.second == my_actor)
 				continue;
 
-			if (mmo_actor->is_near(other_iter.second) == true) // 근처가 맞다면 넣음.
-				mmo_actor->view_list.insert(other_iter);
+			if (my_actor->is_near(other_iter.second) == true) // 근처가 맞다면 넣음.
+				local_view_list.insert(other_iter);
+				//mmo_actor->view_list.insert(other_iter);
 		}
 
 		 //NPC 처리 로직.
 		for (auto other_iter : nears->sectors[n]->npcs) 
 		{
 			MMONpc* npc = mmo_npc_mgr->get_npc(other_iter);
-			if (mmo_actor->is_near(npc) == true) // 근처가 맞다면 넣음.
+			if (my_actor->is_near(npc) == true) // 근처가 맞다면 넣음.
 			{
-				mmo_actor->view_list_for_npc.insert(other_iter);			// 배 npc용 시야 리스트에 넣어줌.
+				//mmo_actor->view_list_for_npc.insert(other_iter);			// 배 npc용 시야 리스트에 넣어줌.
+				local_view_list_for_npc.insert(other_iter);			// 배 npc용 시야 리스트에 넣어줌.
 			}
 		}
 
 		ReleaseSRWLockShared(&nears->sectors[n]->lock);
 	}
-	ReleaseSRWLockExclusive(&mmo_actor->lock);
 	
 
 
 ////////// 내정보를 상대방에 보내고 나는 상대방 정보를 받는다. 
 	c2::Packet* my_info_packet = c2::Packet::alloc();				// 주변에 보내기 위한 내정보 
-	sc_packet_enter my_info_payload{ {sizeof(sc_packet_enter), S2C_ENTER}, (int16_t)mmo_session->session_id, {}, 0, mmo_actor->x , mmo_actor->y};
-	memcpy(my_info_payload.name, mmo_actor->name, 50);				
+	sc_packet_enter my_info_payload{ {sizeof(sc_packet_enter), S2C_ENTER}, (int16_t)mmo_session->session_id, {}, 0, my_actor->x , my_actor->y};
+	memcpy(my_info_payload.name, my_actor->name, 50);				
 	my_info_packet->write(&my_info_payload, sizeof(sc_packet_enter));
 
 
-
-	sc_packet_enter other_info_payload;								// 고정된 타인 정보
-	other_info_payload.header.length = sizeof(sc_packet_enter);
-	other_info_payload.header.type = S2C_ENTER;
-
-
-
-	AcquireSRWLockShared(&mmo_actor->lock);							//내 view_list 에 접근하기 읽기 위해서 락을 얻고 
-	my_info_packet->add_ref( mmo_actor->view_list.size() );			// 락 밖에서 하면 언제  사이즈가 변경되어 있을지 모름.
-	for ( auto& iter : mmo_actor->view_list )
+	//my_info_packet->add_ref( local_view_list.size() );			// 락 밖에서 하면 언제  사이즈가 변경되어 있을지 모름.
+	for ( auto& iter : local_view_list)
 	{
-		if (iter.second == mmo_actor)
+		if (iter.second == my_actor)
 			continue;
 		
 		MMOActor* other = iter.second;
-		
-		c2::Packet* other_info_packet = c2::Packet::alloc();						//
-		other_info_payload.id = other->get_id();
-		memcpy(other_info_payload.name, other->name, sizeof(sc_packet_enter::name));
-		other_info_payload.x = other->x;
-		other_info_payload.y = other->y;
-		other_info_packet->write(&other_info_payload, sizeof(other_info_payload));
-		
-		AcquireSRWLockExclusive(&other->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
-		other->view_list.emplace(mmo_actor->get_id(), mmo_actor);
-		ReleaseSRWLockExclusive(&other->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
-		
-		mmo_server->send_packet(mmo_actor->session_id, other_info_packet);			
-		mmo_server->send_packet(other->session_id, my_info_packet);
+		my_actor->send_enter_packet_without_adding_viewlist(other);
+		other->send_enter_packet(my_actor, my_info_packet);
 	}
 
-	for (auto npc_id : mmo_actor->view_list_for_npc)
+	my_info_packet->decrease_ref_count();						// my_info_packet 릴리즈용 
+
+
+	for (auto npc_id : local_view_list_for_npc)
 	{
 		MMONpc* npc = mmo_npc_mgr->get_npc(npc_id);
-		AcquireSRWLockExclusive(&npc->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
-		npc->view_list.emplace(mmo_actor->get_id(), mmo_actor);		// 서로 시야 리스트에 넣어줌.
-		ReleaseSRWLockExclusive(&npc->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
-		mmo_actor->wake_up_npc(npc);
+		AcquireSRWLockExclusive(&npc->lock);						//내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
+		npc->view_list.emplace(my_actor->get_id(), my_actor);		// 서로 시야 리스트에 넣어줌.
+		ReleaseSRWLockExclusive(&npc->lock);						//내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
+	
+		my_actor->wake_up_npc(npc);
+		/// 나한테 npc 정보 보내기 하셈. 
+		// move에서도.
+		my_actor->send_enter_packet_without_adding_viewlist(npc);
 	}
 
 
-	ReleaseSRWLockShared(&mmo_actor->lock); 
-
-	my_info_packet->decrease_ref_count();						// packet 릴리즈용 
-
-
-
-
+	AcquireSRWLockExclusive(&my_actor->lock);							//내 view_list 에 접근하기 읽기 위해서 락을 얻고 
+	my_actor->view_list = local_view_list;
+	my_actor->view_list_for_npc = local_view_list_for_npc;
+	ReleaseSRWLockExclusive(&my_actor->lock); 
 
 	return;
 }
@@ -311,11 +301,10 @@ REGISTER_HANDLER(C2S_MOVE)
 
 			my_actor->wake_up_npc(npc);
 			
-			AcquireSRWLockExclusive(&my_actor->lock);
-			my_actor->view_list_for_npc.insert(npc_id);
-			ReleaseSRWLockExclusive(&my_actor->lock);
+			my_actor->send_enter_packet(npc); // 이 npc 정보를 나한테 보냄.
 		}
 	}
+
 
 	for (int32_t old_npc_id : local_old_view_list_for_npc)
 	{
@@ -324,6 +313,7 @@ REGISTER_HANDLER(C2S_MOVE)
 			AcquireSRWLockExclusive(&my_actor->lock);
 			my_actor->view_list_for_npc.erase(old_npc_id);
 			ReleaseSRWLockExclusive(&my_actor->lock);
+			// 떠나는건 npc가 알아서 해줌.
 		}
 	}
 

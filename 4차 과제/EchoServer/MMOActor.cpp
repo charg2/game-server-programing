@@ -132,6 +132,27 @@ void MMOActor::send_enter_packet(MMOActor* other)
 	//printf("send_enter_packet() my id : %llu  other id : %llu  \n", this->session_id, payload.id);
 }
 
+// 내 뷰리스트에 상대를 추가과정 생략., 정보도 보냄. 
+void MMOActor::send_enter_packet_without_adding_viewlist(MMOActor* other)
+{
+	sc_packet_enter payload;
+	payload.id = other->get_id();
+	payload.header.length = sizeof(sc_packet_enter);
+	payload.header.type = S2C_ENTER;
+	payload.x = other->x;
+	payload.y = other->y;
+	strcpy_s(payload.name, other->name);
+	payload.o_type = 0;
+
+
+	c2::Packet* enter_packet = c2::Packet::alloc();
+	enter_packet->write(&payload, sizeof(sc_packet_enter));
+
+	server->send_packet(this->session_id, enter_packet);
+
+	//printf("send_enter_packet() my id : %llu  other id : %llu  \n", this->session_id, payload.id);
+}
+
 
 void MMOActor::send_enter_packet(MMOActor* other, c2::Packet* enter_packet)
 {
@@ -167,6 +188,25 @@ void MMOActor::send_enter_packet(MMONpc* other)
 
 	server->send_packet(this->session_id, enter_packet);
 }
+// 내 정보만 보냄.. 
+void MMOActor::send_enter_packet_without_adding_viewlist(MMONpc* other)
+{
+	sc_packet_enter payload;
+	payload.id = (int)other->id;
+	payload.header.length = sizeof(sc_packet_enter);
+	payload.header.type = S2C_ENTER;
+	payload.x = other->x;
+	payload.y = other->y;
+	strcpy_s(payload.name, other->name);
+	payload.o_type = 1;
+
+	c2::Packet* enter_packet = c2::Packet::alloc();
+	enter_packet->write(&payload, sizeof(sc_packet_enter));
+
+	server->send_packet(this->session_id, enter_packet);
+}
+
+
 
 void MMOActor::send_login_ok_packet()
 {

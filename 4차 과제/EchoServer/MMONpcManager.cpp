@@ -10,9 +10,9 @@ MMONpcManager::MMONpcManager()
 
 void MMONpcManager::initilize()
 {
-	npcs = new MMONpc[100000]{};
+	npcs = new MMONpc[c2::constant::MAX_NPC]{};
 
-	for (size_t n{}; n < 100000; ++n)
+	for (size_t n{}; n < c2::constant::MAX_NPC; ++n)
 	{
 		npcs[n].current_sector = nullptr;
 		npcs[n].hp = 200;
@@ -37,7 +37,7 @@ void MMONpcManager::place_npc_in_zone()
 {
 	MMOZone* zone = this->zone;
 	
-	for (size_t n{}; n < 100000; ++n)
+	for (size_t n{}; n < c2::constant::MAX_NPC; ++n)
 		//for (size_t n{}; n < c2::constant::MAX_NPC; ++n)
 	{
 		MMOSector* sector =  zone->get_sector(npcs[n].y, npcs[n].x);

@@ -38,10 +38,13 @@ public:
 	void send_enter_packet(MMOActor* other);
 	void send_enter_packet(MMOActor* other, c2::Packet* enter_packet);
 	void send_enter_packet(MMONpc* other);
+	void send_enter_packet_without_adding_viewlist(MMOActor* other);
+	void send_enter_packet_without_adding_viewlist(MMONpc* other);
 
 	void send_move_packet(MMOActor* other);
 	void send_move_packet(MMOActor* other, c2::Packet* enter_packet);
 	void send_move_packet(MMONpc* other);
+
 
 	void send_leave_packet(MMOActor* other);
 	void send_leave_packet(MMOActor* other, c2::Packet* enter_packet);

@@ -368,7 +368,7 @@ void OuterServer::io_and_timer_service_procedure(uint64_t custom_thread_id)
 	//TimeTaskScheduler* local_timer_cpture = local_timer;
 	local_timer->bind_server(this);
 	//local_timer_cpture->bind_server(this);
-
+	TimeTaskScheduler* local_timer_capture = local_timer;
 	printf("%d :: worker therad start !\n", GetCurrentThreadId());
 	OuterServer::local_storage_accessor = custom_thread_id;
 	//local_timer->push_timer_task(10000, TimerTaskType::TTT_MOVE_NPC, 10,  1);
@@ -376,10 +376,9 @@ void OuterServer::io_and_timer_service_procedure(uint64_t custom_thread_id)
 	HANDLE	local_completion_port{ this->completion_port };
 	int64_t	thread_id{ GetCurrentThreadId() };
 
-
 	for (;;)
 	{
-		local_timer->do_timer_job();
+		local_timer_capture->do_timer_job();
 
 		DWORD			transfered_bytes{};
 		LPOVERLAPPED	overlapped_ptr{};
