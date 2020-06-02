@@ -3,7 +3,9 @@
 
 #include "main.h"
 #include "../C2Server/C2Server/OuterServer.h"
+#include "../C2Server/C2Server/util/TimeScheduler.h"
 #include "MMOServer.h"
+#include "MMONpcManager.h"
 #include "Timer.h"
 
 MMOServer::MMOServer() : OuterServer{}, zone{}
@@ -15,9 +17,11 @@ MMOServer::~MMOServer()
 {
 }
 
-void MMOServer::init_simulator()
+void MMOServer::init_npcs()
 {
-
+	MMONpcManager::instance().set_zone(zone);
+	MMONpcManager::instance().initilize();
+	MMONpcManager::instance().place_npc_in_zone();
 }
 
 void MMOServer::on_create_sessions(size_t capacity)
@@ -69,22 +73,47 @@ void MMOServer::on_update()
 
 }
 
-#include "../C2Server/C2Server/IO/KeyManager.h"
+//#include "../C2Server/C2Server/IO/KeyManager.h"
 void MMOServer::on_start()
 {
-	KeyManager km;
+	//KeyManager km;
 
 	for (;;)
 	{
-		if (km.key_down(VK_RETURN))
-		{
-			printf("hi\n");
-		}
+		//if (km.key_down(VK_RETURN))
+		//{
+			//printf("hi\n");
+		//}
 
 		Sleep(30);
 	}
 
 	return;
+}
+
+//
+void MMOServer::on_timer_service(const TimerTask& task)
+{
+	switch (task.task_type)
+	{
+	case TTT_MOVE_NPC:
+	{
+		MMONpc* npc = MMONpcManager::instance().get_npc(task.server_id);
+
+		npc->move();
+		
+		break;
+	}
+
+
+	default:
+		size_t* invliad_ptr{}; *invliad_ptr = 0;
+	}
+}
+
+void MMOServer::create_npcs(size_t capacity)
+{
+
 }
 
 MMOActor* MMOServer::get_actor(uint64_t session_id)

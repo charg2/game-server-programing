@@ -70,6 +70,8 @@ public:
 	void increase_refer();
 	void decrease_refer();
 
+	bool is_valid(uint64_t session_id);
+
 public:
 	// read and write frequently.
 	int64_t			refer_count;	// 8

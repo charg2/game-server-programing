@@ -72,14 +72,20 @@
     <ClCompile Include="MMOActor.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="MMOSimulator.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="MMOZone.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="MMOSector.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MMONpc.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MMONpcManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\C2Server\C2Server\util\TimeScheduler.cpp">
+      <Filter>lib\common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -108,9 +114,6 @@
       <Filter>lib</Filter>
     </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\concurrency\BackOff.h">
-      <Filter>lib\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\concurrency\concurrency.h">
       <Filter>lib\common</Filter>
     </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentQueue.h">
@@ -161,9 +164,6 @@
     <ClInclude Include="MMOServer.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="MMOSimulator.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
     <ClInclude Include="MMOSector.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
@@ -173,16 +173,31 @@
     <ClInclude Include="..\C2Server\C2Server\concurrency\MPSCQueue.h">
       <Filter>lib\common</Filter>
     </ClInclude>
-    <ClInclude Include="Timer.h">
+    <ClInclude Include="MMONear.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\util\TimeScheduler.h">
       <Filter>lib\common</Filter>
     </ClInclude>
-    <ClInclude Include="function.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="..\C2Server\C2Server\util\Timer.h">
+      <Filter>lib\common</Filter>
+    </ClInclude>
+    <ClInclude Include="MMONpc.h">
+      <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="mmo_function.hpp">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="function.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MMONpcManager.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="contents.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="MMONear.h">
+    <ClInclude Include="content_enviroment.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>

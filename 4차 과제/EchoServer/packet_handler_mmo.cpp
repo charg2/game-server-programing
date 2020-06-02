@@ -3,6 +3,7 @@
 #include "MMOSession.h"
 #include "MMOServer.h"
 #include "MMOZone.h"
+#include "MMONpcManager.h"
 
 
 REGISTER_HANDLER(C2S_LOGIN)
@@ -13,43 +14,31 @@ REGISTER_HANDLER(C2S_LOGIN)
 	mmo_actor->zone				= mmo_server->get_zone();
 	mmo_actor->server			= mmo_server;
 	MMOZone*	mmo_zone		= (MMOZone*)mmo_actor->zone;
-
+	MMONpcManager mmo_npc_mgr	= MMONpcManager::instance();
 
 ////////////////////////////////// 들어온 정보로 클라이언트 업데이트.
 	cs_packet_login login_payload;
 	in_packet.read(&login_payload, sizeof(cs_packet_login));
+	
 	mmo_actor->reset();
-	mmo_actor->status = ST_ACTIVE;
-	memcpy(mmo_actor->name, login_payload.name, c2::constant::MAX_ID_LEN);
-
-
+	memcpy(mmo_actor->name, login_payload.name, c2::constant::MAX_ID_LEN); // 어차피 여기서만 write 함. and 나갈 때;;
 	if (mmo_session->get_actor()->get_id() != (uint16_t)session->session_id) // 이미 나갔다 들어온 녀석.
 	{
 		return;
 	}
 
 	mmo_session->response_loginok();		// 로그인 처리 및 응답
-
-
-
+	mmo_zone->enter_actor(mmo_actor);
+	
 
 
 
 	MMOSector* current_sector = mmo_zone->get_sector(mmo_actor);			// view_list 긁어오기.
-	AcquireSRWLockExclusive(&current_sector->lock);							//내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
-	mmo_actor->current_sector = current_sector;
-	current_sector->actors.emplace(mmo_actor->get_id(), mmo_actor );
-	ReleaseSRWLockExclusive(&current_sector->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
-
-
-
 	const MMONear* nears = current_sector->get_near(mmo_actor->y, mmo_actor->x); // 주벽 섹터들.
 	int near_cnt = nears->count;
-
 	AcquireSRWLockExclusive(&mmo_actor->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 	for (int n = 0; n < near_cnt; ++n)
 	{
-
 		AcquireSRWLockShared(&nears->sectors[n]->lock); //sector에 읽기 위해서 락을 얻고 
 		for (auto& other_iter : nears->sectors[n]->actors)
 		{
@@ -59,6 +48,17 @@ REGISTER_HANDLER(C2S_LOGIN)
 			if (mmo_actor->is_near(other_iter.second) == true) // 근처가 맞다면 넣음.
 				mmo_actor->view_list.insert(other_iter);
 		}
+
+		 //NPC 처리 로직.
+		for (auto other_iter : nears->sectors[n]->npcs) 
+		{
+			MMONpc* npc = mmo_npc_mgr.get_npc(other_iter);
+			if (mmo_actor->is_near(npc) == true) // 근처가 맞다면 넣음.
+			{
+				mmo_actor->view_list_for_npc.insert(other_iter);			// 배 npc용 시야 리스트에 넣어줌.
+			}
+		}
+
 		ReleaseSRWLockShared(&nears->sectors[n]->lock);
 	}
 	ReleaseSRWLockExclusive(&mmo_actor->lock);
@@ -69,12 +69,6 @@ REGISTER_HANDLER(C2S_LOGIN)
 	c2::Packet* my_info_packet = c2::Packet::alloc();				// 주변에 보내기 위한 내정보 
 	sc_packet_enter my_info_payload{ {sizeof(sc_packet_enter), S2C_ENTER}, (int16_t)mmo_session->session_id, {}, 0, mmo_actor->x , mmo_actor->y};
 	memcpy(my_info_payload.name, mmo_actor->name, 50);				
-	//my_info_payload.o_type;
-	//my_info_payload.header.length = sizeof(sc_packet_enter);
-	//my_info_payload.header.type = S2C_ENTER;
-	//my_info_payload.id = (int16_t)mmo_session->session_id;
-	//my_info_payload.x = mmo_actor->x;
-	//my_info_payload.y = mmo_actor->y;
 	my_info_packet->write(&my_info_payload, sizeof(sc_packet_enter));
 
 
@@ -104,13 +98,28 @@ REGISTER_HANDLER(C2S_LOGIN)
 		AcquireSRWLockExclusive(&other->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 		other->view_list.emplace(mmo_actor->get_id(), mmo_actor);
 		ReleaseSRWLockExclusive(&other->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
-
+		
 		mmo_server->send_packet(mmo_actor->session_id, other_info_packet);			
 		mmo_server->send_packet(other->session_id, my_info_packet);
 	}
+
+	for (auto npc_id : mmo_actor->view_list_for_npc)
+	{
+		MMONpc* npc = mmo_npc_mgr.get_npc(npc_id);
+		AcquireSRWLockExclusive(&npc->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
+		npc->view_list.emplace(mmo_actor->get_id(), mmo_actor);		// 서로 시야 리스트에 넣어줌.
+		ReleaseSRWLockExclusive(&npc->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
+		mmo_actor->wake_up_npc(npc);
+	}
+
+
 	ReleaseSRWLockShared(&mmo_actor->lock); 
 
 	my_info_packet->decrease_ref_count();						// packet 릴리즈용 
+
+
+
+
 
 	return;
 }
@@ -126,7 +135,7 @@ REGISTER_HANDLER(C2S_MOVE)
 	MMOZone*	mmo_zone	= mmo_server->get_zone();
 
 
-	cs_packet_move cs_move_payload;							//	들어온 이동정보.
+	cs_packet_move cs_move_payload;								//	들어온 이동정보.
 	in_packet.read(&cs_move_payload, sizeof(cs_packet_move));	// 
 
 
@@ -135,7 +144,7 @@ REGISTER_HANDLER(C2S_MOVE)
 	int local_x = my_actor->x;
 	int local_actor_id = my_actor->get_id();
 
-
+	
 	// 장애물 체크 등등.
 	switch (cs_move_payload.direction)
 	{
@@ -163,12 +172,16 @@ REGISTER_HANDLER(C2S_MOVE)
 	MMOSector* curent_sector = mmo_zone->get_sector(local_y, local_x);			// view_list 긁어오기.
 
 
-	if (prev_sector != curent_sector)
+	if (prev_sector != curent_sector)										//섹터가 바뀐 경우.
 	{
-		AcquireSRWLockExclusive(&curent_sector->lock);						//내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
-		my_actor->current_sector = curent_sector;
-		curent_sector->actors.emplace(my_actor->get_id(), my_actor);
-		ReleaseSRWLockExclusive(&curent_sector->lock);						//내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
+		AcquireSRWLockExclusive(&curent_sector->lock);						// 이전 섹터에서 나가기 위해서.
+		prev_sector->actors.erase(local_actor_id);
+		ReleaseSRWLockExclusive(&curent_sector->lock);						
+
+		AcquireSRWLockExclusive(&curent_sector->lock);						// 내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
+		curent_sector->actors.emplace(local_actor_id, my_actor);
+		my_actor->current_sector = curent_sector;							// 타 스레드에서 접근하면 여기 일로 하고?
+		ReleaseSRWLockExclusive(&curent_sector->lock);						// 내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 	}
 
 
@@ -200,6 +213,7 @@ REGISTER_HANDLER(C2S_MOVE)
 				//continue;
 			if (actor_iter.second == my_actor)
 				continue;
+
 			if (my_actor->is_near(actor_iter.second) == true) // 내 근처가 맞다면 넣음.
 				local_new_view_list.insert(actor_iter);
 		}
@@ -210,13 +224,6 @@ REGISTER_HANDLER(C2S_MOVE)
 	
 	c2::Packet*			my_move_packet = c2::Packet::alloc();
 	sc_packet_move		sc_move_payload{ {sizeof(sc_packet_move), S2C_MOVE}, local_actor_id, local_x, local_y, cs_move_payload.move_time };
-	//sc_move_payload.header.length = sizeof(sc_packet_move);
-	//sc_move_payload.header.type = S2C_MOVE;
-	//sc_move_payload.x = x;
-	//sc_move_payload.y = y;
-	//sc_move_payload.id = mmo_actor->get_id();
-	//sc_move_payload.move_time = cs_move_payload.move_time;
-
 
 	my_move_packet->write(&sc_move_payload, sizeof(sc_packet_move));  // 나한테 내 이동전송.
 	mmo_server->send_packet(my_actor->session_id, my_move_packet);

@@ -4,6 +4,8 @@
 #include "Session.h"
 #include "network/SocketAddress.h"
 #include "OuterServer.h"
+#include "util/TimeScheduler.h"
+
 //LPFN_ACCEPTEX		OuterServer::accept_ex{  };
 //LPFN_DISCONNECTEX	OuterServer::disconnect_ex{  };
 //LPFN_CONNECTEX		OuterServer::connect_ex{  };
@@ -164,12 +166,20 @@ bool OuterServer::init_sessions()
 bool OuterServer::init_threads()
 {
 	uint64_t n = 0;
+
+	if (this->concurrent_thread_count < 1)
+	{
+		c2::util::crash_assert();
+	}
+
+
 	for (; n < this->concurrent_thread_count; ++n)
 	{
-		void* params = new void* [3]{ (void*)this, (void*)c2::enumeration::ThreadType::TT_IO, (void*)n };
+		void* params = new void* [3]{ (void*)this, (void*)c2::enumeration::ThreadType::TT_IO_AND_TIMER, (void*)n };
 
 		accepter = (HANDLE)_beginthreadex(NULL, NULL, OuterServer::start_thread, params, NULL, NULL);
 	}
+
 
 	// 접속을 나중에 받기 위해 ㅇㅇ
 	void* params = new void* [3]{ (void*)this, (void*)c2::enumeration::ThreadType::TT_ACCEPTER, (void*)n };
@@ -269,20 +279,25 @@ void OuterServer::accepter_procedure(uint64_t idx)
 void OuterServer::io_service_procedure(uint64_t custom_thread_id)
 {
 	OuterServer::local_storage_accessor = custom_thread_id;
-
 	HANDLE	local_completion_port{ this->completion_port };
 	int64_t	thread_id{ GetCurrentThreadId() };
 
 	for (;;)
 	{
+
 		DWORD			transfered_bytes	{};
 		LPOVERLAPPED	overlapped_ptr		{};
 		ULONG_PTR		completion_key		{};
 
 		bool ret = GetQueuedCompletionStatus(local_completion_port, &transfered_bytes, &completion_key, &overlapped_ptr, INFINITE);
-		if (completion_key == 0 && overlapped_ptr == nullptr && transfered_bytes == 0)
+		if (ret == 0)
 		{
-			break;
+			if (GetLastError() == WAIT_TIMEOUT)
+				continue;
+		}
+		else if (transfered_bytes == 0 && overlapped_ptr == nullptr && completion_key == 0)
+		{
+			return;
 		}
 
 		on_wake_io_thread();
@@ -346,6 +361,97 @@ void OuterServer::io_service_procedure(uint64_t custom_thread_id)
 	}
 }
 
+void OuterServer::io_and_timer_service_procedure(uint64_t custom_thread_id)
+{
+	TimeTaskScheduler* local_timer_cpture = local_timer = new TimeTaskScheduler{};
+	local_timer_cpture->bind_server(this);
+
+	OuterServer::local_storage_accessor = custom_thread_id;
+	//do_sync(0, [](uint64_t)  { printf("zz timer\n"); }  , 15);
+
+	HANDLE	local_completion_port{ this->completion_port };
+	int64_t	thread_id{ GetCurrentThreadId() };
+
+	for (;;)
+	{
+		local_timer_cpture->do_timer_job();
+
+		DWORD			transfered_bytes{};
+		LPOVERLAPPED	overlapped_ptr{};
+		ULONG_PTR		completion_key{};
+
+		bool ret = GetQueuedCompletionStatus(local_completion_port, &transfered_bytes, &completion_key, &overlapped_ptr, c2::constant::GQCS_TIME_OUT);
+		if (ret == 0)
+		{
+			if (GetLastError() == WAIT_TIMEOUT)
+				continue;
+		}
+		else if (transfered_bytes == 0 && overlapped_ptr == nullptr && completion_key == 0)
+		{
+			return;
+		}
+
+		on_wake_io_thread();
+
+		// accpet 처리.
+		if (completion_key == c2::constant::ASYNC_ACCEPT_SIGN)
+		{
+			IoContext* context_ptr{ reinterpret_cast<IoContext*>(overlapped_ptr) };
+			Session* session = (Session*)context_ptr->session;
+
+			session->accept_completion();
+			on_accept(session);
+			continue;
+		}
+
+		// 
+		Session* session = acquire_session_ownership(completion_key);
+		if (nullptr == session)
+		{
+			c2::util::crash_assert();
+		}
+
+		// acquire session
+		if ((size_t)overlapped_ptr == c2::constant::SEND_SIGN)
+		{
+			session->post_send();
+
+			release_session_ownership(completion_key);
+
+			continue;
+		}
+
+		IoContext* context_ptr{ reinterpret_cast<IoContext*>(overlapped_ptr) };
+		switch (context_ptr->io_type)
+		{
+		case IO_RECV:
+			session->recv_completion(transfered_bytes);
+			break;
+
+		case IO_SEND:
+			session->send_completion(transfered_bytes);
+			break;
+
+		case IO_DISCONNECT:
+			session->disconnect_completion();
+			on_disconnect(session->session_id);
+			break;
+
+		case IO_ACCEPT:
+			//session->accept_completion();
+			//break;
+		default:
+			c2::util::crash_assert();
+			break;
+		}
+
+		// release session
+		release_session_ownership(completion_key);
+
+		on_sleep_io_thread();
+	}
+}
+
 void OuterServer::custom_precedure(uint64_t idx)
 {
 }
@@ -362,12 +468,16 @@ uint32_t WINAPI OuterServer::start_thread(LPVOID param)
 
 	switch (info->thread_tye)
 	{
+	case ThreadType::TT_ACCEPTER:
+		info->server->accepter_procedure(info->index);
+		break;
+
 	case ThreadType::TT_IO:
 		info->server->io_service_procedure(info->index);
 		break;
 
-	case ThreadType::TT_ACCEPTER:
-		info->server->accepter_procedure(info->index);
+	case ThreadType::TT_IO_AND_TIMER:
+		info->server->io_and_timer_service_procedure(info->index);
 		break;
 
 	case ThreadType::TT_CUSTOM:
@@ -380,6 +490,7 @@ uint32_t WINAPI OuterServer::start_thread(LPVOID param)
 	}
 
 	delete info;
+
 	return 0;
 }
 
@@ -429,6 +540,12 @@ void OuterServer::on_start()
 {
 
 }
+
+void OuterServer::on_timer_service(const TimerTask& timer_job)
+{
+}
+
+//void OuterServer::on_timer_service(const TimerTask& timer_job)
 
 void OuterServer::on_create_sessions(size_t n)
 {

@@ -8,7 +8,6 @@ MMOSector::MMOSector()
 has_obstacle{},
 f{}, g{}, h{}
 {
-
 	InitializeSRWLock(&lock);
 }
 
@@ -38,23 +37,6 @@ bool MMOSector::leave_actor(uint64_t session_idx)
 void MMOSector::calculate_serctor_idx()
 {
 	using namespace c2::constant;
-
-	//for (int y = index_y - 1; y <= index_y + 1; ++y)
-	//{
-	//	for (int x = index_x -1; x <= index_x + 1; ++x)
-	//	{
-	//		MMOSector* cur_sector;
-	//		if (0 <= y && y <= index_y)
-	//		{
-	//			if (0 <= x && x <= index_x)
-	//			{
-	//				cur_sector = &zone->sectors[y][x];
-	//				this->near_sectors.push_back(cur_sector);
-	//			}
-	//		}
-	//	}
-	//}
-
 	this->sector_min_x = index_x * SECTOR_WIDTH;
 	this->sector_max_x = sector_min_x + (SECTOR_WIDTH - 1);
 	this->sector_min_y = index_y * SECTOR_HEIGHT;
@@ -74,7 +56,6 @@ void MMOSector::calculate_serctor_idx()
 	{
 		sector_max_x = MAP_WIDTH - 1;
 	}
-
 
 
 	for (int y = sector_min_y; y <= sector_max_y; ++y)
@@ -138,9 +119,9 @@ void MMOSector::calculate_serctor_idx()
 						break;
 					}
 				}
-				if (has_same == true)
+				if (has_same == true)	// 풀내에 이미 있다면 지워줌.
 				{
-					delete near_sect;
+					delete near_sect;	// 사실 
 				}
 				else
 				{

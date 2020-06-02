@@ -4,11 +4,12 @@
 
 #include <vector>
 #include <map>
+#include <set>
 #include "MMONear.h"
 
 struct MMOActor;
 struct MMOZone;
-
+struct MMONpc;
 using namespace c2::constant;
 
 struct MMOSector 
@@ -22,9 +23,12 @@ struct MMOSector
 	void calculate_serctor_idx();
 	void broadcaset();
 	const MMONear* const get_near(int y, int x) const;
+
+
+
 ///////////////////
-	
-	std::map<uint16_t, MMOActor*>	actors;
+	std::map<int16_t, MMOActor*>	actors;
+	std::set<int16_t>				npcs;
 	MMONear*						near_sector_table[SECTOR_HEIGHT][SECTOR_WIDTH];
 	MMOZone*						zone;
 	int								index_x, index_y;

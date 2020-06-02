@@ -157,18 +157,19 @@
     <ClCompile Include="..\C2Server\C2Server\Session.cpp" />
     <ClCompile Include="..\C2Server\C2Server\util\dump.cpp" />
     <ClCompile Include="..\C2Server\C2Server\util\JsonParser.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\util\TimeScheduler.cpp" />
     <ClCompile Include="MMOActor.cpp" />
+    <ClCompile Include="MMONpc.cpp" />
     <ClCompile Include="MMOSector.cpp" />
     <ClCompile Include="MMOServer.cpp" />
     <ClCompile Include="MMOSession.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MMOSimulator.cpp" />
+    <ClCompile Include="MMONpcManager.cpp" />
     <ClCompile Include="MMOZone.cpp" />
     <ClCompile Include="packet_handler_mmo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\C2Server\C2Server\concurrency\BackOff.h" />
-    <ClInclude Include="..\C2Server\C2Server\concurrency\concurrency.h" />
     <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentQueue.h" />
     <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentStack.h" />
     <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPoolTLS.h" />
@@ -190,17 +191,21 @@
     <ClInclude Include="..\C2Server\C2Server\util\dump.h" />
     <ClInclude Include="..\C2Server\C2Server\util\exception.h" />
     <ClInclude Include="..\C2Server\C2Server\util\JsonParser.h" />
+    <ClInclude Include="..\C2Server\C2Server\util\Timer.h" />
+    <ClInclude Include="..\C2Server\C2Server\util\TimeScheduler.h" />
+    <ClInclude Include="contents.h" />
+    <ClInclude Include="content_enviroment.h" />
     <ClInclude Include="function.h" />
     <ClInclude Include="MMONear.h" />
     <ClInclude Include="MMOActor.h" />
+    <ClInclude Include="MMONpc.h" />
     <ClInclude Include="MMOSector.h" />
     <ClInclude Include="MMOServer.h" />
     <ClInclude Include="MMOSession.h" />
     <ClInclude Include="main.h" />
-    <ClInclude Include="MMOSimulator.h" />
+    <ClInclude Include="MMONpcManager.h" />
     <ClInclude Include="MMOZone.h" />
     <ClInclude Include="mmo_function.hpp" />
-    <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\C2Server\C2Server\concurrency\spin_wait.asm" />

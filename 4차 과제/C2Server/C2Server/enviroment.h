@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../EchoServer/mmo_function.hpp"
 namespace c2
 {
 	namespace constant
@@ -11,50 +10,11 @@ namespace c2
 		constexpr inline size_t ASYNC_ACCEPT_SIGN = 10003U; // 유저수에 따라 조정해줘야 함.
 		constexpr inline size_t MAX_CONCURRENT_SEND_COUNT = 256U;
 		constexpr inline size_t CACHE_LINE = 64U;
-
-
-		constexpr unsigned char D_UP = 0;
-		constexpr unsigned char D_DOWN = 1;
-		constexpr unsigned char D_LEFT = 2;
-		constexpr unsigned char D_RIGHT = 3;
-
-		constexpr int MAX_ID_LEN = 50;
-		constexpr int MAX_STR_LEN = 255;
-		constexpr int MAX_CHAT_LEN = 100;
-
-		constexpr int FOV_WIDTH = 11;
-		constexpr int FOV_HEIGHT = 11;
-
-		constexpr int SECTOR_WIDTH = FOV_WIDTH * 2;
-		constexpr int SECTOR_HEIGHT = FOV_HEIGHT * 2;
-
-		constexpr int FOV_HALF_WIDTH = 11 / 2 ;
-		constexpr int FOV_HALF_HEIGHT = 11 / 2;
-
-		constexpr int BROADCAST_HEIGHT = 11;
-		constexpr int BROADCAST_WIDTH = 11;
-		constexpr int MAP_WIDTH  = 400;
-		constexpr int MAP_HEIGHT = 400;
-
-		constexpr int MAP_NAX_HEIGHT_INDEX= calc_static_map_index<MAP_HEIGHT, SECTOR_HEIGHT>(); // 딱 들어맞으면 + 1
-		constexpr int MAP_NAX_WIDTH_INDEX = calc_static_map_index<MAP_WIDTH,  SECTOR_WIDTH>();
-
-		constexpr int INITIAL_HP = 200;
-		constexpr int LEVEL_MAXIMUM_EXP = 200;  // level * LEVLE_MAXIMUM_EXP하면 됨.
 	}
 
 
 	namespace enumeration
 	{
-		enum NearDirection
-		{
-			NEAR_RIGHT, 
-			NEAR_LEFT,
-			NEAR_UP,
-			NEAR_DOWN,
-			NEAR_MAX
-		};
-
 		enum IoType 
 		{
 			IO_RECV,
@@ -91,18 +51,18 @@ namespace c2
 		enum SessionState
 		{};
 
-		enum MMOActorState : uint64_t
+
+		enum TimerTaskType
 		{
-			ACS_NONE,
-			ACS_BEFORE_LOGIN,
-			ACS_AFTER_LOGIN,
-			ACS_PLAYING,
+			TTT_MOVE_NPC, 
+
 		};
 
 		enum ThreadType
 		{
 			TT_ACCEPTER,
 			TT_IO,
+			TT_IO_AND_TIMER,
 			TT_CUSTOM,
 			TT_MAX
 		};

@@ -19,3 +19,12 @@ float clamp(float min, float value, float max)
 }
 
 
+uint32_t fast_rand()
+{
+	static int seed = 'fast';
+
+	seed = (214013 * seed + 2531011);
+
+	return ((seed >> 16) & 0x7FFF);
+}
+

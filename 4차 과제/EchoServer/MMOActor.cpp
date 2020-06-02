@@ -1,9 +1,11 @@
 #include "../C2Server/C2Server/pre_compile.h"
 #include "MMOSession.h"
-#include "MMOSimulator.h"
+#include "MMONpc.h"
+#include "MMONpcManager.h"
 #include "MMOZone.h"
-#include "MMOActor.h"
 #include "MMOServer.h"
+#include "MMOActor.h"
+#include "../C2Server/C2Server/util/TimeScheduler.h"
 
 MMOActor::MMOActor(MMOSession* owner)
 	: x{}, y{},
@@ -23,29 +25,24 @@ void MMOActor::enter_sector(int32_t x, int32_t y)
 	//prev_sector = nullptr;
 
 	//current_sector/* = &zone->sectors[x][y];*/
-
-	
 }
 
 
 
 void MMOActor::move(int8_t direction)
 {
-
-
-
 }
 
 void MMOActor::reset()
 {
+	AcquireSRWLockExclusive(&lock);
+	
 	session_id = this->session->session_id;
 	zone = nullptr;
 	current_exp = 0;
 	levelup_exp = 0;
 	hp = 10;
 	level = 1;
-	sector_x =  sector_y = 0;
-	direction = NEAR_MAX;
 
 	static int g_seed = 2;
 
@@ -58,18 +55,13 @@ void MMOActor::reset()
 	ret = ((g_seed >> 16) & 0x7FFF);
 
 	y = ret % c2::constant::MAP_HEIGHT;
-	
-
-	//x = n;
-	//y = n++;
-
 
 	name[0] = NULL;
 
-	//current_sector	= nullptr;
-
-	AcquireSRWLockExclusive(&lock);
 	view_list.clear();
+
+	status = ST_ACTIVE;
+
 	ReleaseSRWLockExclusive(&lock);
 }
 
@@ -83,6 +75,14 @@ bool MMOActor::is_near(MMOActor* other)
 	if (abs(this->y - other->y) > FOV_HALF_HEIGHT) return false;
 
 	return true;
+}
+
+bool MMOActor::is_near(MMONpc* other)
+{
+	if (abs(this->x - other->x) > FOV_HALF_WIDTH) return false;
+	if (abs(this->y - other->y) > FOV_HALF_HEIGHT) return false;
+
+	return false;
 }
 
 
@@ -132,6 +132,42 @@ void MMOActor::send_enter_packet(MMOActor* other)
 	//printf("send_enter_packet() my id : %llu  other id : %llu  \n", this->session_id, payload.id);
 }
 
+
+void MMOActor::send_enter_packet(MMOActor* other, c2::Packet* enter_packet)
+{
+	AcquireSRWLockExclusive(&this->lock);
+	this->view_list.emplace(other->get_id(), other);
+	ReleaseSRWLockExclusive(&this->lock);
+
+	enter_packet->increase_ref_count();
+	server->send_packet(this->session_id, enter_packet);
+
+	//printf("send_enter_packet() my id : %llu  other id : %llu  \n", this->session_id, payload.id);
+}
+
+
+// 내 뷰리스트에 상대를 추가하고, 정보도 보냄. 
+void MMOActor::send_enter_packet(MMONpc* other)
+{
+	sc_packet_enter payload;
+	payload.id = (int)other->id;
+	payload.header.length = sizeof(sc_packet_enter);
+	payload.header.type = S2C_ENTER;
+	payload.x = other->x;
+	payload.y = other->y;
+	strcpy_s(payload.name, other->name);
+	payload.o_type = 1;
+
+	AcquireSRWLockExclusive(&this->lock);
+	this->view_list_for_npc.emplace((int)other->id);
+	ReleaseSRWLockExclusive(&this->lock);
+
+	c2::Packet* enter_packet = c2::Packet::alloc();
+	enter_packet->write(&payload, sizeof(sc_packet_enter));
+
+	server->send_packet(this->session_id, enter_packet);
+}
+
 void MMOActor::send_login_ok_packet()
 {
 	sc_packet_login_ok p;
@@ -145,6 +181,24 @@ void MMOActor::send_login_ok_packet()
 	server->send_packet(this->session_id, login_ok_packet);
 	//printf("send_login_ok_packet() id : %llu \n", this->session_id);
 }
+
+void MMOActor::wake_up_npc(MMONpc* npc)
+{
+	if (npc->is_active == 0) // false
+	{
+		if ( InterlockedExchange(&npc->is_active, NPC_WORKING) == NPC_SLEEP)		// 이전 상태가 자고 있었다면 꺠움.
+		{
+			// 내가 꺠운 상태.
+			// 내가 책임지고 일을 시켜야 함.
+			local_timer->push_timer_task(npc->id, TTT_MOVE_NPC, 1000, session_id);
+		}
+		else 
+		{
+			return;
+		}
+	}
+}
+
 
 void MMOActor::send_move_packet(MMOActor* other)
 {
@@ -166,6 +220,30 @@ void MMOActor::send_move_packet(MMOActor* other)
 	//printf("send_move_packet() my id : %llu  other id : %llu  \n", this->session_id, payload.id);
 }
 
+void MMOActor::send_move_packet(MMONpc* other)
+{
+	sc_packet_move payload;
+	payload.header.length = sizeof(sc_packet_move);
+	payload.header.type = S2C_MOVE;
+	payload.id = other->id;
+	payload.x = other->x;
+	payload.y = other->y;
+	payload.move_time = 0;
+
+	c2::Packet* move_packet = c2::Packet::alloc();
+
+	move_packet->write(&payload, sizeof(sc_packet_move));
+
+	server->send_packet(this->session_id, move_packet);
+}
+
+void MMOActor::send_move_packet(MMOActor* other, c2::Packet* move_packet)
+{
+	move_packet->increase_ref_count();
+
+	server->send_packet(this->session_id, move_packet);
+}
+
 void MMOActor::send_leave_packet(MMOActor* other)
 {
 	sc_packet_leave payload;
@@ -183,8 +261,34 @@ void MMOActor::send_leave_packet(MMOActor* other)
 	leave_packet->write(&payload, sizeof(sc_packet_leave));
 
 	server->send_packet(this->session_id, leave_packet);
+}
 
-	//printf("send_leave_packet() my id : %llu  other id : %llu  \n", this->session_id, payload.id);
+void MMOActor::send_leave_packet(MMOActor* other, c2::Packet* leave_packet)
+{
+	AcquireSRWLockExclusive(&this->lock);
+	this->view_list.erase(other->get_id());
+	ReleaseSRWLockExclusive(&this->lock);
+
+	leave_packet->increase_ref_count();
+	server->send_packet(this->session_id, leave_packet);
+}
+
+void MMOActor::send_leave_packet(MMONpc* other)
+{
+	sc_packet_leave payload;
+	payload.id = other->id;
+	payload.header.length = sizeof(sc_packet_leave);
+	payload.header.type = S2C_LEAVE;
+
+	AcquireSRWLockExclusive(&this->lock);
+	this->view_list_for_npc.erase(other->id);
+	ReleaseSRWLockExclusive(&this->lock);
+
+
+	c2::Packet* leave_packet = c2::Packet::alloc();
+	leave_packet->write(&payload, sizeof(sc_packet_leave));
+
+	server->send_packet(this->session_id, leave_packet);
 }
 
 void MMOActor::sned_chat_packet(MMOActor* other)

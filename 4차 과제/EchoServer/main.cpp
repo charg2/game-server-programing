@@ -1,5 +1,4 @@
 #include "main.h"
-#include "MMOServer.h"
 
 /*
 ¼­¹ö
@@ -30,7 +29,7 @@ void main()
 
 	server->load_config_using_json(L"config.json");
 
-	server->init_simulator();
+	server->init_npcs();
 
 	server->initialize();
 

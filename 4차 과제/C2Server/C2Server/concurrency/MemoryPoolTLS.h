@@ -65,7 +65,7 @@ namespace c2::concurrency
 
 			void free()
 			{
-				if (maxBlockIndex == InterlockedIncrement64(&released_count))
+				if (Config::MaxBlockIndex == InterlockedIncrement64(&released_count))
 					owner->chunk_pool->free(this);
 			}
 

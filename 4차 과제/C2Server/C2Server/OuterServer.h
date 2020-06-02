@@ -3,7 +3,6 @@
 #include <type_traits>
 #include "concurrency/ConcurrentStack.h"
 
-
 #define session_mapping_helper( session_class ) \
 static_assert(std::is_base_of<Session, session_class>::value, #session_class ## "is not derived from Session"); \
 session_class* session_class##_ptr = (session_class*)HeapAlloc(session_heap, 0, sizeof(session_class) * capacity); \
@@ -14,8 +13,11 @@ new(sessions[i]) session_class(); \
 } \
 
 class Session;
+class TimeTaskScheduler;
+class TimerTask;
 class OuterServer
 {
+
 	struct ThreadInfo
 	{
 		OuterServer*					server;
@@ -46,6 +48,7 @@ public:
 	
 	virtual void		on_update();
 	virtual void		on_start();
+	virtual void		on_timer_service(const TimerTask& timer_job);
 
 	virtual void		on_create_sessions(size_t n);
 	void				destroy_sessions();
@@ -58,8 +61,6 @@ public:
 	
 	Session*							acquire_session_ownership(int64_t session_id);
 	void								release_session_ownership(int64_t session_id);
-
-
 	const wchar_t*						get_version() const;
 	const c2::enumeration::ErrorCode	get_os_last_error() const;
 	const c2::enumeration::ErrorCode	get_server_last_error() const;
@@ -74,9 +75,11 @@ public:
 	size_t								get_total_recv_count();
 	size_t								get_total_sent_count();
 
+
 protected:
 	void					accepter_procedure(uint64_t idx);
 	void					io_service_procedure(uint64_t idx);
+	void					io_and_timer_service_procedure(uint64_t idx);
 	virtual void			custom_precedure(uint64_t idx);
 	static uint32_t WINAPI 	start_thread(LPVOID param);
 
@@ -112,6 +115,8 @@ protected:
 	alignas(c2::constant::CACHE_LINE)	int64_t		total_sent_count;			// 8
 	alignas(c2::constant::CACHE_LINE)	uint64_t	current_accepted_count;		// 8
 
+	static inline thread_local TimeTaskScheduler* local_timer{};
+	
 private:
 	static inline LPFN_ACCEPTEX		accept_ex		{};
 	static inline LPFN_DISCONNECTEX	disconnect_ex	{};

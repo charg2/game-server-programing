@@ -1,14 +1,19 @@
 #pragma once
-#include "concurrency.h"
 
 namespace c2::concurrency
 {
-	template <typename Type, size_t Capacity = kDefaultCapacity, bool PlacementNew = true>
+	template <typename Type, size_t Capacity = 1024, bool PlacementNew = true>
 	class ConcurrentQueueMemoryPool
 	{
+		enum Config
+		{
+			DeadBeef = 0xFDEEAADDBBEEEEFF
+		};
+
+
 		struct BlockNode
 		{
-			BlockNode() : next{ nullptr }, magic_number{ kDeadBeef }//, data{ }
+			BlockNode() : next{ nullptr }, magic_number{ Config:DeadBeef }//, data{ }
 			{
 			}
 
@@ -98,7 +103,7 @@ namespace c2::concurrency
 
 						//new(local_head.node) BlockNode; 
 						local_head.node->next		  = nullptr;
-						local_head.node->magic_number = kDeadBeef;
+						local_head.node->magic_number = Config::DeadBeef;
 
 						break;
 					}
@@ -139,7 +144,7 @@ namespace c2::concurrency
 			BlockNode* node = (BlockNode*)(((uint8_t*)src) - sizeof(BlockNode::next) - sizeof(BlockNode::magic_number));
 			node->next = nullptr;
 
-			if (node->magic_number != kDeadBeef)  // magicNumber Check
+			if (node->magic_number != Config::DeadBeef)  // magicNumber Check
 			{
 				size_t* invalid_ptr{};
 				*invalid_ptr = 0xDDAAEEDDDDAAEEDD;
