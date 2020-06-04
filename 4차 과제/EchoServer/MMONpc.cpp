@@ -49,6 +49,7 @@ void MMONpc::move()
 	int local_x = x;
 	int local_actor_id = id;
 
+
 	is_active = NPC_SLEEP;  // 타 스레드에서 접근해서 일을 가로 챌 수 있도록...
 
 	// 장애물 체크 등등.
