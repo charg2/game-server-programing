@@ -19,15 +19,18 @@
     <Filter Include="lib\common">
       <UniqueIdentifier>{c9048252-fc94-42de-b87a-a14f8ace8030}</UniqueIdentifier>
     </Filter>
+    <Filter Include="lib\extlib">
+      <UniqueIdentifier>{5cc6b24c-6135-4ded-9651-cbb3e7c1c6c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="script">
+      <UniqueIdentifier>{811c3b0e-a15c-4aca-a861-1e6e09b55e4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\core">
+      <UniqueIdentifier>{cb06884f-e9bd-447f-893c-a031ebc9a6e3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\C2Server\C2Server\OuterServer.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
     <ClCompile Include="..\C2Server\C2Server\protocol.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\C2Server\C2Server\Session.cpp">
       <Filter>lib</Filter>
     </ClCompile>
     <ClCompile Include="..\C2Server\C2Server\packet_handler_base.cpp">
@@ -87,6 +90,12 @@
     <ClCompile Include="function.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="..\C2Server\C2Server\OuterServer.cpp">
+      <Filter>lib\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\C2Server\C2Server\Session.cpp">
+      <Filter>lib\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -95,22 +104,13 @@
     <ClInclude Include="..\C2Server\C2Server\enviroment.h">
       <Filter>lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\IOContext.h">
-      <Filter>lib</Filter>
-    </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\macro.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\OuterServer.h">
       <Filter>lib</Filter>
     </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\packet_handler.h">
       <Filter>lib</Filter>
     </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\pre_compile.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\Session.h">
       <Filter>lib</Filter>
     </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\concurrency\BackOff.h">
@@ -194,6 +194,30 @@
     <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentQueueMemPool.hpp">
       <Filter>lib\common</Filter>
     </ClInclude>
+    <ClInclude Include="lua\lua.h">
+      <Filter>lib\extlib</Filter>
+    </ClInclude>
+    <ClInclude Include="lua\lua.hpp">
+      <Filter>lib\extlib</Filter>
+    </ClInclude>
+    <ClInclude Include="lua\luaconf.h">
+      <Filter>lib\extlib</Filter>
+    </ClInclude>
+    <ClInclude Include="lua\lualib.h">
+      <Filter>lib\extlib</Filter>
+    </ClInclude>
+    <ClInclude Include="lua\lauxlib.h">
+      <Filter>lib\extlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\IOContext.h">
+      <Filter>lib\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\OuterServer.h">
+      <Filter>lib\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\Session.h">
+      <Filter>lib\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\C2Server\C2Server\config.json">
@@ -205,10 +229,18 @@
     <None Include="..\C2Server\C2Server\concurrency\spin_wait.asm">
       <Filter>lib\common</Filter>
     </None>
+    <None Include="npc.lua">
+      <Filter>script</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Object Include="..\C2Server\C2Server\concurrency\spin_wait.obj">
       <Filter>lib\common</Filter>
     </Object>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="lua53.lib">
+      <Filter>lib\extlib</Filter>
+    </Library>
   </ItemGroup>
 </Project>

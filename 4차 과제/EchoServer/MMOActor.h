@@ -45,7 +45,6 @@ public:
 	void send_move_packet(MMOActor* other, c2::Packet* enter_packet);
 	void send_move_packet(MMONpc* other);
 
-
 	void send_leave_packet(MMOActor* other);
 	void send_leave_packet(MMOActor* other, c2::Packet* enter_packet);
 	void send_leave_packet(MMONpc* other);

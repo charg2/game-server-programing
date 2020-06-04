@@ -21,7 +21,7 @@ namespace c2
 
 		constexpr int MAX_ID_LEN = 50;
 		constexpr int MAX_STR_LEN = 255;
-		constexpr int MAX_CHAT_LEN = 100;
+		constexpr int MAX_CHAT_LEN = 50;
 
 		constexpr int FOV_WIDTH = 17;
 		constexpr int FOV_HEIGHT = 17;
@@ -38,6 +38,7 @@ namespace c2
 		constexpr int MAP_HEIGHT = 800;
 
 		constexpr int MAX_NPC = 200'000;
+		//constexpr int MAX_NPC = 20'000;
 		constexpr int NPC_ID_OFFSET = 10'000;
 
 		constexpr size_t MAP_NAX_HEIGHT_INDEX = calc_static_map_index<MAP_HEIGHT, SECTOR_HEIGHT>(); // 딱 들어맞으면 + 1

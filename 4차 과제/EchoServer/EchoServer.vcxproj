@@ -194,6 +194,11 @@
     <ClInclude Include="..\C2Server\C2Server\util\Timer.h" />
     <ClInclude Include="..\C2Server\C2Server\util\TimeScheduler.h" />
     <ClInclude Include="function.h" />
+    <ClInclude Include="lua\lauxlib.h" />
+    <ClInclude Include="lua\lua.h" />
+    <ClInclude Include="lua\lua.hpp" />
+    <ClInclude Include="lua\luaconf.h" />
+    <ClInclude Include="lua\lualib.h" />
     <ClInclude Include="MMONear.h" />
     <ClInclude Include="MMOActor.h" />
     <ClInclude Include="MMONpc.h" />
@@ -209,9 +214,13 @@
     <None Include="..\C2Server\C2Server\concurrency\spin_wait.asm" />
     <None Include="..\C2Server\C2Server\config.json" />
     <None Include="config.json" />
+    <None Include="npc.lua" />
   </ItemGroup>
   <ItemGroup>
     <Object Include="..\C2Server\C2Server\concurrency\spin_wait.obj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="lua53.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

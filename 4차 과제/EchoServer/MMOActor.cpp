@@ -224,7 +224,7 @@ void MMOActor::send_login_ok_packet()
 
 void MMOActor::wake_up_npc(MMONpc* npc)
 {
-	if (npc->is_active == 0) // false
+	if (npc->is_active == NPC_SLEEP) // false
 	{
 		if ( InterlockedExchange(&npc->is_active, NPC_WORKING) == NPC_SLEEP)		// 이전 상태가 자고 있었다면 꺠움.
 		{
@@ -238,6 +238,8 @@ void MMOActor::wake_up_npc(MMONpc* npc)
 		}
 	}
 }
+
+
 
 
 void MMOActor::send_move_packet(MMOActor* other)

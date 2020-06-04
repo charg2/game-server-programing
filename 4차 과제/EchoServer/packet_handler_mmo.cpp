@@ -92,6 +92,7 @@ REGISTER_HANDLER(C2S_LOGIN)
 	my_info_packet->decrease_ref_count();						// my_info_packet 릴리즈용 
 
 
+////// NPC 처리.
 	for (auto npc_id : local_view_list_for_npc)
 	{
 		MMONpc* npc = mmo_npc_mgr->get_npc(npc_id);
@@ -295,7 +296,7 @@ REGISTER_HANDLER(C2S_MOVE)
 	///////////////////
 	for (int32_t npc_id : local_new_view_list_for_npc)
 	{
-		if (0 == local_old_view_list_for_npc.count(npc_id)) // 이동후 새로 보이는 유저.
+		if (0 == local_old_view_list_for_npc.count(npc_id)) // 이동후 새로 보이는 NPC
 		{
 			MMONpc* npc = mmo_npc_mgr->get_npc(npc_id);
 
@@ -321,16 +322,19 @@ REGISTER_HANDLER(C2S_MOVE)
 
 REGISTER_HANDLER(C2S_CHAT)
 {
-	//MMOSession* mmo_session		{ (MMOSession*)session };
-	//MMOActor*	mmo_actor		{ mmo_session->get_actor() };
-	//MMOServer*	mmo_server		{ (MMOServer*)session->server };
-	//MMOSector*	sector			{ mmo_actor->current_sector };
+	MMOSession* mmo_session		{ (MMOSession*)session };
+	MMOActor*	my_actor		{ mmo_session->get_actor() };
+	MMOServer*	mmo_server		{ (MMOServer*)session->server };
+	MMOSector*	sector			{ my_actor->current_sector };
+
+	cs_packet_chat chat_payload; 								// id check
+	in_packet.read(&chat_payload, sizeof(cs_packet_chat));
 
 
-	//cs_packet_chat chat_payload; 								// id check
-	//in_packet.read(&chat_payload, sizeof(cs_packet_chat));
+	MMOSector* current_sector = mmo_server->get_zone()->get_sector(my_actor);			// view_list 긁어오기.
+	const MMONear* nears = current_sector->get_near(my_actor->y, my_actor->x); // 주벽 섹터들.
+	int near_cnt = nears->count;
 
-	//std::vector<MMOSector*>& near_sectors = sector->near_sectors;
 	//for ( MMOSector* n_sector : near_sectors)
 	//{
 	//	AcquireSRWLockShared(&n_sector->lock);
@@ -347,5 +351,6 @@ REGISTER_HANDLER(C2S_CHAT)
 
 	//	ReleaseSRWLockShared(&n_sector->lock);
 	//}
+
 }
 

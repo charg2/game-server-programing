@@ -29,7 +29,8 @@ void MMONpcManager::initilize()
 		npcs[n].y = rand() % c2::constant::MAP_HEIGHT;
 		npcs[n].zone = this->zone;
 		npcs[n].is_active = 0;
-		npcs[n].is_active = 0;
+
+		//npcs[n].preare_vm();
 	}
 }
 

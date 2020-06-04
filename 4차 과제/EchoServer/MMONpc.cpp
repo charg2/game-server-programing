@@ -13,6 +13,31 @@
 
 using namespace c2::constant;
 
+void MMONpc::preare_vm()
+{
+	lua_vm = luaL_newstate();
+	luaL_openlibs(lua_vm);
+
+	int error = luaL_loadfile(lua_vm, "npc.lua");
+	error = lua_pcall(lua_vm, 0, 0, 0);
+	if (error != 0) 
+		printf( "lua error %s \n", lua_tostring(lua_vm, -1));
+
+	lua_getglobal(lua_vm, "set_npc_id");
+	lua_pcall(lua_vm, 0, 0, 0);
+
+	lua_getglobal(lua_vm, "set_npc_id");
+	lua_pushnumber(lua_vm, id);
+	lua_pcall(lua_vm, 1, 1, 0);
+	lua_pop(lua_vm, 1);
+
+
+	//lua_register(L, "API_send_message", API_SendMessage);
+	//lua_register(L, "API_get_x", API_get_x);
+	//lua_register(L, "API_get_y", API_get_y);
+	//lua_register(L, "API_get_y", API_get_cur_state);
+}
+
 void MMONpc::move()
 {
 	//int8_t direction = rand
@@ -23,6 +48,8 @@ void MMONpc::move()
 	int local_y = y;
 	int local_x = x;
 	int local_actor_id = id;
+
+	is_active = NPC_SLEEP;  // 타 스레드에서 접근해서 일을 가로 챌 수 있도록...
 
 	// 장애물 체크 등등.
 	switch (direction)
@@ -94,6 +121,9 @@ void MMONpc::move()
 		ReleaseSRWLockShared(&nears->sectors[n]->lock);
 	}
 
+	/*if (local_new_view_list.size() > 0)
+		is_isolated = false;*/
+
 
 	// broad cast
 
@@ -157,14 +187,20 @@ void MMONpc::move()
 		}
 	}
 
+
 	// 주변에 아무도 없다면?
 	if (is_isolated == true)
 	{
-		is_active = NPC_SLEEP; // compare echage   is_active = 0;
+		// 딴 사람이 건들였으면 딴족에서 처리해줌.
+		return;
 	}
 	else // 있다면 업데이트 계속.
 	{
-		local_timer->push_timer_task( this->id, TTT_MOVE_NPC, 1000, 0);
+		// is_active 상태의 빈 공간이 있어서 업데이트 못했을 수도 있으니 내가 해줌.
+		if (InterlockedExchange(&this->is_active, NPC_WORKING) == NPC_SLEEP) 
+		{
+			local_timer->push_timer_task(this->id, TTT_MOVE_NPC, 1000, 0);
+		}
 	}
 }
 
