@@ -5,7 +5,6 @@
 
 constexpr size_t kKeyMax = 256;
 
-
 enum VirtualKey
 {
 	LeftArrow = 0x25,

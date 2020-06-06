@@ -5,6 +5,8 @@
 #include "MMOZone.h"
 #include "MMONpcManager.h"
 
+#include <unordered_map>
+#include <unordered_set>
 
 REGISTER_HANDLER(C2S_LOGIN)
 {
@@ -22,6 +24,7 @@ REGISTER_HANDLER(C2S_LOGIN)
 	
 	my_actor->reset();
 	memcpy(my_actor->name, login_payload.name, c2::constant::MAX_ID_LEN); // 어차피 여기서만 write 함. and 나갈 때;;
+
 	if (mmo_session->get_actor()->get_id() != (uint16_t)session->session_id) // 이미 나갔다 들어온 녀석.
 	{
 		return;
@@ -30,16 +33,13 @@ REGISTER_HANDLER(C2S_LOGIN)
 	mmo_session->response_loginok();		// 로그인 처리 및 응답
 	mmo_zone->enter_actor(my_actor);
 	
-
-	
-
 	MMOSector* current_sector = mmo_zone->get_sector(my_actor);			// view_list 긁어오기.
 	const MMONear* nears = current_sector->get_near(my_actor->y, my_actor->x); // 주벽 섹터들.
 	int near_cnt = nears->count;
 
 
-	std::map<int32_t, MMOActor*>	local_view_list;
-	std::set<int32_t>				local_view_list_for_npc;
+	std::unordered_map<int32_t, MMOActor*>	local_view_list;
+	std::unordered_set<int32_t>				local_view_list_for_npc;
 
 
 	for (int n = 0; n < near_cnt; ++n)
@@ -85,7 +85,7 @@ REGISTER_HANDLER(C2S_LOGIN)
 			continue;
 		
 		MMOActor* other = iter.second;
-		my_actor->send_enter_packet_without_adding_viewlist(other);
+		my_actor->send_enter_packet_without_updating_viewlist(other);
 		other->send_enter_packet(my_actor, my_info_packet);
 	}
 
@@ -103,7 +103,7 @@ REGISTER_HANDLER(C2S_LOGIN)
 		my_actor->wake_up_npc(npc);
 		/// 나한테 npc 정보 보내기 하셈. 
 		// move에서도.
-		my_actor->send_enter_packet_without_adding_viewlist(npc);
+		my_actor->send_enter_packet_without_updating_viewlist(npc);
 	}
 
 
@@ -182,8 +182,8 @@ REGISTER_HANDLER(C2S_MOVE)
 
 
 	AcquireSRWLockShared(&my_actor->lock);
-	std::map<int32_t, MMOActor*> local_old_view_list = my_actor->view_list;
-	std::set<int32_t> local_old_view_list_for_npc = my_actor->view_list_for_npc;
+	std::unordered_map<int32_t, MMOActor*> local_old_view_list = my_actor->view_list;
+	std::unordered_set<int32_t> local_old_view_list_for_npc = my_actor->view_list_for_npc;
 	ReleaseSRWLockShared(&my_actor->lock);
 
 
@@ -194,10 +194,9 @@ REGISTER_HANDLER(C2S_MOVE)
 	int				near_cnt		= nears->count;
 
 
-
 	// 내 주변 정보를 긁어 모음.
-	std::map<int32_t, MMOActor*>	local_new_view_list;
-	std::set<int32_t>				local_new_view_list_for_npc;
+	std::unordered_map<int32_t, MMOActor*>	local_new_view_list;
+	std::unordered_set<int32_t>				local_new_view_list_for_npc;
 	for (int n = 0; n < near_cnt; ++n)					
 	{
 		AcquireSRWLockShared(&nears->sectors[n]->lock); // sector에 읽기 위해서 락을 얻고 
@@ -218,7 +217,11 @@ REGISTER_HANDLER(C2S_MOVE)
 				//continue;
 			MMONpc* npc = mmo_npc_mgr->get_npc(npc_id);
 			if (my_actor->is_near(npc) == true) // 내 근처가 맞다면 넣음.
+			{
+				my_actor->wake_up_npc(npc);
+				
 				local_new_view_list_for_npc.insert(npc_id);
+			}
 		}
 		ReleaseSRWLockShared(&nears->sectors[n]->lock);
 	}
@@ -299,26 +302,27 @@ REGISTER_HANDLER(C2S_MOVE)
 		if (0 == local_old_view_list_for_npc.count(npc_id)) // 이동후 새로 보이는 NPC
 		{
 			MMONpc* npc = mmo_npc_mgr->get_npc(npc_id);
-
-			my_actor->wake_up_npc(npc);
 			
 			my_actor->send_enter_packet(npc); // 이 npc 정보를 나한테 보냄.
+
 		}
 	}
-
 
 	for (int32_t old_npc_id : local_old_view_list_for_npc)
 	{
 		if (0 == local_new_view_list_for_npc.count(old_npc_id))
 		{
-			AcquireSRWLockExclusive(&my_actor->lock);
-			my_actor->view_list_for_npc.erase(old_npc_id);
-			ReleaseSRWLockExclusive(&my_actor->lock);
-			// 떠나는건 npc가 알아서 해줌.
+			//AcquireSRWLockExclusive(&my_actor->lock);
+			//my_actor->view_list_for_npc.erase(old_npc_id);
+			//ReleaseSRWLockExclusive(&my_actor->lock);
+			// 떠나는건 npc가 알아서 해줌. // 얘는 1초에 한번이기도 하고 내가 반영을 안함.
+			MMONpc* npc = mmo_npc_mgr->get_npc(old_npc_id);
+
+			my_actor->send_leave_packet(npc); // 이 npc 정보를 나한테 보냄.
 		}
 	}
-
 }
+
 
 REGISTER_HANDLER(C2S_CHAT)
 {
@@ -331,26 +335,41 @@ REGISTER_HANDLER(C2S_CHAT)
 	in_packet.read(&chat_payload, sizeof(cs_packet_chat));
 
 
+	//static thread_local 
+
+	std::unordered_map<int16_t, MMOActor*> local_view_list;
+	local_view_list.clear();
+
+
 	MMOSector* current_sector = mmo_server->get_zone()->get_sector(my_actor);			// view_list 긁어오기.
 	const MMONear* nears = current_sector->get_near(my_actor->y, my_actor->x); // 주벽 섹터들.
 	int near_cnt = nears->count;
 
-	//for ( MMOSector* n_sector : near_sectors)
-	//{
-	//	AcquireSRWLockShared(&n_sector->lock);
-	//	auto& actors = n_sector->actors;
+	for (int i = 0; i < near_cnt; ++i)
+	{
+		AcquireSRWLockShared(&nears->sectors[i]->lock);
 
-	//	for (auto& iter : actors)
-	//	{
-	//		MMOActor*	neighbor	= iter.second;
-	//		c2::Packet* out_packet	=  c2::Packet::alloc();
+		for (auto& iter : nears->sectors[i]->actors)
+		{
+			MMOActor* neighbor = iter.second;
+			if (my_actor->is_near(neighbor) == true) // 내 근처가 맞다면 넣음.
+				local_view_list.emplace(iter);
+		}
+		
+		ReleaseSRWLockShared(&nears->sectors[i]->lock);
+	}
+	
 
-	//		out_packet->write(&chat_payload, sizeof(cs_packet_chat));	//여기가 좀 병목인가;
-	//		mmo_server->send_packet(neighbor->session_id, out_packet);	// 
-	//	}
+	c2::Packet* out_packet = c2::Packet::alloc();
+	// 프로토콜이 형식이 똑같음 타입만 바꿔주면 됨.
+	chat_payload.header.type = S2C_CHAT;
+	out_packet->write(&chat_payload, sizeof(cs_packet_chat));	//여기가 좀 병목인가;
+	out_packet->add_ref( local_view_list.size() );
+	for (auto& it : local_view_list)
+	{
+		mmo_server->send_packet(it.second->session_id, out_packet);	// 
+	}
 
-	//	ReleaseSRWLockShared(&n_sector->lock);
-	//}
-
+	out_packet->decrease_ref_count();
 }
 

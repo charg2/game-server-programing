@@ -24,3 +24,4 @@ private:
 };
 
 extern MMONpcManager* g_npc_manager;
+

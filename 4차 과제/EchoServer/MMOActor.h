@@ -5,8 +5,8 @@
 #include "../C2Server/C2Server/protocol.h"
 #include <cstdint>
 #include <atomic>
-#include <map>
-#include <set>
+#include <unordered_map>
+#include <unordered_set>
 
 struct	MMOZone;
 struct	MMOSector;
@@ -38,8 +38,8 @@ public:
 	void send_enter_packet(MMOActor* other);
 	void send_enter_packet(MMOActor* other, c2::Packet* enter_packet);
 	void send_enter_packet(MMONpc* other);
-	void send_enter_packet_without_adding_viewlist(MMOActor* other);
-	void send_enter_packet_without_adding_viewlist(MMONpc* other);
+	void send_enter_packet_without_updating_viewlist(MMOActor* other);
+	void send_enter_packet_without_updating_viewlist(MMONpc* other);
 
 	void send_move_packet(MMOActor* other);
 	void send_move_packet(MMOActor* other, c2::Packet* enter_packet);
@@ -72,8 +72,8 @@ public:
 	MMOSector*						current_sector; 
 	MMOSession* const				session;
 
-	std::map<int32_t, MMOActor*>	view_list;
-	std::set<int32_t>				view_list_for_npc;
+	std::unordered_map<int32_t, MMOActor*>	view_list;
+	std::unordered_set<int32_t>				view_list_for_npc;
 	SRWLOCK							lock;
 };
 

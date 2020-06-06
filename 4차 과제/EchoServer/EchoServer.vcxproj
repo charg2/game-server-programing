@@ -167,6 +167,7 @@
     <ClCompile Include="MMONpcManager.cpp" />
     <ClCompile Include="MMOZone.cpp" />
     <ClCompile Include="packet_handler_mmo.cpp" />
+    <ClCompile Include="script_api.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\C2Server\C2Server\concurrency\BackOff.h" />
@@ -207,12 +208,13 @@
     <ClInclude Include="MMOSession.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="MMONpcManager.h" />
+    <ClInclude Include="MMOSysteMessage.h" />
     <ClInclude Include="MMOZone.h" />
     <ClInclude Include="mmo_function.hpp" />
+    <ClInclude Include="script_api.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\C2Server\C2Server\concurrency\spin_wait.asm" />
-    <None Include="..\C2Server\C2Server\config.json" />
     <None Include="config.json" />
     <None Include="npc.lua" />
   </ItemGroup>

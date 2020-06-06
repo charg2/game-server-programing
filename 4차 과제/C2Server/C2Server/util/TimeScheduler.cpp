@@ -12,7 +12,7 @@ TimeTaskScheduler::~TimeTaskScheduler()
 
 void TimeTaskScheduler::push_timer_task(uint64_t session_id, TimerTaskType task, uint64_t after_tick, uint64_t target_id)
 {
-	timer_job_queue.push({ session_id, task, after_tick + current_tick, target_id });
+	timer_job_queue.push({ after_tick + current_tick, session_id, task, target_id });
 }
 
 void TimeTaskScheduler::bind_server(OuterServer* server)

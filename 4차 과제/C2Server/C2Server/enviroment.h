@@ -6,6 +6,7 @@ namespace c2
 {
 	namespace constant
 	{
+		/// core 
 		constexpr inline size_t SEND_SIGN = 5001U;
 		//constexpr inline size_t SEND_SIGN = 'SEND' + 1;
 		//static_assert( ( SEND_SIGN % 4 ) != 0, "Send sign must  " );
@@ -37,13 +38,11 @@ namespace c2
 		constexpr int MAP_WIDTH = 800;
 		constexpr int MAP_HEIGHT = 800;
 
-		constexpr int MAX_NPC = 200'000;
-		//constexpr int MAX_NPC = 20'000;
+		//constexpr int MAX_NPC = 200'000;
+		constexpr int MAX_NPC = 20'000;
 		constexpr int NPC_ID_OFFSET = 10'000;
-
-		constexpr size_t MAP_NAX_HEIGHT_INDEX = calc_static_map_index<MAP_HEIGHT, SECTOR_HEIGHT>(); // µü µé¾î¸ÂÀ¸¸é + 1
+		constexpr size_t MAP_NAX_HEIGHT_INDEX = calc_static_map_index<MAP_HEIGHT, SECTOR_HEIGHT>();
 		constexpr size_t MAP_NAX_WIDTH_INDEX = calc_static_map_index<MAP_WIDTH, SECTOR_WIDTH>();
-
 		constexpr int INITIAL_HP = 200;
 		constexpr int LEVEL_MAXIMUM_EXP = 200;  // level * LEVLE_MAXIMUM_EXPÇÏ¸é µÊ.
 	}

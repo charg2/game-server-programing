@@ -133,7 +133,7 @@ void MMOActor::send_enter_packet(MMOActor* other)
 }
 
 // 내 뷰리스트에 상대를 추가과정 생략., 정보도 보냄. 
-void MMOActor::send_enter_packet_without_adding_viewlist(MMOActor* other)
+void MMOActor::send_enter_packet_without_updating_viewlist(MMOActor* other)
 {
 	sc_packet_enter payload;
 	payload.id = other->get_id();
@@ -189,7 +189,7 @@ void MMOActor::send_enter_packet(MMONpc* other)
 	server->send_packet(this->session_id, enter_packet);
 }
 // 내 정보만 보냄.. 
-void MMOActor::send_enter_packet_without_adding_viewlist(MMONpc* other)
+void MMOActor::send_enter_packet_without_updating_viewlist(MMONpc* other)
 {
 	sc_packet_enter payload;
 	payload.id = (int)other->id;
@@ -226,7 +226,7 @@ void MMOActor::wake_up_npc(MMONpc* npc)
 {
 	if (npc->is_active == NPC_SLEEP) // false
 	{
-		if ( InterlockedExchange(&npc->is_active, NPC_WORKING) == NPC_SLEEP)		// 이전 상태가 자고 있었다면 꺠움.
+		if (NPC_SLEEP == InterlockedExchange(&npc->is_active, NPC_WORKING) )		// 이전 상태가 자고 있었다면 꺠움.
 		{
 			// 내가 꺠운 상태.
 			// 내가 책임지고 일을 시켜야 함.
@@ -325,7 +325,6 @@ void MMOActor::send_leave_packet(MMONpc* other)
 	AcquireSRWLockExclusive(&this->lock);
 	this->view_list_for_npc.erase(other->id);
 	ReleaseSRWLockExclusive(&this->lock);
-
 
 	c2::Packet* leave_packet = c2::Packet::alloc();
 	leave_packet->write(&payload, sizeof(sc_packet_leave));

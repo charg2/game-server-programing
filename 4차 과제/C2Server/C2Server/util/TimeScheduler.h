@@ -6,15 +6,16 @@
 class OuterServer;
 enum TimerTaskType
 {
-	TTT_MOVE_NPC,
+	TTT_MOVE_NPC, 
+	TTT_NPC_HELLO, 
+	TTT_NPC_BYE
 };
-
 
 struct TimerTask
 {
-	uint64_t		server_id; 
-	TimerTaskType	task_type;
 	uint64_t		execution_tick;
+	uint64_t		actor_id; 
+	TimerTaskType	task_type;
 	uint64_t		target_id;
 };
 
@@ -38,7 +39,6 @@ public:
 	void push_timer_task(uint64_t session_id, TimerTaskType task, uint64_t after_tick, uint64_t target_id);
 	void bind_server(OuterServer* server);
 	void do_timer_job();
-
 
 private:	
 	using TimerJobQueue = std::priority_queue<TimerTask, std::vector<TimerTask>, TimerTaskComparer>;

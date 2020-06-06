@@ -7,13 +7,15 @@
 #include "MMONpcManager.h"
 #include "MMOZone.h"
 #include "MMONear.h"
+#include "MMOServer.h"
 
 //#include "../C2Server/C2Server/util/TimeScheduler.h"
 //#include "MMOActor.h"
 
 using namespace c2::constant;
+#include "script_api.h"
 
-void MMONpc::preare_vm()
+void MMONpc::prepare_virtual_machine()
 {
 	lua_vm = luaL_newstate();
 	luaL_openlibs(lua_vm);
@@ -23,37 +25,30 @@ void MMONpc::preare_vm()
 	if (error != 0) 
 		printf( "lua error %s \n", lua_tostring(lua_vm, -1));
 
-	lua_getglobal(lua_vm, "set_npc_id");
-	lua_pcall(lua_vm, 0, 0, 0);
-
-	lua_getglobal(lua_vm, "set_npc_id");
-	lua_pushnumber(lua_vm, id);
-	lua_pcall(lua_vm, 1, 1, 0);
-	lua_pop(lua_vm, 1);
+	// 
+	lua_getglobal(lua_vm, "prepare_npc_script");
+	lua_pushnumber(lua_vm, (int32_t)id);
+	lua_pcall(lua_vm, 1, 0, 0);
 
 
-	//lua_register(L, "API_send_message", API_SendMessage);
-	//lua_register(L, "API_get_x", API_get_x);
-	//lua_register(L, "API_get_y", API_get_y);
-	//lua_register(L, "API_get_y", API_get_cur_state);
+	lua_register(lua_vm, "server_send_chatting",		l2c_send_chatting_to_target);
+	lua_register(lua_vm, "server_get_npc_x",			l2c_get_npc_pos_x);
+	lua_register(lua_vm, "server_get_npc_y",			l2c_get_npc_pos_y);
+	lua_register(lua_vm, "server_npc_move_to_anywhere", l2c_npc_move_to_anywhere);
+	lua_register(lua_vm, "server_npc_go_sleep",			l2c_npc_go_sleep);
 }
 
 void MMONpc::move()
 {
-	//int8_t direction = rand
-	// 목표지점.. 
-	// 길찾기 한 칸.
-	char direction = fast_rand() % 4;
 	bool is_isolated = true;
 	int local_y = y;
 	int local_x = x;
 	int local_actor_id = id;
 
 
-	is_active = NPC_SLEEP;  // 타 스레드에서 접근해서 일을 가로 챌 수 있도록...
 
 	// 장애물 체크 등등.
-	switch (direction)
+	switch (fast_rand() % 4)
 	{
 	case D_DOWN:
 		if (local_y < MAP_HEIGHT - 1)	local_y++;
@@ -95,7 +90,7 @@ void MMONpc::move()
 
 	// 뷰리스트 수정.
 	AcquireSRWLockExclusive(&lock); // // 락 걸고...
-	std::map<int32_t, MMOActor*> local_old_view_list = view_list;
+	std::unordered_map<int32_t, MMOActor*> local_old_view_list = view_list;
 	ReleaseSRWLockExclusive(&lock); // // 락 걸고...
 
 
@@ -106,7 +101,7 @@ void MMONpc::move()
 
 	
 	// 내 주변 정보를 긁어 모음.
-	std::map<int32_t, MMOActor*>	local_new_view_list;
+	std::unordered_map<int32_t, MMOActor*>	local_new_view_list;
 	for (int n = 0; n < near_cnt; ++n)
 	{
 		AcquireSRWLockShared(&nears->sectors[n]->lock); // sector에 읽기 위해서 락을 얻고 
@@ -122,13 +117,6 @@ void MMONpc::move()
 		ReleaseSRWLockShared(&nears->sectors[n]->lock);
 	}
 
-	/*if (local_new_view_list.size() > 0)
-		is_isolated = false;*/
-
-
-	// broad cast
-
-	///////////////////
 	for (auto& new_actor : local_new_view_list)
 	{
 		if (0 == local_old_view_list.count(new_actor.first))	// 이동후 새로 보이는 유저.
@@ -171,12 +159,12 @@ void MMONpc::move()
 	//시야에서 벗어난 플레이어
 	for (auto& old_it : local_old_view_list)
 	{
-		if (0 == local_new_view_list.count(old_it.first))
-		{
-			this->update_leaving_actor(old_it.second); // npc 시야에서 유저가 나간것을 업뎃 해줌.
-
-			AcquireSRWLockShared(&old_it.second->lock);
-			if (0 != old_it.second->view_list_for_npc.count(this->id))
+		if (0 == local_new_view_list.count(old_it.first))		// 현재 내 시야에 없는 플레이어.
+		{														// 
+			this->update_leaving_actor(old_it.second);			// npc 시야에서 유저가 나간것을 업뎃 해줌.
+			
+			AcquireSRWLockShared(&old_it.second->lock);			// 
+			if (0 != old_it.second->view_list_for_npc.count(this->id)) // 클라 시야에 내가 있는 경우
 			{
 				ReleaseSRWLockShared(&old_it.second->lock);
 				old_it.second->send_leave_packet(this);
@@ -188,21 +176,37 @@ void MMONpc::move()
 		}
 	}
 
-
 	// 주변에 아무도 없다면?
 	if (is_isolated == true)
 	{
 		// 딴 사람이 건들였으면 딴족에서 처리해줌.
-		return;
+		// 타 스레드에서 접근해서 일을 가로 챌 수 있도록...
+		is_active = NPC_SLEEP;
 	}
 	else // 있다면 업데이트 계속.
 	{
 		// is_active 상태의 빈 공간이 있어서 업데이트 못했을 수도 있으니 내가 해줌.
-		if (InterlockedExchange(&this->is_active, NPC_WORKING) == NPC_SLEEP) 
-		{
-			local_timer->push_timer_task(this->id, TTT_MOVE_NPC, 1000, 0);
-		}
+		//if (InterlockedExchange(&this->is_active, NPC_WORKING) == NPC_SLEEP) 
+		local_timer->push_timer_task(this->id, TTT_MOVE_NPC, 1000, 0);
 	}
+}
+
+void MMONpc::move_to_anywhere()
+{
+}
+
+void MMONpc::send_chatting_to_actor(int32_t actor_id ,char* message)
+{
+	sc_packet_chat chat_payload;
+	chat_payload.header.length = sizeof(sc_packet_chat);
+	chat_payload.header.type = S2C_CHAT;
+	chat_payload.id = this->id;
+	strcpy(chat_payload.chat, message);
+	
+	c2::Packet* chat_packet = c2::Packet::alloc();
+	chat_packet->write(&chat_payload, sizeof(sc_packet_chat));
+
+	zone->server->send_packet(actor_id, chat_packet);
 }
 
 void MMONpc::update_entering_actor(MMOActor* other)

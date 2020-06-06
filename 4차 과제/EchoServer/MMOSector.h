@@ -3,8 +3,8 @@
 // 기존의 섹터의 개념을 변경함.
 
 #include <vector>
-#include <map>
-#include <set>
+#include <unordered_map>
+#include <unordered_set>
 #include "MMONear.h"
 
 struct MMOActor;
@@ -27,8 +27,8 @@ struct MMOSector
 
 
 ///////////////////
-	std::map<int16_t, MMOActor*>	actors;
-	std::set<int32_t>				npcs;
+	std::unordered_map<int16_t, MMOActor*>	actors;
+	std::unordered_set<int32_t>				npcs;
 	MMONear*						near_sector_table[SECTOR_HEIGHT][SECTOR_WIDTH];
 	MMOZone*						zone;
 	int								index_x, index_y;

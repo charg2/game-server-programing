@@ -1,7 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include <cstdint>
-#include <map>
+#include <unordered_map>
 
 
 extern "C"
@@ -19,9 +19,11 @@ struct MMONpc
 	void update_entering_actor(MMOActor* actor);
 	void update_leaving_actor(MMOActor* actor);
 
-	void preare_vm();
+	void prepare_virtual_machine();
 	void move();
-
+	void move_to_anywhere();
+	void send_chatting_to_actor(int32_t actor_id, char* message);
+	
 	int16_t		hp;
 	int16_t		max_hp;
 	int32_t		x, y;
@@ -31,12 +33,12 @@ struct MMONpc
 	MMOActor*	target;
 	MMOZone*	zone;
 	uint64_t	is_active;
+	int32_t		target_id;
 
-	std::map<int32_t, MMOActor*>	view_list;
-	SRWLOCK							lock;
+	std::unordered_map<int32_t, MMOActor*>	view_list;
+	SRWLOCK									lock;
 
 	lua_State*	lua_vm;
 	SRWLOCK		vm_lock;
-
 };
 

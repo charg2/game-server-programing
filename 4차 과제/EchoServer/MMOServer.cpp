@@ -37,6 +37,10 @@ void MMOServer::on_disconnect(uint64_t session_id)
 	MMOActor*	my_actor = get_actor(session_id);
 	int			my_actor_id = my_actor->get_id();
 	MMOSector*	my_actor_sector = my_actor->current_sector;
+	if (my_actor_sector == nullptr)
+	{
+		return;
+	}
 	AcquireSRWLockExclusive(&my_actor->lock);
 	
 	AcquireSRWLockExclusive(&my_actor_sector->lock);
@@ -98,18 +102,31 @@ void MMOServer::on_timer_service(const TimerTask& task)
 {
 	switch (task.task_type)
 	{
-	case TTT_MOVE_NPC:
-	{
-		MMONpc* npc = g_npc_manager->get_npc(task.server_id);
+		case TTT_MOVE_NPC:
+		{
+			MMONpc*		npc		= g_npc_manager->get_npc(task.actor_id);
+			MMOActor*	actor	= this->get_actor(task.target_id);
+			lua_State*	vm		= npc->lua_vm;
+			
 
-		npc->move();
-		
-		break;
-	}
+			AcquireSRWLockExclusive(&npc->vm_lock);
+			// vm->event_palayer_move((int32_t)npc->id, actor->x, actor->y);
+			lua_getglobal(vm, "event_palayer_move"); // 
 
+			lua_pushnumber(vm, (int32_t)npc->id);
+			lua_pushnumber(vm, actor->x);
+			lua_pushnumber(vm, actor->y);
 
-	default:
-		size_t* invliad_ptr{}; *invliad_ptr = 0;
+			lua_pcall(vm, 3, 0, 0);
+
+			ReleaseSRWLockExclusive(&npc->vm_lock);
+			break;
+		}
+
+		default:
+		{
+			size_t* invliad_ptr{}; *invliad_ptr = 0;
+		}
 	}
 }
 

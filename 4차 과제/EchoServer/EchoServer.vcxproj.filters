@@ -33,9 +33,6 @@
     <ClCompile Include="..\C2Server\C2Server\protocol.cpp">
       <Filter>lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\C2Server\C2Server\packet_handler_base.cpp">
-      <Filter>lib</Filter>
-    </ClCompile>
     <ClCompile Include="..\C2Server\C2Server\concurrency\BackOff.cpp">
       <Filter>lib\common</Filter>
     </ClCompile>
@@ -96,18 +93,18 @@
     <ClCompile Include="..\C2Server\C2Server\Session.cpp">
       <Filter>lib\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\C2Server\C2Server\packet_handler_base.cpp">
+      <Filter>lib\core</Filter>
+    </ClCompile>
+    <ClCompile Include="script_api.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\enviroment.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\macro.h">
-      <Filter>lib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\C2Server\C2Server\packet_handler.h">
       <Filter>lib</Filter>
     </ClInclude>
     <ClInclude Include="..\C2Server\C2Server\pre_compile.h">
@@ -218,11 +215,20 @@
     <ClInclude Include="..\C2Server\C2Server\Session.h">
       <Filter>lib\core</Filter>
     </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\macro.h">
+      <Filter>lib\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\C2Server\C2Server\packet_handler.h">
+      <Filter>lib\core</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOSysteMessage.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="script_api.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\C2Server\C2Server\config.json">
-      <Filter>lib</Filter>
-    </None>
     <None Include="config.json">
       <Filter>헤더 파일</Filter>
     </None>

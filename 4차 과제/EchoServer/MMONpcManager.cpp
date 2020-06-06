@@ -30,7 +30,7 @@ void MMONpcManager::initilize()
 		npcs[n].zone = this->zone;
 		npcs[n].is_active = 0;
 
-		//npcs[n].preare_vm();
+		npcs[n].prepare_virtual_machine();
 	}
 }
 
@@ -53,8 +53,6 @@ MMONpc* MMONpcManager::get_npc(uint64_t server_id)
 {
 	return &npcs[server_id- c2::constant::NPC_ID_OFFSET];
 }
-
-
 
 
 void MMONpcManager::set_zone(MMOZone* zone)
