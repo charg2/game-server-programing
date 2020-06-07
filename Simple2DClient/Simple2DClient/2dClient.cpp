@@ -1,6 +1,5 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
-
 #include <windows.h>
 #include <iostream>
 #include <unordered_map>
@@ -12,17 +11,14 @@ using namespace chrono;
 
 sf::TcpSocket g_socket;
 
-constexpr auto SCREEN_WIDTH = 20;
-constexpr auto SCREEN_HEIGHT = 20;
+constexpr auto SCREEN_WIDTH = 21;
+constexpr auto SCREEN_HEIGHT = 21;
 
 constexpr auto TILE_WIDTH = 65;
 constexpr auto WINDOW_WIDTH = TILE_WIDTH * SCREEN_WIDTH / 2 + 10;   // size of window
 constexpr auto WINDOW_HEIGHT = TILE_WIDTH * SCREEN_WIDTH / 2 + 10;
 constexpr auto BUF_SIZE = 200;
-constexpr auto MAX_USER = 10;
-
-// 추후 확장용.
-int NPC_ID_START = 10000;
+constexpr auto MAX_USER = NPC_ID_START;
 
 int g_left_x;
 int g_top_y;
@@ -84,7 +80,7 @@ public:
 		m_name.setPosition(rx - 10, ry - 10);
 		g_window->draw(m_name);
 		if (high_resolution_clock::now() < m_time_out) {
-			m_text.setPosition(rx - 10, ry - 10);
+			m_text.setPosition(rx - 10, ry + 15);
 			g_window->draw(m_text);
 		}
 	}
@@ -97,6 +93,7 @@ public:
 	void add_chat(char chat[]) {
 		m_text.setFont(g_font);
 		m_text.setString(chat);
+		m_text.setFillColor(sf::Color(255, 0, 0));
 		m_time_out = high_resolution_clock::now() + 1s;
 	}
 };
@@ -140,7 +137,6 @@ void ProcessPacket(char* ptr)
 	case S2C_LOGIN_OK:
 	{
 		sc_packet_login_ok* my_packet = reinterpret_cast<sc_packet_login_ok*>(ptr);
-		//printf("S2C_LOGIN_OK %d (%d, %d) \n", my_packet->id, my_packet->y, my_packet->x);
 		g_myid = my_packet->id;
 		avatar.move(my_packet->x, my_packet->y);
 		g_left_x = my_packet->x - (SCREEN_WIDTH / 2);
@@ -152,7 +148,6 @@ void ProcessPacket(char* ptr)
 	case S2C_ENTER:
 	{
 		sc_packet_enter* my_packet = reinterpret_cast<sc_packet_enter*>(ptr);
-		//printf("S2C_ENTER : %d (%d, %d) \n", my_packet->id, my_packet->y, my_packet->x);
 		int id = my_packet->id;
 
 		if (id == g_myid) {
@@ -176,7 +171,6 @@ void ProcessPacket(char* ptr)
 	case S2C_MOVE:
 	{
 		sc_packet_move* my_packet = reinterpret_cast<sc_packet_move*>(ptr);
-		//printf("S2C_MOVE : %d (%d, %d) \n", my_packet->id, my_packet->y, my_packet->x );
 		int other_id = my_packet->id;
 		if (other_id == g_myid) {
 			avatar.move(my_packet->x, my_packet->y);
@@ -193,7 +187,6 @@ void ProcessPacket(char* ptr)
 	case S2C_LEAVE:
 	{
 		sc_packet_leave* my_packet = reinterpret_cast<sc_packet_leave*>(ptr);
-		//printf("S2C_LEAVE : %d \n", my_packet->id);
 		int other_id = my_packet->id;
 		if (other_id == g_myid) {
 			avatar.hide();
@@ -204,6 +197,14 @@ void ProcessPacket(char* ptr)
 		}
 	}
 	break;
+	case S2C_CHAT: {
+		sc_packet_chat *my_packet = reinterpret_cast<sc_packet_chat*>(ptr);
+		int o_id = my_packet->id;
+		if (0 != npcs.count(o_id)) {
+			npcs[o_id].add_chat(my_packet->mess);
+		}
+	}
+				   break;
 	default:
 		printf("Unknown PACKET type [%d]\n", ptr[1]);
 
@@ -312,8 +313,7 @@ int main()
 	sf::Socket::Status status = g_socket.connect("127.0.0.1", SERVER_PORT);
 	g_socket.setBlocking(false);
 
-	if (status != sf::Socket::Done) 
-	{
+	if (status != sf::Socket::Done) {
 		wcout << L"서버와 연결할 수 없습니다.\n";
 		while (true);
 	}
@@ -328,7 +328,6 @@ int main()
 	strcpy_s(avatar.name, l_packet.name);
 	avatar.set_name(l_packet.name);
 	send_packet(&l_packet);
-
 
 	sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH , WINDOW_HEIGHT), "2D CLIENT");
 	g_window = &window;
