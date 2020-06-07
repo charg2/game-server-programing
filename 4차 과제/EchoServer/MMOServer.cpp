@@ -12,6 +12,7 @@
 MMOServer::MMOServer() : OuterServer{}, zone{}
 {
 	zone = new MMOZone{};
+	zone->server = this;
 }
 
 MMOServer::~MMOServer()
@@ -32,6 +33,7 @@ void MMOServer::on_create_sessions(size_t capacity)
 }
 
 void MMOServer::on_connect(uint64_t session_id){}
+
 void MMOServer::on_disconnect(uint64_t session_id) 
 {
 	MMOActor*	my_actor = get_actor(session_id);
@@ -102,24 +104,34 @@ void MMOServer::on_timer_service(const TimerTask& task)
 {
 	switch (task.task_type)
 	{
-		case TTT_MOVE_NPC:
+		case TTT_NPC_SCRIPT:
 		{
 			MMONpc*		npc		= g_npc_manager->get_npc(task.actor_id);
 			MMOActor*	actor	= this->get_actor(task.target_id);
 			lua_State*	vm		= npc->lua_vm;
 			
-
-			AcquireSRWLockExclusive(&npc->vm_lock);
-			// vm->event_palayer_move((int32_t)npc->id, actor->x, actor->y);
+			AcquireSRWLockExclusive(&npc->vm_lock); // 여러명이 실행해야함.
+			
 			lua_getglobal(vm, "event_palayer_move"); // 
-
-			lua_pushnumber(vm, (int32_t)npc->id);
+			lua_pushnumber(vm, actor->session_id);
 			lua_pushnumber(vm, actor->x);
 			lua_pushnumber(vm, actor->y);
 
 			lua_pcall(vm, 3, 0, 0);
-
+			
 			ReleaseSRWLockExclusive(&npc->vm_lock);
+
+			break;
+		}
+
+		case TTT_NPC_SCRIPT2: // 한명만 ㅇㅇ.
+		{
+			MMONpc*		npc		= g_npc_manager->get_npc(task.actor_id);
+			//MMOActor*	actor	= this->get_actor(task.target_id);
+			lua_State*  vm		= npc->lua_vm;
+
+			npc->move_to_anywhere();
+
 			break;
 		}
 

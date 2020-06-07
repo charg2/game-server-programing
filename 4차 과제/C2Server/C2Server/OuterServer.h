@@ -72,7 +72,6 @@ public:
 	size_t								get_total_recv_count();
 	size_t								get_total_sent_count();
 
-
 protected:
 	void					accepter_procedure(uint64_t idx);
 	void					io_service_procedure(uint64_t idx);

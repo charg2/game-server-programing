@@ -11,9 +11,19 @@ extern "C"
 #include "lua\lualib.h"
 }
 
+
+enum NPCState
+{
+	NPC_SLEEP = 0,
+	NPC_WORKING = 1, // ±ú¿ì±â¸¸
+};
+
+
 struct MMOSector;
 struct MMOActor;
 struct MMOZone;
+
+
 struct MMONpc
 {
 	void update_entering_actor(MMOActor* actor);

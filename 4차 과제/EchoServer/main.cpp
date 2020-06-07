@@ -24,17 +24,17 @@
 #include <memory>
 void main()
 {
-	std::unique_ptr<MMOServer> server{ std::make_unique<MMOServer>() };
-	
-	server->setup_dump();
+	g_server = new MMOServer();
 
-	server->load_config_using_json(L"config.json");
+	g_server->setup_dump();
 
-	server->init_npcs();
+	g_server->load_config_using_json(L"config.json");
 
-	server->initialize();
+	g_server->init_npcs();
 
-	server->start();
-	
-	server->finalize();
+	g_server->initialize();
+
+	g_server->start();
+
+	g_server->finalize();
 }

@@ -100,7 +100,9 @@ REGISTER_HANDLER(C2S_LOGIN)
 		npc->view_list.emplace(my_actor->get_id(), my_actor);		// 서로 시야 리스트에 넣어줌.
 		ReleaseSRWLockExclusive(&npc->lock);						//내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 	
-		my_actor->wake_up_npc(npc);
+		//my_actor->wake_up_npc(npc);
+		local_timer->push_timer_task(npc->id, TTT_NPC_SCRIPT, 1, my_actor->session_id);
+
 		/// 나한테 npc 정보 보내기 하셈. 
 		// move에서도.
 		my_actor->send_enter_packet_without_updating_viewlist(npc);
@@ -218,8 +220,9 @@ REGISTER_HANDLER(C2S_MOVE)
 			MMONpc* npc = mmo_npc_mgr->get_npc(npc_id);
 			if (my_actor->is_near(npc) == true) // 내 근처가 맞다면 넣음.
 			{
-				my_actor->wake_up_npc(npc);
-				
+				//my_actor->wake_up_npc(npc);
+				local_timer->push_timer_task(npc->id, TTT_NPC_SCRIPT, 1, my_actor->session_id);
+
 				local_new_view_list_for_npc.insert(npc_id);
 			}
 		}

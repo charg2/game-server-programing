@@ -211,6 +211,7 @@
     <ClInclude Include="MMOSysteMessage.h" />
     <ClInclude Include="MMOZone.h" />
     <ClInclude Include="mmo_function.hpp" />
+    <ClInclude Include="packet_handler_mmo.h" />
     <ClInclude Include="script_api.h" />
   </ItemGroup>
   <ItemGroup>

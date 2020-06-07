@@ -4,6 +4,8 @@
 #include "MMOSession.h"
 //#include "MMOZone.h"
 
+#define send_packet_(s_id, pack) g_server->send_packet(s_id, pack);
+
 
 struct MMOZone;
 class MMOServer final : public OuterServer
@@ -35,3 +37,5 @@ private:
 	MMOZone* zone;
 };
 
+
+extern inline MMOServer* g_server{};

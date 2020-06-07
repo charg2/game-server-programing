@@ -7,8 +7,8 @@ class OuterServer;
 enum TimerTaskType
 {
 	TTT_MOVE_NPC, 
-	TTT_NPC_HELLO, 
-	TTT_NPC_BYE
+	TTT_NPC_SCRIPT,
+	TTT_NPC_SCRIPT2,
 };
 
 struct TimerTask

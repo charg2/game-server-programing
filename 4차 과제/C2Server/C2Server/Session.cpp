@@ -161,7 +161,7 @@ void Session::post_send()
 			if (WSA_IO_PENDING != local_last_error)
 			{
 				//debug_console(printf("ret_val of WSASend() is not IO_PENDING  : %d \n", local_last_error));
-				printf("WSASend() failure : %d \n", session_id);
+				printf("WSASend() failure : %llu,  error_code : %llu \n", session_id, local_last_error);
 				if ( 1 > InterlockedDecrement64(&this->refer_count)) // 
 				{
 					//this->decrease_refer();
