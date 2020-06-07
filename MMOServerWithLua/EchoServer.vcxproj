@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{F4D3B027-ABC0-4970-A83B-ED1A2CE018DD}</ProjectGuid>
+    <RootNamespace>EchoServer</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>MMOServer</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <Optimization>Disabled</Optimization>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <Optimization>Disabled</Optimization>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\C2Server\C2Server\concurrency\BackOff.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\concurrency\MemoryPoolTLS.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\concurrency\tls.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\IO\KeyManager.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\network\SocketAddress.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\OuterServer.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\packet_handler_base.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\protocol.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\Session.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\util\dump.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\util\JsonParser.cpp" />
+    <ClCompile Include="..\C2Server\C2Server\util\TimeScheduler.cpp" />
+    <ClCompile Include="function.cpp" />
+    <ClCompile Include="MMOActor.cpp" />
+    <ClCompile Include="MMONpc.cpp" />
+    <ClCompile Include="MMOSector.cpp" />
+    <ClCompile Include="MMOServer.cpp" />
+    <ClCompile Include="MMOSession.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="MMONpcManager.cpp" />
+    <ClCompile Include="MMOZone.cpp" />
+    <ClCompile Include="packet_handler_mmo.cpp" />
+    <ClCompile Include="script_api.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\C2Server\C2Server\concurrency\BackOff.h" />
+    <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentQueue.h" />
+    <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentStack.h" />
+    <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPoolTLS.h" />
+    <ClInclude Include="..\C2Server\C2Server\concurrency\ConcurrentQueueMemPool.hpp" />
+    <ClInclude Include="..\C2Server\C2Server\concurrency\MemoryPool_Stack.h" />
+    <ClInclude Include="..\C2Server\C2Server\concurrency\MPSCQueue.h" />
+    <ClInclude Include="..\C2Server\C2Server\concurrency\tls.h" />
+    <ClInclude Include="..\C2Server\C2Server\enviroment.h" />
+    <ClInclude Include="..\C2Server\C2Server\IOContext.h" />
+    <ClInclude Include="..\C2Server\C2Server\IO\KeyManager.h" />
+    <ClInclude Include="..\C2Server\C2Server\macro.h" />
+    <ClInclude Include="..\C2Server\C2Server\network\Packet.h" />
+    <ClInclude Include="..\C2Server\C2Server\network\SocketAddress.h" />
+    <ClInclude Include="..\C2Server\C2Server\OuterServer.h" />
+    <ClInclude Include="..\C2Server\C2Server\packet_handler.h" />
+    <ClInclude Include="..\C2Server\C2Server\pre_compile.h" />
+    <ClInclude Include="..\C2Server\C2Server\protocol.h" />
+    <ClInclude Include="..\C2Server\C2Server\Session.h" />
+    <ClInclude Include="..\C2Server\C2Server\util\dump.h" />
+    <ClInclude Include="..\C2Server\C2Server\util\exception.h" />
+    <ClInclude Include="..\C2Server\C2Server\util\JsonParser.h" />
+    <ClInclude Include="..\C2Server\C2Server\util\Timer.h" />
+    <ClInclude Include="..\C2Server\C2Server\util\TimeScheduler.h" />
+    <ClInclude Include="function.h" />
+    <ClInclude Include="lua\lauxlib.h" />
+    <ClInclude Include="lua\lua.h" />
+    <ClInclude Include="lua\lua.hpp" />
+    <ClInclude Include="lua\luaconf.h" />
+    <ClInclude Include="lua\lualib.h" />
+    <ClInclude Include="MMONear.h" />
+    <ClInclude Include="MMOActor.h" />
+    <ClInclude Include="MMONpc.h" />
+    <ClInclude Include="MMOSector.h" />
+    <ClInclude Include="MMOServer.h" />
+    <ClInclude Include="MMOSession.h" />
+    <ClInclude Include="main.h" />
+    <ClInclude Include="MMONpcManager.h" />
+    <ClInclude Include="MMOSysteMessage.h" />
+    <ClInclude Include="MMOZone.h" />
+    <ClInclude Include="mmo_function.hpp" />
+    <ClInclude Include="packet_handler_mmo.h" />
+    <ClInclude Include="script_api.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\C2Server\C2Server\concurrency\spin_wait.asm" />
+    <None Include="config.json" />
+    <None Include="npc.lua" />
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="..\C2Server\C2Server\concurrency\spin_wait.obj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="lua53.lib" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
