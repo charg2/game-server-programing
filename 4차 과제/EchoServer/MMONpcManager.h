@@ -16,11 +16,13 @@ struct MMONpcManager
 
 public:
 	void set_zone(MMOZone* zone);
+	static void set_max_npc_count(uint32_t max_npc_count);
 
 private:
-	MMONpc*		npcs;
-	MMOServer*	server;
-	MMOZone*	zone;
+	MMONpc*					npcs;
+	MMOServer*				server;
+	MMOZone*				zone;
+	static inline uint32_t	max_npc_count{};
 };
 
 extern MMONpcManager* g_npc_manager;

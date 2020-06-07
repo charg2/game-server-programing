@@ -4,7 +4,6 @@
 
 #include "network/SocketAddress.h"
 #include "IOContext.h"
-#include "util/JsonParser.h"
 
 
 //LPFN_ACCEPTEX		OuterServer::accept_ex{  };
@@ -822,7 +821,16 @@ void OuterServer::load_config_using_json(const wchar_t* file_name)
 	if (false == json_file.get_uint16(L"maximum_accept_count", this->maximum_accpet_count))
 		c2::util::crash_assert();
 
+	if(false == on_load_config(&json_file))
+		c2::util::crash_assert();
+
 	return;
 }
+
+bool OuterServer::on_load_config(c2::util::JsonParser* parser)
+{
+	return true;
+}
+
 
 

@@ -2,6 +2,7 @@
 #include <type_traits>
 #include "enviroment.h"
 #include "concurrency/ConcurrentStack.h"
+#include "util/JsonParser.h"
 
 #define session_mapping_helper( session_class ) \
 static_assert(std::is_base_of<Session, session_class>::value, #session_class ## "is not derived from Session"); \
@@ -29,6 +30,7 @@ public:
 	virtual ~OuterServer();
 
 	void load_config_using_json(const wchar_t* file_name);
+	virtual bool on_load_config(c2::util::JsonParser* parser);
 	bool initialize();
 	bool init_network_and_system();
 	bool init_sessions();
@@ -44,6 +46,7 @@ public:
 	virtual void		on_sleep_io_thread();
 	
 	virtual void		on_update();
+	
 	virtual void		on_start();
 	virtual void		on_timer_service(const TimerTask& timer_job);
 

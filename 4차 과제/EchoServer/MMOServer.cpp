@@ -142,6 +142,18 @@ void MMOServer::on_timer_service(const TimerTask& task)
 	}
 }
 
+bool MMOServer::on_load_config(c2::util::JsonParser* parser)
+{
+	uint32_t max_npc{};
+	if (false == parser->get_uint32(L"maximum_npc_count", max_npc))
+		return false;
+	MMONpcManager::set_max_npc_count(max_npc);
+
+
+
+	return true;
+}
+
 void MMOServer::create_npcs(size_t capacity)
 {
 

@@ -10,9 +10,9 @@ MMONpcManager::MMONpcManager()
 
 void MMONpcManager::initilize()
 {
-	npcs = new MMONpc[c2::constant::MAX_NPC]{};
+	npcs = new MMONpc[MMONpcManager::max_npc_count]{};
 
-	for (size_t n{}; n < c2::constant::MAX_NPC; ++n)
+	for (size_t n{}; n < MMONpcManager::max_npc_count; ++n)
 	{
 		npcs[n].current_sector = nullptr;
 		npcs[n].hp = 200;
@@ -38,7 +38,7 @@ void MMONpcManager::place_npc_in_zone()
 {
 	MMOZone* zone = this->zone;
 	
-	for (size_t n{}; n < c2::constant::MAX_NPC; ++n)
+	for (size_t n{}; n < MMONpcManager::max_npc_count; ++n)
 		//for (size_t n{}; n < c2::constant::MAX_NPC; ++n)
 	{
 		MMOSector* sector =  zone->get_sector(npcs[n].y, npcs[n].x);
@@ -58,4 +58,9 @@ MMONpc* MMONpcManager::get_npc(uint64_t server_id)
 void MMONpcManager::set_zone(MMOZone* zone)
 {
 	this->zone = zone;
+}
+
+void MMONpcManager::set_max_npc_count(uint32_t max_npc_count)
+{
+	MMONpcManager::max_npc_count = max_npc_count;
 }
