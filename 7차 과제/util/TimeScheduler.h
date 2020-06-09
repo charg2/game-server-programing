@@ -28,8 +28,6 @@ struct TimerTaskComparer
 	}
 };
 
-
-
 class TimeTaskScheduler
 {
 public:

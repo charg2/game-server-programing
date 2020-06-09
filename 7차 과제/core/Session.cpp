@@ -1,4 +1,4 @@
-#include "pre_compile.h"
+#include "../pre_compile.h"
 #include "OuterServer.h"
 #include "Session.h"
 

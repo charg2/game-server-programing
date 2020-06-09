@@ -10,5 +10,5 @@
 
 constexpr size_t				MAX_TLS_INDEX = 16;
 
-extern thread_local int64_t		current_tls_idx;
-extern thread_local void*		thread_local_storage[MAX_TLS_INDEX];
+extern inline thread_local int64_t		current_tls_idx{ -1 };
+extern inline thread_local void*		thread_local_storage[MAX_TLS_INDEX]{};

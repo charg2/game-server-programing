@@ -1,8 +1,8 @@
 #pragma once
 #include <type_traits>
-#include "enviroment.h"
-#include "concurrency/ConcurrentStack.h"
-#include "util/JsonParser.h"
+#include "../enviroment.h"
+#include "../concurrency/ConcurrentStack.h"
+#include "../util/JsonParser.h"
 
 #define session_mapping_helper( session_class ) \
 static_assert(std::is_base_of<Session, session_class>::value, #session_class ## "is not derived from Session"); \

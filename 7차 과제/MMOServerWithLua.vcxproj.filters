@@ -201,9 +201,6 @@
     <ClInclude Include="MMOZone.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="network_struct.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
     <ClInclude Include="packet_handler_mmo.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
@@ -288,6 +285,9 @@
     <ClInclude Include="core\IOContext.h">
       <Filter>소스 파일\core</Filter>
     </ClInclude>
+    <ClInclude Include="contents_enviroment.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="function.cpp">
@@ -341,9 +341,6 @@
     <ClCompile Include="util\dump.cpp">
       <Filter>소스 파일\util</Filter>
     </ClCompile>
-    <ClCompile Include="concurrency\ConcurrentStack.cpp">
-      <Filter>소스 파일\core</Filter>
-    </ClCompile>
     <ClCompile Include="concurrency\BackOff.cpp">
       <Filter>소스 파일\core</Filter>
     </ClCompile>
@@ -355,12 +352,6 @@
     </ClCompile>
     <ClCompile Include="DBHelper.cpp">
       <Filter>소스 파일\db</Filter>
-    </ClCompile>
-    <ClCompile Include="concurrency\tls.cpp">
-      <Filter>소스 파일\core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\Packet.cpp">
-      <Filter>소스 파일\core</Filter>
     </ClCompile>
     <ClCompile Include="core\Session.cpp">
       <Filter>소스 파일\core</Filter>

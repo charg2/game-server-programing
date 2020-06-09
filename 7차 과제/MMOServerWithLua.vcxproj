@@ -154,6 +154,7 @@
     <ClInclude Include="concurrency\MemoryPool_Stack.h" />
     <ClInclude Include="concurrency\MPSCQueue.h" />
     <ClInclude Include="concurrency\tls.h" />
+    <ClInclude Include="contents_enviroment.h" />
     <ClInclude Include="core\CircularBuffer.h" />
     <ClInclude Include="core\IOContext.h" />
     <ClInclude Include="core\OuterServer.h" />
@@ -183,7 +184,6 @@
     <ClInclude Include="MMOZone.h" />
     <ClInclude Include="mmo_function.hpp" />
     <ClInclude Include="network\SocketAddress.h" />
-    <ClInclude Include="network_struct.h" />
     <ClInclude Include="packet_handler_mmo.h" />
     <ClInclude Include="pre_compile.h" />
     <ClInclude Include="protocol.h" />
@@ -232,11 +232,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="concurrency\BackOff.cpp" />
-    <ClCompile Include="concurrency\ConcurrentStack.cpp" />
     <ClCompile Include="concurrency\MemoryPoolTLS.cpp" />
-    <ClCompile Include="concurrency\tls.cpp" />
     <ClCompile Include="core\OuterServer.cpp" />
-    <ClCompile Include="core\Packet.cpp" />
     <ClCompile Include="core\Session.cpp" />
     <ClCompile Include="DBHelper.cpp" />
     <ClCompile Include="function.cpp" />
