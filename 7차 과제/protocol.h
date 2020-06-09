@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include "enviroment.h"
+#include "contents_enviroment.h"
 //#include "../../EchoServer/mmo_function.hpp"
 
 

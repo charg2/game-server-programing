@@ -3,8 +3,9 @@
 #include <vector>
 
 #include "MMOSector.h"
-using namespace c2::enumeration;
+#include "contents_enviroment.h"
 
+using namespace c2::enumeration;
 class MMOServer;
 struct MMOACtor;
 struct MMOZone //

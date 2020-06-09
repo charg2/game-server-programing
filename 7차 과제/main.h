@@ -3,7 +3,6 @@
 #include <cstdint>
 
 #include "pre_compile.h"
-#include "concurrency/tls.h"
 
 //#include "EchoServer.h"
 //#include "EchoSession.h"

@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
+#include "contents_enviroment.h"
 #include "MMONear.h"
 
 struct MMOActor;
