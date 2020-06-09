@@ -5,7 +5,6 @@
 #include "Session.h"
 
 
-
 using namespace::c2;
 using  HandlerFunc = void (*)(Session* session, PacketHeader header, c2::Packet& in_packet);
 extern HandlerFunc handler_table[PT_MAX];

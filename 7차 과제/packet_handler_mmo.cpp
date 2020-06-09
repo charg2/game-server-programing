@@ -118,7 +118,6 @@ REGISTER_HANDLER(C2S_LOGIN)
 }
 
 
-#include "function.h"
 
 REGISTER_HANDLER(C2S_MOVE)
 {

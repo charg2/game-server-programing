@@ -159,15 +159,6 @@
     <ClInclude Include="lua\lualib.h">
       <Filter>소스 파일\extlib\lua</Filter>
     </ClInclude>
-    <ClInclude Include="enviroment.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="function.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="macro.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
     <ClInclude Include="main.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
@@ -285,11 +276,14 @@
     <ClInclude Include="contents_enviroment.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
+    <ClInclude Include="core\macro.h">
+      <Filter>소스 파일\core</Filter>
+    </ClInclude>
+    <ClInclude Include="core\enviroment.h">
+      <Filter>소스 파일\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="function.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -361,8 +355,8 @@
     <None Include="config.json">
       <Filter>소스 파일</Filter>
     </None>
-    <None Include="concurrency\spin_wait.asm">
-      <Filter>소스 파일</Filter>
+    <None Include="script\npc.lua">
+      <Filter>소스 파일\script</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -372,7 +366,7 @@
   </ItemGroup>
   <ItemGroup>
     <Object Include="concurrency\spin_wait.obj">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\core</Filter>
     </Object>
   </ItemGroup>
 </Project>

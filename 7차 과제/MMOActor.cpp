@@ -1,6 +1,5 @@
 #include "pre_compile.h"
 #include "MMOSession.h"
-#include "MMONpcManager.h"
 #include "MMOZone.h"
 #include "MMOActor.h"
 #include "util/TimeScheduler.h"

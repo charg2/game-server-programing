@@ -1,6 +1,4 @@
 #pragma once
-//#include "../C2Server/C2Server/concurrency/MPSCQueue.h"
-#include "enviroment.h"
 #include "MMONpc.h"
 
 struct MMOZone;

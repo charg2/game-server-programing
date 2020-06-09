@@ -1,5 +1,8 @@
 #pragma once
 #include <WinSock2.h>
+#include <sqltypes.h>
+#include <sqlext.h>
+
 #include <Windows.h>
 #include <MSWSock.h>
 #include <mstcpip.h>
@@ -7,8 +10,9 @@
 #include <cstdint>
 #include <process.h>
 
-#include "enviroment.h"
-#include "macro.h"
+
+#include "core/enviroment.h"
+#include "core/macro.h"
 
 #include "concurrency/tls.h"
 //#include "concurrency/MemoryPoolTLS.h"

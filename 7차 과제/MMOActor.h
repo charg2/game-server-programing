@@ -1,7 +1,6 @@
 #pragma once
 
 // content
-#include "enviroment.h"
 #include "protocol.h"
 #include <cstdint>
 #include <atomic>

@@ -10,12 +10,14 @@
 
 MMOServer::MMOServer() : OuterServer{}, zone{}
 {
-	zone = new MMOZone{};
-	zone->server = this;
+	g_zone = new MMOZone{};
+	zone = g_zone;
+	g_zone->server = this;
 }
 
 MMOServer::~MMOServer()
 {
+	delete g_zone;
 }
 
 void MMOServer::init_npcs()
@@ -75,16 +77,9 @@ bool MMOServer::on_accept(Session* session)
 void MMOServer::on_wake_io_thread(){}
 void MMOServer::on_sleep_io_thread(){}
 void MMOServer::custom_precedure(uint64_t idx) {}
-void MMOServer::on_update()
-{
-
-}
-
-//#include "IO/KeyManager.h"
+void MMOServer::on_update(){}
 void MMOServer::on_start()
 {
-	//KeyManager km;
-
 	for (;;)
 	{
 		//if (km.key_down(VK_RETURN))

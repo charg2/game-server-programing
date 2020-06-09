@@ -32,3 +32,4 @@ public:
 	MMOServer*						server;// only read after init
 };
 
+extern inline MMOZone* g_zone{};

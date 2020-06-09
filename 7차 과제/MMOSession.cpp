@@ -1,4 +1,4 @@
-#include "main.h"
+#include "protocol.h"
 #include "MMOSession.h"
 #include "MMOServer.h"
 

@@ -1,7 +1,7 @@
 #pragma once
-
-#include <sqltypes.h>
-#include <sqlext.h>
+#include "pre_compile.h"
+//#include <sqltypes.h>
+//#include <sqlext.h>
 
 struct SQL_CONN
 {

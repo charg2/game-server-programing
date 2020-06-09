@@ -1,26 +1,25 @@
 
 #include "pre_compile.h"
-#include "enviroment.h"
-#include "function.h"
+#include "MMOServer.h"
+#include "mmo_function.hpp"
 #include "MMONpc.h"
 #include "MMOActor.h"
 #include "MMONpcManager.h"
 #include "MMOZone.h"
 #include "MMONear.h"
-#include "MMOServer.h"
 
-//#include "../C2Server/C2Server/util/TimeScheduler.h"
-//#include "MMOActor.h"
+
+#include "script_api.h"
 
 using namespace c2::constant;
-#include "script_api.h"
+
 
 void MMONpc::prepare_virtual_machine()
 {
 	lua_vm = luaL_newstate();
 	luaL_openlibs(lua_vm);
 
-	int error = luaL_loadfile(lua_vm, "npc.lua");
+	int error = luaL_loadfile(lua_vm, "scripts\\npc.lua");
 	if (error != 0)
 		printf("1lua error %s \n", lua_tostring(lua_vm, -1));
 	error = lua_pcall(lua_vm, 0, 0, 0);
