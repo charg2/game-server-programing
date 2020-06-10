@@ -164,6 +164,7 @@
     <ClInclude Include="core\packet_handler.h" />
     <ClInclude Include="core\Session.h" />
     <ClInclude Include="DBHelper.h" />
+    <ClInclude Include="DBManager.h" />
     <ClInclude Include="db_statement.h" />
     <ClInclude Include="IO\KeyManager.h" />
     <ClInclude Include="lua\lauxlib.h" />
@@ -179,7 +180,7 @@
     <ClInclude Include="MMOSector.h" />
     <ClInclude Include="MMOServer.h" />
     <ClInclude Include="MMOSession.h" />
-    <ClInclude Include="MMOSysteMessage.h" />
+    <ClInclude Include="MMOSystmeMessage.h" />
     <ClInclude Include="MMOZone.h" />
     <ClInclude Include="mmo_function.hpp" />
     <ClInclude Include="network\SocketAddress.h" />
@@ -234,6 +235,7 @@
     <ClCompile Include="core\OuterServer.cpp" />
     <ClCompile Include="core\Session.cpp" />
     <ClCompile Include="DBHelper.cpp" />
+    <ClCompile Include="DBManager.cpp" />
     <ClCompile Include="IO\KeyManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MMOActor.cpp" />

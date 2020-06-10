@@ -20,7 +20,7 @@ public:
 	DbHelper();
 	~DbHelper();
 
-	static bool initialize(const wchar_t* connInfoStr, int worker_thread_count);
+	static bool initialize(const wchar_t* connetion_info_str, int worker_thread_count);
 	static void finalize();
 
 	bool execute(const wchar_t* sqlstmt);
@@ -46,9 +46,9 @@ private:
 
 	SQLSMALLINT	current_result_col;
 	SQLSMALLINT	current_bind_param;
+	static inline SQL_CONN		sql_connection{}; ///< 워커스레드수만큼
 
 	static inline SQLHENV		sql_henv;
-	static inline SQL_CONN*		sql_connection_pool; ///< 워커스레드수만큼
 	static inline int			db_worker_thread_count;
 };
 

@@ -3,16 +3,15 @@
 
 DbHelper::DbHelper()
 {
-	c2::util::assert_if_false(sql_connection_pool[c2::local::io_thread_id].using_now == false);
+	c2::util::assert_if_false(sql_connection.using_now == false);
 
-	current_sql_hstmt = sql_connection_pool[c2::local::io_thread_id].sql_hstmt;
+	current_sql_hstmt = sql_connection.sql_hstmt;
 	current_result_col = 1;
 	current_bind_param = 1;
 
 	c2::util::assert_if_false(current_sql_hstmt != nullptr);
 
-
-	sql_connection_pool[c2::local::io_thread_id].using_now = true;
+	sql_connection.using_now = true;
 }
 
 DbHelper::~DbHelper()
@@ -21,14 +20,12 @@ DbHelper::~DbHelper()
 	SQLFreeStmt(current_sql_hstmt, SQL_RESET_PARAMS);
 	SQLFreeStmt(current_sql_hstmt, SQL_CLOSE);
 
-	sql_connection_pool[c2::local::io_thread_id].using_now = false;
+	sql_connection.using_now = false;
 }
 
 bool DbHelper::initialize(const wchar_t* connetion_info_str, int worker_thread_count)
 {
-	sql_connection_pool = new SQL_CONN[worker_thread_count];
 	db_worker_thread_count = worker_thread_count;
-
 
 	//환경 핸들 할당
 	if (SQL_SUCCESS != SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &sql_henv))
@@ -45,55 +42,52 @@ bool DbHelper::initialize(const wchar_t* connetion_info_str, int worker_thread_c
 	}
 
 
-	/// 스레드별로 SQL connection을 풀링하는 방식. 즉, 스레드마다 SQL서버로의 연결을 갖는다.
-	for (int i = 0; i < db_worker_thread_count; ++i)
+	//SQLAllocHandle을 이용하여 SQL_CONN의 SqlHdbc 핸들 사용가능하도록 처리
+	//Connection 핸들
+
+	if (SQL_SUCCESS != SQLAllocHandle(SQL_HANDLE_DBC, sql_henv, &sql_connection.sql_hdbc))
 	{
-		//SQLAllocHandle을 이용하여 SQL_CONN의 SqlHdbc 핸들 사용가능하도록 처리
-		//Connection 핸들
-		if (SQL_SUCCESS != SQLAllocHandle(SQL_HANDLE_DBC, sql_henv, &sql_connection_pool[i].sql_hdbc))
-		{
-			printf_s("DbHelper Initialize SQLAllocHandle SQL_HANDLE_DBC failed\n");
-			return false;
-		}
+		printf_s("DbHelper Initialize SQLAllocHandle SQL_HANDLE_DBC failed\n");
+		return false;
+	}
 
-		SQLSMALLINT resultLen = 0;
+	SQLSMALLINT resultLen = 0;
 
-		//SQLDriverConnect를 이용하여 SQL서버에 연결하고 그 핸들을 SQL_CONN의 sql_hdbc에 할당
-		SQLRETURN ret = SQLDriverConnect(
-			sql_connection_pool[i].sql_hdbc,
-			NULL,
-			(SQLWCHAR*)connetion_info_str,
-			(SQLSMALLINT)wcslen(connetion_info_str),
-			NULL,
-			0,
-			&resultLen,
-			SQL_DRIVER_NOPROMPT
-		);
+	//SQLDriverConnect를 이용하여 SQL서버에 연결하고 그 핸들을 SQL_CONN의 sql_hdbc에 할당
+	SQLRETURN ret = SQLDriverConnect(
+		sql_connection.sql_hdbc,
+		NULL,
+		(SQLWCHAR*)connetion_info_str,
+		(SQLSMALLINT)wcslen(connetion_info_str),
+		NULL,
+		0,
+		&resultLen,
+		SQL_DRIVER_NOPROMPT
+	);
 
 
-		if (SQL_SUCCESS != ret && SQL_SUCCESS_WITH_INFO != ret)
-		{
-			SQLWCHAR sqlState[1024]{};
-			SQLINTEGER nativeError{};
-			SQLWCHAR msgText[1024] {};
-			SQLSMALLINT textLen{};
+	if (SQL_SUCCESS != ret && SQL_SUCCESS_WITH_INFO != ret)
+	{
+		SQLWCHAR sqlState[1024]{};
+		SQLINTEGER nativeError{};
+		SQLWCHAR msgText[1024]{};
+		SQLSMALLINT textLen{};
 
-			SQLGetDiagRec(SQL_HANDLE_DBC, sql_connection_pool[i].sql_hdbc, 1, sqlState, &nativeError, msgText, 1024, &textLen);
+		SQLGetDiagRec(SQL_HANDLE_DBC, sql_connection.sql_hdbc, 1, sqlState, &nativeError, msgText, 1024, &textLen);
 
-			wprintf_s(L"DbHelper Initialize SQLDriverConnect failed: %s \n", msgText);
+		wprintf_s(L"DbHelper Initialize SQLDriverConnect failed: %s \n", msgText);
 
-			return false;
-		}
+		return false;
+	}
 
 
-		if (SQL_SUCCESS != SQLAllocHandle(
-			SQL_HANDLE_STMT,
-			sql_connection_pool[i].sql_hdbc,
-			&sql_connection_pool[i].sql_hstmt))
-		{
-			printf_s("DbHelper Initialize SQLAllocHandle SQL_HANDLE_STMT failed\n");
-			return false;
-		}
+	if (SQL_SUCCESS != SQLAllocHandle(
+		SQL_HANDLE_STMT,
+		sql_connection.sql_hdbc,
+		&sql_connection.sql_hstmt))
+	{
+		printf_s("DbHelper Initialize SQLAllocHandle SQL_HANDLE_STMT failed\n");
+		return false;
 	}
 
 	return true;
@@ -101,17 +95,13 @@ bool DbHelper::initialize(const wchar_t* connetion_info_str, int worker_thread_c
 
 void DbHelper::finalize()
 {
-	for (int i = 0; i < db_worker_thread_count; ++i)
-	{
-		SQL_CONN* currConn = &sql_connection_pool[i];
+
+		SQL_CONN* currConn = &sql_connection;
 		if (currConn->sql_hstmt)
 			SQLFreeHandle(SQL_HANDLE_STMT, currConn->sql_hstmt);
 
 		if (currConn->sql_hdbc)
 			SQLFreeHandle(SQL_HANDLE_DBC, currConn->sql_hdbc);
-	}
-
-	delete[] sql_connection_pool;
 
 }
 

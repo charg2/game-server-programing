@@ -270,9 +270,6 @@
     <ClInclude Include="MMOSession.h">
       <Filter>소스 파일\contents</Filter>
     </ClInclude>
-    <ClInclude Include="MMOSysteMessage.h">
-      <Filter>소스 파일\contents</Filter>
-    </ClInclude>
     <ClInclude Include="MMOZone.h">
       <Filter>소스 파일\contents</Filter>
     </ClInclude>
@@ -284,6 +281,12 @@
     </ClInclude>
     <ClInclude Include="pre_compile.h">
       <Filter>소스 파일\core</Filter>
+    </ClInclude>
+    <ClInclude Include="DBManager.h">
+      <Filter>소스 파일\db</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOSystmeMessage.h">
+      <Filter>소스 파일\contents</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -352,6 +355,9 @@
     </ClCompile>
     <ClCompile Include="script_api.cpp">
       <Filter>소스 파일\contents</Filter>
+    </ClCompile>
+    <ClCompile Include="DBManager.cpp">
+      <Filter>소스 파일\db</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

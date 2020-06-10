@@ -71,6 +71,8 @@ public:
 
 	void increase_refer();
 	void decrease_refer();
+	
+	virtual void on_handling_db();
 
 	bool is_valid(uint64_t session_id);
 

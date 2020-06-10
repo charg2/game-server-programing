@@ -391,6 +391,10 @@ void Session::decrease_refer()
 	}
 }
 
+void Session::on_handling_db()
+{
+}
+
 bool Session::is_valid(uint64_t session_id)
 {
 	return this->session_id = session_id;

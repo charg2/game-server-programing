@@ -54,7 +54,7 @@ bool OuterServer::init_network_and_system()
 	listen_sock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 	if (INVALID_SOCKET == this->listen_sock)
 	{
-		debug_code(printf("%s::%s \n", __FILE__, __LINE__));
+		debug_code(printf("%s::%d \n", __FILE__, __LINE__));
 
 		return false;
 	}
@@ -382,13 +382,22 @@ void OuterServer::io_and_timer_service_procedure(uint64_t custom_thread_id)
 		}
 
 		// acquire session
-		if ((size_t)overlapped_ptr == c2::constant::SEND_SIGN)
+		switch ((size_t)overlapped_ptr)
 		{
-			session->post_send();
-
-			release_session_ownership(completion_key);
-
-			continue;
+			case c2::constant::SEND_SIGN:
+			{
+				session->post_send();
+				release_session_ownership(completion_key);
+				continue;
+			}
+			case c2::constant::DB_SIGN:
+			{
+				session->on_handling_db();
+				release_session_ownership(completion_key);
+				continue;
+			}
+			default:
+				break;
 		}
 
 		IoContext* context_ptr{ reinterpret_cast<IoContext*>(overlapped_ptr) };

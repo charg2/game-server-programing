@@ -4,6 +4,7 @@
 #include "MMOServer.h"
 #include "MMOZone.h"
 #include "MMONpcManager.h"
+#include "DBHelper.h"
 
 #include <unordered_map>
 #include <unordered_set>
@@ -29,6 +30,20 @@ REGISTER_HANDLER(C2S_LOGIN)
 	{
 		return;
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	mmo_session->response_loginok();		// 로그인 처리 및 응답
 	mmo_zone->enter_actor(my_actor);

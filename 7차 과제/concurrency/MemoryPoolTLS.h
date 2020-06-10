@@ -29,7 +29,7 @@ namespace c2::concurrency
 		{
 			Type	data;   // 순서 변경시 오프셋 계산 다시 
 			Chunk*	chunk;  // 
-		};
+		} ;
 
 		typedef struct Chunk
 		{

@@ -1,4 +1,5 @@
 #pragma once
+#pragma optimize("", off)
 #include <type_traits>
 #include "enviroment.h"
 #include "../concurrency/ConcurrentStack.h"

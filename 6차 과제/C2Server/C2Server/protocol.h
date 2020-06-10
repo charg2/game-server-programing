@@ -2,38 +2,9 @@
 
 #include <cstdint>
 #include "enviroment.h"
-//#include "../../EchoServer/mmo_function.hpp"
-
 
 namespace c2::enumeration
 {
-	//enum PacketType : uint16_t
-	//{
-	//	PT_NONE,
-
-	//	PT_CS_HI,
-	//	PT_SC_HI,
-	//	PT_SC_OTHER_INFO,
-	//	PT_SC_HI_AROUND,
-	//	
-	//	PT_CS_CHATTING,
-	//	PT_SC_CHATTING,
-
-	//	PT_CS_MOVE,
-	//	PT_SC_MOVE,
-
-	//	PT_CS_BYE,
-	//	PT_SC_BYE,
-
-	//	PT_CS_HEARTBEAT,
-	//	PT_SC_HEARTBEAT,
-
-	//	PT_SC_ECHO,
-	//	PT_CS_ECHO,
-
-	//	PT_MAX,
-	//};
-
 	enum PacketType : char
 	{
 		PT_NONE,
@@ -116,7 +87,7 @@ struct cs_packet_login
 {
 	PacketHeader header;
 
-	char	name[MAX_ID_LEN];
+	char		 name[MAX_ID_LEN];
 };
 
 

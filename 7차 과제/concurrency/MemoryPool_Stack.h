@@ -37,7 +37,7 @@ namespace c2::concurrency
 		};
 
 	public:
-		ConcurrentStackMemoryPool() : top{ nullptr }, heap_handle{ INVALID_HANDLE_VALUE }
+		ConcurrentStackMemoryPool() : top{ nullptr }, heap_handle{ INVALID_HANDLE_VALUE }, size{}
 		{
 			heap_handle = HeapCreate( /* HEAP_ZERO_MEMORY */ HEAP_GENERATE_EXCEPTIONS, 0, NULL);
 			if (INVALID_HANDLE_VALUE == heap_handle)
@@ -137,7 +137,7 @@ namespace c2::concurrency
 
 			if (((BlockNode*)data)->magic_number != Keyword::DEAD)  // magicNumber Check
 			{
-				int* invliad_ptr{};
+				size_t* invliad_ptr{};
 				*invliad_ptr = Keyword::DEAD;
 			}
 
