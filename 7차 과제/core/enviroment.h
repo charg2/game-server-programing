@@ -1,7 +1,5 @@
 #pragma once
 
-#include "mmo_function.hpp"
-
 namespace c2
 {
 	namespace constant
@@ -14,7 +12,6 @@ namespace c2
 		constexpr inline size_t MAX_CONCURRENT_SEND_COUNT = 256U;
 		constexpr inline size_t CACHE_LINE = 64U;
 		constexpr inline size_t GQCS_TIME_OUT = 20;
-
 	}
 
 
@@ -57,11 +54,17 @@ namespace c2
 			TT_CUSTOM,
 			TT_MAX
 		};
-
 	}
 
 	namespace global
 	{
+		extern inline size_t	concurrent_io_thread_count{};
+	}
+
+
+	namespace local
+	{
+		extern inline thread_local int32_t	io_thread_id{ -1 };
 	}
 }
 

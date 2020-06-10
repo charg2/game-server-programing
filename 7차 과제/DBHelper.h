@@ -5,18 +5,22 @@
 
 struct SQL_CONN
 {
-	SQLHDBC		mSqlHdbc;
-	SQLHSTMT	mSqlHstmt;
-	bool		mUsingNow;
+	SQL_CONN() : sql_hdbc{}, sql_hstmt{}, using_now{}
+	{
+	}
+
+	SQLHDBC		sql_hdbc ;
+	SQLHSTMT	sql_hstmt ;
+	bool		using_now ;
 };
 
-class DBHelper
+class DbHelper
 {
 public:
-	DBHelper();
-	~DBHelper();
+	DbHelper();
+	~DbHelper();
 
-	static bool initialize(const wchar_t* connInfoStr, int workerThreadCount);
+	static bool initialize(const wchar_t* connInfoStr, int worker_thread_count);
 	static void finalize();
 
 	bool execute(const wchar_t* sqlstmt);
@@ -24,7 +28,6 @@ public:
 
 
 	/// 아래는 DbHelper 객체를 선언하고 사용해야 함
-
 	bool bind_param_int(int* param);
 	bool bind_param_float(float* param);
 	bool bind_param_bool(bool* param);
@@ -45,7 +48,7 @@ private:
 	SQLSMALLINT	current_bind_param;
 
 	static inline SQLHENV		sql_henv;
-	static inline SQL_CONN*		sql_conn_pool; ///< 워커스레드수만큼
+	static inline SQL_CONN*		sql_connection_pool; ///< 워커스레드수만큼
 	static inline int			db_worker_thread_count;
 };
 

@@ -61,15 +61,6 @@ void MMOZone::enter_actor(MMOActor* actor)
 	ReleaseSRWLockExclusive(&current_sector->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 }
 
-void MMOZone::leave_actor(MMOActor* actor)
-{
-	//this->actors.erase(actor->get_id());
-}
-
-void MMOZone::move_sector(MMOActor* actor, MMOSector* start, MMOSector* end)
-{
-
-}
 
 
 

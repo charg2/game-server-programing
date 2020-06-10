@@ -1,10 +1,6 @@
 #pragma once
-#include <map>
-#include <vector>
-
 #include "MMOSector.h"
 #include "contents_enviroment.h"
-
 using namespace c2::enumeration;
 class MMOServer;
 struct MMOACtor;
@@ -17,8 +13,7 @@ public:
 	~MMOZone();
 
 	void enter_actor(MMOActor* actor);		//  for login
-	void leave_actor(MMOActor* actor);		//  for logout
-	void move_sector(MMOActor* actor, MMOSector* start, MMOSector* end); // move to
+
 	
 	MMOSector* get_sector(int32_t y, int32_t x);
 	MMOSector* get_sector(MMOActor* actor);

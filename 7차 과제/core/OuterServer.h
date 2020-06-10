@@ -76,7 +76,7 @@ public:
 	size_t								get_total_sent_count();
 
 protected:
-	void					accepter_procedure(uint64_t idx);
+	void					acceptor_procedure(uint64_t idx);
 	void					io_service_procedure(uint64_t idx);
 	void					io_and_timer_service_procedure(uint64_t idx);
 	virtual void			custom_precedure(uint64_t idx);
@@ -96,7 +96,7 @@ protected:
 	Session**					sessions;					// 8
 	uint16_t					maximum_listening_count;		// 2
 	HANDLE						session_heap;				//8 
-	uint16_t					maximum_accpet_count;	// 8 
+	uint16_t					maximum_accept_count;	// 8 
 
 	size_t						concurrent_thread_count;	// 8
 	wchar_t						ip[16];						// 32

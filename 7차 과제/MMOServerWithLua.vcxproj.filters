@@ -34,6 +34,9 @@
     <Filter Include="소스 파일\db">
       <UniqueIdentifier>{02eddd7b-5380-4911-91e6-0f2f8e34a55a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\contents">
+      <UniqueIdentifier>{60baef62-9cfd-4a73-b0b0-3ff3ff9bb03c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rapidjson\allocators.h">
@@ -162,39 +165,6 @@
     <ClInclude Include="main.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="mmo_function.hpp">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MMOActor.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MMONear.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MMONpc.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MMONpcManager.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MMOSector.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MMOServer.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MMOSession.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MMOSysteMessage.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MMOZone.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="pre_compile.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
     <ClInclude Include="protocol.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
@@ -203,9 +173,6 @@
     </ClInclude>
     <ClInclude Include="IO\KeyManager.h">
       <Filter>소스 파일\util</Filter>
-    </ClInclude>
-    <ClInclude Include="script_api.h">
-      <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="util\TimeScheduler.h">
       <Filter>소스 파일\core</Filter>
@@ -273,39 +240,54 @@
     <ClInclude Include="core\IOContext.h">
       <Filter>소스 파일\core</Filter>
     </ClInclude>
-    <ClInclude Include="contents_enviroment.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
     <ClInclude Include="core\macro.h">
       <Filter>소스 파일\core</Filter>
     </ClInclude>
     <ClInclude Include="core\enviroment.h">
       <Filter>소스 파일\core</Filter>
     </ClInclude>
+    <ClInclude Include="mmo_function.hpp">
+      <Filter>소스 파일\contents</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOActor.h">
+      <Filter>소스 파일\contents</Filter>
+    </ClInclude>
+    <ClInclude Include="MMONear.h">
+      <Filter>소스 파일\contents</Filter>
+    </ClInclude>
+    <ClInclude Include="MMONpc.h">
+      <Filter>소스 파일\contents</Filter>
+    </ClInclude>
+    <ClInclude Include="MMONpcManager.h">
+      <Filter>소스 파일\contents</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOSector.h">
+      <Filter>소스 파일\contents</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOServer.h">
+      <Filter>소스 파일\contents</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOSession.h">
+      <Filter>소스 파일\contents</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOSysteMessage.h">
+      <Filter>소스 파일\contents</Filter>
+    </ClInclude>
+    <ClInclude Include="MMOZone.h">
+      <Filter>소스 파일\contents</Filter>
+    </ClInclude>
+    <ClInclude Include="script_api.h">
+      <Filter>소스 파일\contents</Filter>
+    </ClInclude>
+    <ClInclude Include="contents_enviroment.h">
+      <Filter>소스 파일\contents</Filter>
+    </ClInclude>
+    <ClInclude Include="pre_compile.h">
+      <Filter>소스 파일\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MMOActor.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MMONpc.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MMONpcManager.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MMOSector.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MMOServer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MMOSession.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MMOZone.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="packet_handler_base.cpp">
@@ -322,9 +304,6 @@
     </ClCompile>
     <ClCompile Include="util\JsonParser.cpp">
       <Filter>소스 파일\util</Filter>
-    </ClCompile>
-    <ClCompile Include="script_api.cpp">
-      <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="util\TimeScheduler.cpp">
       <Filter>소스 파일\core</Filter>
@@ -349,6 +328,30 @@
     </ClCompile>
     <ClCompile Include="core\OuterServer.cpp">
       <Filter>소스 파일\core</Filter>
+    </ClCompile>
+    <ClCompile Include="MMOActor.cpp">
+      <Filter>소스 파일\contents</Filter>
+    </ClCompile>
+    <ClCompile Include="MMONpc.cpp">
+      <Filter>소스 파일\contents</Filter>
+    </ClCompile>
+    <ClCompile Include="MMONpcManager.cpp">
+      <Filter>소스 파일\contents</Filter>
+    </ClCompile>
+    <ClCompile Include="MMOSector.cpp">
+      <Filter>소스 파일\contents</Filter>
+    </ClCompile>
+    <ClCompile Include="MMOServer.cpp">
+      <Filter>소스 파일\contents</Filter>
+    </ClCompile>
+    <ClCompile Include="MMOSession.cpp">
+      <Filter>소스 파일\contents</Filter>
+    </ClCompile>
+    <ClCompile Include="MMOZone.cpp">
+      <Filter>소스 파일\contents</Filter>
+    </ClCompile>
+    <ClCompile Include="script_api.cpp">
+      <Filter>소스 파일\contents</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

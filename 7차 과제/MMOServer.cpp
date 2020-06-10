@@ -5,6 +5,7 @@
 #include "MMOServer.h"
 #include "MMONpcManager.h"
 #include "util/TimeScheduler.h"
+#include "contents_enviroment.h"
 #include "MMOZone.h"
 
 
@@ -141,7 +142,14 @@ bool MMOServer::on_load_config(c2::util::JsonParser* parser)
 	uint32_t max_npc{};
 	if (false == parser->get_uint32(L"maximum_npc_count", max_npc))
 		return false;
+
 	MMONpcManager::set_max_npc_count(max_npc);
+
+	if (false == parser->get_uint32(L"maximum_npc_count", c2::global::MAX_NPC))
+		return false;
+	
+	if (false == parser->get_raw_wstring(L"db_connection_string", c2::global::db_connection_string, count_of(c2::global::db_connection_string)))
+		return false;
 
 
 

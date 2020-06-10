@@ -29,8 +29,6 @@ namespace c2
 		constexpr int MAP_WIDTH = 800;
 		constexpr int MAP_HEIGHT = 800;
 
-		//constexpr int MAX_NPC = 200'000;
-		constexpr int MAX_NPC = 20'000;
 		constexpr int NPC_ID_OFFSET = 10'000;
 		constexpr size_t MAP_NAX_HEIGHT_INDEX = calc_static_map_index<MAP_HEIGHT, SECTOR_HEIGHT>();
 		constexpr size_t MAP_NAX_WIDTH_INDEX = calc_static_map_index<MAP_WIDTH, SECTOR_WIDTH>();
@@ -51,6 +49,12 @@ namespace c2
 	}
 
 	namespace global
+	{
+		wchar_t inline db_connection_string[128] {};
+		extern inline uint32_t MAX_NPC{};
+	}
+
+	namespace local
 	{
 	}
 }

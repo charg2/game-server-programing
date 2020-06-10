@@ -19,7 +19,7 @@ OuterServer::OuterServer()
 	: listen_sock{ INVALID_SOCKET }, completion_port{ INVALID_HANDLE_VALUE }, accepter{ INVALID_HANDLE_VALUE }, session_heap{ INVALID_HANDLE_VALUE }
 	, io_handler{ nullptr }, ip{}, port{ 0 }, sessions{ }
 	, custom_last_server_error{ c2::enumeration::ER_NONE }, custom_last_os_error{ c2::enumeration::ER_NONE } // error'
-	, maximum_accpet_count{ 0 }, concurrent_thread_count{ 0 }
+	, maximum_accept_count{ 0 }, concurrent_thread_count{ 0 }
 	, version{}
 	, enable_nagle_opt{ false }, enable_keep_alive_opt{}
 	, maximum_listening_count{}, capacity{}
@@ -41,7 +41,7 @@ bool OuterServer::init_network_and_system()
 		return false;
 	}
 
-	completion_port = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, this->concurrent_thread_count);
+	completion_port = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, c2::global::concurrent_io_thread_count);
 	if (NULL == completion_port)
 	{
 		debug_code(printf("%s::%s \n", __FILE__, __LINE__));
@@ -167,19 +167,17 @@ bool OuterServer::init_threads()
 {
 	uint64_t n = 0;
 
-	if (this->concurrent_thread_count < 1)
+	if (c2::global::concurrent_io_thread_count < 1)
 	{
 		c2::util::crash_assert();
 	}
 
-
-	for (; n < this->concurrent_thread_count; ++n)
+	for (; n < c2::global::concurrent_io_thread_count; ++n)
 	{
 		void* params = new void* [3]{ (void*)this, (void*)c2::enumeration::ThreadType::TT_IO_AND_TIMER, (void*)n };
 
 		accepter = (HANDLE)_beginthreadex(NULL, NULL, OuterServer::start_thread, params, NULL, NULL);
 	}
-
 
 	// 접속을 나중에 받기 위해 ㅇㅇ
 	void* params = new void* [3]{ (void*)this, (void*)c2::enumeration::ThreadType::TT_ACCEPTER, (void*)n };
@@ -190,39 +188,10 @@ bool OuterServer::init_threads()
 
 void OuterServer::start()
 {
-	//const uint16_t	maximum_accept_waiting_count = this->maximum_accpet_count;
-	//size_t			accpet_waiting_count = 0;
-	//size_t			id = 0;
-	
-	// session 꺼내서 
-	//for (;;)
-	//{
-	//	//size_t invalid_heap_count = 0;
-
-	//	//unsigned long  heap_count = GetProcessHeaps(0, NULL);
-	//	//HANDLE* heaps = new HANDLE[heap_count];
-	//	//GetProcessHeaps(heap_count, heaps);
-	//	//PROCESS_HEAP_ENTRY heapEntry;
-	//	//long long sizeSum = 0;
-
-	//	//for (unsigned long i = 0; i < heap_count; i++)
-	//	//{
-	//	//	if (0 == HeapValidate(heaps[i], 0, NULL))
-	//	//	{
-	//	//		invalid_heap_count += 1;
-	//	//	}
-	//	//}
-	//	//delete[] heaps;
-
-	//	//printf("----------------%d-----------", invalid_heap_count);
-	//	on_update();
-
-	//	Sleep(50);
-	//}
 	on_start();
 }
 
-void OuterServer::accepter_procedure(uint64_t idx)
+void OuterServer::acceptor_procedure(uint64_t idx)
 {
 	SOCKET		local_listen_sock = this->listen_sock;
 	uint64_t	post_accepted_counter = 0;
@@ -243,7 +212,7 @@ void OuterServer::accepter_procedure(uint64_t idx)
 	//	Sleep(100);
 	//}
 
-	const uint16_t	maximum_accept_waiting_count = this->maximum_accpet_count;
+	const uint16_t	maximum_accept_waiting_count = this->maximum_accept_count;
 	size_t			accpet_waiting_count = 0;
 	size_t			id = 0;
 
@@ -364,13 +333,11 @@ void OuterServer::io_service_procedure(uint64_t custom_thread_id)
 void OuterServer::io_and_timer_service_procedure(uint64_t custom_thread_id)
 {
 	local_timer = new TimeTaskScheduler{};
-	//TimeTaskScheduler* local_timer_cpture = local_timer;
 	local_timer->bind_server(this);
-	//local_timer_cpture->bind_server(this);
 	TimeTaskScheduler* local_timer_capture = local_timer;
 	printf("%d :: worker therad start !\n", GetCurrentThreadId());
 	OuterServer::local_storage_accessor = custom_thread_id;
-	//local_timer->push_timer_task(10000, TimerTaskType::TTT_MOVE_NPC, 10,  1);
+	c2::local::io_thread_id = custom_thread_id;
 
 	HANDLE	local_completion_port{ this->completion_port };
 	int64_t	thread_id{ GetCurrentThreadId() };
@@ -472,7 +439,7 @@ uint32_t WINAPI OuterServer::start_thread(LPVOID param)
 	switch (info->thread_tye)
 	{
 	case ThreadType::TT_ACCEPTER:
-		info->server->accepter_procedure(info->index);
+		info->server->acceptor_procedure(info->index);
 		break;
 
 	case ThreadType::TT_IO:
@@ -767,7 +734,7 @@ size_t OuterServer::get_total_sent_count()
 
 constexpr size_t OuterServer::get_ccu() const
 {
-	return maximum_accpet_count;
+	return maximum_accept_count;
 }
 
 const wchar_t* OuterServer::get_version() const
@@ -789,39 +756,42 @@ const c2::enumeration::ErrorCode OuterServer::get_server_last_error() const
 
 void OuterServer::load_config_using_json(const wchar_t* file_name)
 {
-	c2::util::JsonParser json_file;
+	c2::util::JsonParser json_parser;
 
-	if (false == json_file.load_json(file_name))
+	if (false == json_parser.load_json(file_name))
 		c2::util::crash_assert();
 
-	if (false == json_file.get_raw_wstring(L"server_version", this->version, count_of(version)))
+	if (false == json_parser.get_raw_wstring(L"server_version", this->version, count_of(version)))
 		c2::util::crash_assert();
 
-	if (false == json_file.get_boolean(L"enable_nagle_opt", this->enable_nagle_opt))
+	if (false == json_parser.get_boolean(L"enable_nagle_opt", this->enable_nagle_opt))
 		c2::util::crash_assert();
 
-	if (false == json_file.get_boolean(L"enable_keep_alive_opt", this->enable_keep_alive_opt))
+	if (false == json_parser.get_boolean(L"enable_keep_alive_opt", this->enable_keep_alive_opt))
 		c2::util::crash_assert();
 
-	if (false == json_file.get_uint64(L"concurrent_thread_count", this->concurrent_thread_count))
+	if (false == json_parser.get_uint64(L"concurrent_thread_count", c2::global::concurrent_io_thread_count))
+		c2::util::crash_assert();
+	
+	this->concurrent_thread_count = c2::global::concurrent_io_thread_count;
+
+
+	if (false == json_parser.get_uint16(L"server_port", this->port))
 		c2::util::crash_assert();
 
-	if (false == json_file.get_uint16(L"server_port", this->port))
+	if (false == json_parser.get_raw_wstring(L"server_ip", this->ip, count_of(ip)))
 		c2::util::crash_assert();
 
-	if (false == json_file.get_raw_wstring(L"server_ip", this->ip, count_of(ip)))
+	if (false == json_parser.get_uint16(L"capacity", this->capacity))
 		c2::util::crash_assert();
 
-	if (false == json_file.get_uint16(L"capacity", this->capacity))
+	if (false == json_parser.get_uint16(L"maximum_listening_count", this->maximum_listening_count))
 		c2::util::crash_assert();
 
-	if (false == json_file.get_uint16(L"maximum_listening_count", this->maximum_listening_count))
+	if (false == json_parser.get_uint16(L"maximum_accept_count", this->maximum_accept_count))
 		c2::util::crash_assert();
 
-	if (false == json_file.get_uint16(L"maximum_accept_count", this->maximum_accpet_count))
-		c2::util::crash_assert();
-
-	if(false == on_load_config(&json_file))
+	if(false == on_load_config(&json_parser))
 		c2::util::crash_assert();
 
 	return;
