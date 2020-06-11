@@ -19,6 +19,7 @@ struct CreateActorTask : public DBTask
 
 struct UpdatePositionTask : public DBTask
 {
+	UpdatePositionTask(uint64_t session_id, int32_t user_id, int32_t y, int32_t x);
 	virtual ~UpdatePositionTask();
 
 	int32_t		user_id;

@@ -80,6 +80,9 @@ REGISTER_HANDLER(C2S_MOVE)
 
 	my_actor->x = local_x;
 	my_actor->y = local_y;
+
+	mmo_session->request_updating_position(local_y, local_x);
+
 	MMOSector* prev_sector = my_actor->current_sector;					// view_list ±Ü¾î¿À±â.
 	MMOSector* curent_sector = mmo_zone->get_sector(local_y, local_x);			// view_list ±Ü¾î¿À±â.
 

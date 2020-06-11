@@ -5,6 +5,7 @@
 #include "util/TimeScheduler.h"
 #include "MMOServer.h"
 #include "MMONpc.h"
+#include "MMODBTask.h"
 
 MMOActor::MMOActor(MMOSession* owner)
 	: x{}, y{},
@@ -40,24 +41,16 @@ void MMOActor::reset()
 	zone = nullptr;
 	current_exp = 0;
 	levelup_exp = 0;
-	hp = 10;
+	hp = 200;
 	level = 1;
 
-	static int g_seed = 2;
-
-	g_seed = (214013 * g_seed + 2531011);
-	size_t ret = ((g_seed >> 16) & 0x7FFF);
-
-	x = ret % c2::constant::MAP_WIDTH;
-
-	g_seed = (214013 * g_seed + 2531011);
-	ret = ((g_seed >> 16) & 0x7FFF);
-
-	y = ret % c2::constant::MAP_HEIGHT;
+	x = 0;
+	y = 0;
 
 	name[0] = NULL;
 
 	view_list.clear();
+	view_list_for_npc.clear();
 
 	status = ST_ACTIVE;
 
@@ -66,6 +59,33 @@ void MMOActor::reset()
 
 void MMOActor::exit()
 {
+}
+
+void MMOActor::set_data(LoadActorTask* task)
+{
+	AcquireSRWLockExclusive(&lock);
+
+	session_id = task->session_id;
+	user_id = task->user_id;
+	zone = nullptr;
+
+	current_exp = task->exp;
+	levelup_exp = task->level * 200;
+	hp = task->hp;
+	level = task->level;
+
+	x = task->x;
+	y = task->y;
+
+	memcpy(this->name, task->name, 50);
+	//name[0] = NULL;
+
+	view_list.clear();
+	view_list_for_npc.clear();
+
+	status = ST_ACTIVE;
+
+	ReleaseSRWLockExclusive(&lock);
 }
 
 bool MMOActor::is_near(MMOActor* other)

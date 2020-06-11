@@ -66,7 +66,7 @@ void DBManager::post_db_writing_task(DBTask* task)
 void DBManager::init_db_threads()
 {
 	size_t i{};
-	for (; i < c2::global::concurrent_db_reader_thread_count; ++i)
+	for (; i < c2::global::concurrent_db_reader_thread_count - 1ULL; ++i)
 	{
 		db_reader_threads[i] = (HANDLE)_beginthreadex(NULL, 0, db_reader, (LPVOID)i, NULL, NULL);
 		if (db_reader_threads[i] == NULL || (size_t)db_reader_threads[i] % 4 != 0)
@@ -108,7 +108,6 @@ uint32_t __stdcall DBManager::db_writer(LPVOID param)
 			{
 				case DTT_UPDATE_ACTOR_POSITION:
 				{
-					//UpdatePositionTask* update_task1 = new UpdatePositionTask{ { DTT_UPDATE_ACTOR_POSITION, task->session_id, task->need_result }, 0, 0, 0, };
 					UpdatePositionTask* update_task = reinterpret_cast<UpdatePositionTask*>(task);
 					DbHelper			db_helper;
 

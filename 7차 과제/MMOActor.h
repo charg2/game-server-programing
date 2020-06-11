@@ -12,7 +12,7 @@ struct	MMOSector;
 class	MMOServer;
 class	MMOSession;
 struct	MMONpc;
-
+struct  LoadActorTask;
 enum ActorStatus { ST_FREE, ST_ALLOCATED, ST_ACTIVE };
 
 using namespace c2::enumeration;
@@ -27,6 +27,8 @@ public:
 	void attack();
 	void reset();
 	void exit();
+
+	void set_data(LoadActorTask* task);
 
 	bool is_near(MMOActor* actor);
 	bool is_near(MMONpc* npc);
@@ -64,6 +66,7 @@ public:
 	std::atomic<ActorStatus>		status = ST_FREE;
 
 	uint64_t						session_id;
+	uint64_t						user_id;
 	unsigned						last_move_time;
 	MMOZone*						zone;
 

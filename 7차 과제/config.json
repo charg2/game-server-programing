@@ -22,7 +22,7 @@
   "db_name": "charg2dang",
   "db_password": "",
   "db_connection_string": "Driver={SQL Server};SERVER=DESKTOP-TPGEADF; Database=game_server; UID=charg2dang; PWD=zx0925",
-  "db_thread_count": 4,
+  "db_thread_count": 5,
 
   "[contents config] ": "",
   "maximum_npc_count": 20000,
