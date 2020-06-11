@@ -53,7 +53,7 @@ namespace c2
 		extern inline wchar_t	db_connection_string[128]			{ };
 		extern inline int32_t	db_read_thread_count				{ - 1};
 		extern inline uint32_t	max_npc								{ };
-		extern inline uint32_t	concurrent_db_reader_thread_count	{ -1 };
+		extern inline int32_t	concurrent_db_reader_thread_count	{ -1 };
 	}
 
 	namespace local

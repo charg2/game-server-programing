@@ -288,6 +288,12 @@
     <ClInclude Include="MMOSystmeMessage.h">
       <Filter>소스 파일\contents</Filter>
     </ClInclude>
+    <ClInclude Include="DbTask.h">
+      <Filter>소스 파일\db</Filter>
+    </ClInclude>
+    <ClInclude Include="MMODbTask.h">
+      <Filter>소스 파일\db</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

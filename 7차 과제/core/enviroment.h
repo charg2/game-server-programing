@@ -5,7 +5,7 @@ namespace c2
 	namespace constant
 	{
 		/// core 
-		constexpr inline size_t SEND_SIGN = 1U;
+		constexpr inline size_t SEND_SIGN = 1Ui64;
 		constexpr inline size_t DB_SIGN = 2U;
 		//constexpr inline size_t SEND_SIGN = 'SEND' + 1;
 		//static_assert( ( SEND_SIGN % 4 ) != 0, "Send sign must  " );

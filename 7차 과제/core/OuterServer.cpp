@@ -392,6 +392,7 @@ void OuterServer::io_and_timer_service_procedure(uint64_t custom_thread_id)
 			}
 			case c2::constant::DB_SIGN:
 			{
+				// DbTask* task = reinterpret_cast<DbTask*>(transfered_bytes);
 				session->on_handling_db();
 				release_session_ownership(completion_key);
 				continue;

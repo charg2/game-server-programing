@@ -1,25 +1,15 @@
 #pragma once
 
 #include <cstdint>
+#include "DbTask.h"
 #include "concurrency/MPSCQueue.h"
 
 // job에 포함된게 task.
 // TASK < JOB 
 //
 
-enum DbTaskType
-{
-	LOAD_ACTOR,
-	DTT_UPDATE_ACTOR_POSITION = 0,
 
-	DTT_CREATE_ACTOR, 
-}; 
 
-struct DbTask
-{
-	DbTaskType	type;
-	uint64_t	session_id;
-};
 
 using namespace c2::concurrency;
 class DbManager
@@ -34,6 +24,8 @@ public:
 	void bind_server_completion_port(HANDLE server_completion_port);
 	void post_db_reading_task(DbTask* task); // for procedure
 	void post_db_writing_task(DbTask* task); // for procedure
+
+private:
 	void post_task_to_server(DbTask* task);
 
 	static uint32_t WINAPI 	db_writer(LPVOID param);

@@ -1,6 +1,8 @@
+#include "util/exception.h"
 #include "DBHelper.h"
 #include "DBManager.h"
 #include "contents_enviroment.h"
+#include "core/enviroment.h"
 
 DbManager::DbManager() : db_completion_port { INVALID_HANDLE_VALUE}
 {
@@ -34,17 +36,17 @@ bool DbManager::initialize()
 
 void DbManager::finalize()
 {
-
 }
 
 void DbManager::bind_server_completion_port(HANDLE server_completion_port)
 {
+	c2::util::assert_if_false(0 < server_completion_port);
 
+	this->server_completion_port = server_completion_port;
 }
 
 void DbManager::post_db_reading_task(DbTask* task)
 {
-	// rr
 	bool ret =PostQueuedCompletionStatus(db_completion_port, 0, 0, 0);
 	if (ret == 1)
 	{}
@@ -57,9 +59,9 @@ void DbManager::post_db_writing_task(DbTask* task)
 
 void DbManager::post_task_to_server(DbTask* task)
 {
-	if (false == PostQueuedCompletionStatus(server_completion_port, 0, 0, nullptr))
+	if (false == PostQueuedCompletionStatus(server_completion_port, (DWORD)task, task->session_id, (LPOVERLAPPED)c2::constant::DB_SIGN))
 	{
-		// GetLastError();
+		c2::util::crash_assert();
 	}
 }
 
@@ -77,17 +79,50 @@ uint32_t __stdcall DbManager::db_writer(LPVOID param)
 			switch (tsk->type)
 			{
 			case DTT_UPDATE_ACTOR_POSITION:
-				break;
-			case DTT_CREATE_ACTOR:
-				break;
+			{
+				//{
+				//	DbHelper db_helper;
 
+				//	int uid = 101, y = 259, x = 144;
+				//	db_helper.bind_param_int(&uid);
+				//	db_helper.bind_param_int(&y);
+				//	db_helper.bind_param_int(&x);
+				//	if (true == db_helper.execute(sql_update_actor_position))
+				//	{
+				//		if (true == db_helper.fetch_row())
+				//		{
+				//			wprintf(L"actor position update ok\n");
+				//		}
+				//	}
+				//}
+				break;
+			}
+			case DTT_CREATE_ACTOR:
+			{
+				//	DbHelper db_helper;
+				//	const wchar_t* name{ L"actor_21" };
+				//	wchar_t password[100];
+				
+				//	db_helper.bind_param_text(name);
+				//	if (true == db_helper.execute(sql_create_actor))
+				//	{
+				//		if (true == db_helper.fetch_row())
+				//		{
+				//			wprintf(L"actor creation ok\n");
+				//		}
+				//	}
+				break;
+			}
 			default:
 				break;
 			}
 
 			
 			// 처리 결과를 넘겨야 하는 작업은 db 서버로 넘긴다. 
-			// dbm->post_task_to_server(tsk);
+			if (true == tsk->need_result)
+			{
+				// dbm->post_task_to_server(tsk);
+			}
 		}
 
 		Sleep(1);
@@ -116,13 +151,47 @@ uint32_t __stdcall DbManager::db_reader(LPVOID param)
 			break;
 		}
 
-		switch ((size_t)overlapped_ptr)
+		DbTask* db_task = reinterpret_cast<DbTask*>(overlapped_ptr);
+		
+		switch (db_task->type)
 		{
-		case DbTaskType::LOAD_ACTOR:
-			break;
+			case DbTaskType::LOAD_ACTOR:
+			{	
+				DbTask*		db_task = reinterpret_cast<DbTask*>(overlapped_ptr);
+				DbHelper	db_helper;
+				
+				//	int id, level, hp, exp, y, x;
+				//	char_t name[50];
+				//	wchar_t password[100];
 
-		default:
-			break;
+				//	db_helper.bind_param_int(&uid);
+				//	db_helper.bind_result_column_int(&id);
+				//	db_helper.bind_result_column_text(name, count_of(name));
+				//	db_helper.bind_result_column_int(&y);
+				//	db_helper.bind_result_column_int(&x);
+				//	db_helper.bind_result_column_int(&level);
+				//	db_helper.bind_result_column_int(&exp);
+				//	db_helper.bind_result_column_int(&hp);
+				
+				//	if (db_helper.execute(sql_load_actor))
+				//	{
+				//		if (true == db_helper.fetch_row())
+				//		{
+				//			wprintf(L"%d %d %d %d %d, %d| \n", id,  level, y, x, hp, exp);
+				//		}
+				//	}
+
+				break;
+			}
+			default:
+				break;
+		}
+
+
+		// 처리 결과를 넘겨야 하는 작업은 db 서버로 넘긴다. 
+		if (true == db_task->need_result)
+		{
+			// dbm->post_task_to_server(tsk);
 		}
 	}
 
