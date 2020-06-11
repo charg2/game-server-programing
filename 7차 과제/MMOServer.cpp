@@ -39,7 +39,11 @@ void MMOServer::on_connect(uint64_t session_id){}
 void MMOServer::on_disconnect(uint64_t session_id) 
 {
 	MMOActor*	my_actor = get_actor(session_id);
+	my_actor->session->request_updating_position( my_actor->y, my_actor->x);
+	
 	int			my_actor_id = my_actor->get_id();
+
+	
 	MMOSector*	my_actor_sector = my_actor->current_sector;
 	if (my_actor_sector == nullptr)
 	{
