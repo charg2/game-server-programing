@@ -5,8 +5,8 @@ namespace c2
 	namespace constant
 	{
 		/// core 
-		constexpr inline size_t SEND_SIGN = 1Ui64;
-		constexpr inline size_t DB_SIGN = 2U;
+		constexpr inline DWORD SEND_SIGN = -1L;
+		constexpr inline DWORD DB_SIGN = -2L;
 		//constexpr inline size_t SEND_SIGN = 'SEND' + 1;
 		//static_assert( ( SEND_SIGN % 4 ) != 0, "Send sign must  " );
 		constexpr inline size_t ASYNC_ACCEPT_SIGN = 10003U; // 유저수에 따라 조정해줘야 함.

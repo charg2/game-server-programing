@@ -288,10 +288,10 @@
     <ClInclude Include="MMOSystmeMessage.h">
       <Filter>소스 파일\contents</Filter>
     </ClInclude>
-    <ClInclude Include="DbTask.h">
+    <ClInclude Include="DBTask.h">
       <Filter>소스 파일\db</Filter>
     </ClInclude>
-    <ClInclude Include="MMODbTask.h">
+    <ClInclude Include="MMODBTask.h">
       <Filter>소스 파일\db</Filter>
     </ClInclude>
   </ItemGroup>
@@ -364,6 +364,12 @@
     </ClCompile>
     <ClCompile Include="DBManager.cpp">
       <Filter>소스 파일\db</Filter>
+    </ClCompile>
+    <ClCompile Include="MMODBTask.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="DBTask.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,7 @@
 #include "../pre_compile.h"
 #include "OuterServer.h"
 #include "Session.h"
+#include "../DBTask.h"
 
 using namespace c2::enumeration;
 
@@ -391,9 +392,11 @@ void Session::decrease_refer()
 	}
 }
 
-void Session::on_handling_db()
+void Session::on_handling_db_task(DBTask* task)
 {
+
 }
+
 
 bool Session::is_valid(uint64_t session_id)
 {

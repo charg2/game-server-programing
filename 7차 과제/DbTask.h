@@ -1,7 +1,7 @@
 #pragma once
+#include <cstdint>
 
-
-enum DbTaskType
+enum DBTaskType
 {
 	LOAD_ACTOR,
 	DTT_UPDATE_ACTOR_POSITION = 0,
@@ -10,11 +10,14 @@ enum DbTaskType
 };
 
 
-struct DbTask
+struct DBTask
 {
-	DbTask() = delete;
+	DBTask();
+	DBTask(const DBTask& other) = delete;
+	DBTask(DBTask&& other) = delete;
+	virtual ~DBTask();
 
-	DbTaskType	type;
+	DBTaskType	type;
 	uint64_t	session_id;
-	bool		need_result;
+	bool		is_success;
 };

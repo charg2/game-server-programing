@@ -3,6 +3,8 @@
 #include "core/Session.h"
 #include "MMOActor.h"
 
+
+struct DBTask;
 class MMOSession : public Session
 {
 public :
@@ -12,8 +14,11 @@ public :
 	MMOActor* get_actor();
 	void response_loginok();
 
+	virtual void on_handling_db_task(DBTask* task);
 
-	void has_vliad_id();
+	void request_login_validation(char* name);
+
+	//void has_vliad_id();
 
 private:
 	MMOActor	actor;

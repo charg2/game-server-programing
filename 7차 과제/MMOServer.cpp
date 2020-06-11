@@ -151,7 +151,10 @@ bool MMOServer::on_load_config(c2::util::JsonParser* parser)
 	if (false == parser->get_raw_wstring(L"db_connection_string", c2::global::db_connection_string, count_of(c2::global::db_connection_string)))
 		return false;
 
+	if (false == parser->get_int32(L"db_thread_count", c2::global::db_read_thread_count))
+		return false;
 
+	c2::global::concurrent_db_reader_thread_count = c2::global::db_read_thread_count;
 
 	return true;
 }

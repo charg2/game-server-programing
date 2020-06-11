@@ -4,15 +4,7 @@
 
 #include "../network/SocketAddress.h"
 #include "IOContext.h"
-
-
-//LPFN_ACCEPTEX		OuterServer::accept_ex{  };
-//LPFN_DISCONNECTEX	OuterServer::disconnect_ex{  };
-//LPFN_CONNECTEX		OuterServer::connect_ex{  };
-
-//thread_local size_t OuterServer::local_storage_accessor {};
-
-
+#include "../DBTask.h"
 
 
 OuterServer::OuterServer()
@@ -382,7 +374,7 @@ void OuterServer::io_and_timer_service_procedure(uint64_t custom_thread_id)
 		}
 
 		// acquire session
-		switch ((size_t)overlapped_ptr)
+		switch ((size_t)transfered_bytes)
 		{
 			case c2::constant::SEND_SIGN:
 			{
@@ -392,8 +384,7 @@ void OuterServer::io_and_timer_service_procedure(uint64_t custom_thread_id)
 			}
 			case c2::constant::DB_SIGN:
 			{
-				// DbTask* task = reinterpret_cast<DbTask*>(transfered_bytes);
-				session->on_handling_db();
+				session->on_handling_db_task(reinterpret_cast<DBTask*>(overlapped_ptr));
 				release_session_ownership(completion_key);
 				continue;
 			}
@@ -543,7 +534,6 @@ void OuterServer::on_create_sessions(size_t n)
 void OuterServer::destroy_sessions()
 {
 	HeapDestroy(session_heap); // ½ÇÆÐÇÏµç°¡ ¸»µç°¡ ¤»¤» ¿¡·¯ ®c ¾ÈÇÔ
-
 	//session_heap = INVALID_HANDLE_VALUE;
 }
 
@@ -631,7 +621,7 @@ void OuterServer::send_packet(uint64_t session_id, c2::Packet* out_packet)
 	// sendÁßÀÌ ¾Æ´Ï¶ó¸é....
 	if (session->send_flag == 0)
 	{
-		PostQueuedCompletionStatus(this->completion_port, 0, (ULONG_PTR)session_id, (LPOVERLAPPED)c2::constant::SEND_SIGN);
+		PostQueuedCompletionStatus(this->completion_port, c2::constant::SEND_SIGN, (ULONG_PTR)session_id, (LPOVERLAPPED)0);
 	}
 
 	this->release_session_ownership(session_id);
@@ -745,6 +735,11 @@ size_t OuterServer::get_total_sent_count()
 constexpr size_t OuterServer::get_ccu() const
 {
 	return maximum_accept_count;
+}
+
+HANDLE OuterServer::get_completion_port() const
+{
+	return completion_port;
 }
 
 const wchar_t* OuterServer::get_version() const

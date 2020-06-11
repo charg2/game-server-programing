@@ -1,9 +1,10 @@
 #pragma once
-#include "pre_compile.h"
-#include "concurrency/ConcurrentQueue.h"
+#include "../pre_compile.h"
+#include "../concurrency/ConcurrentQueue.h"
 #include "CircularBuffer.h"
 #include "IOContext.h"
 
+struct DBTask;
 class OuterServer;
 class CircularBuffer;
 struct IoContext;
@@ -72,7 +73,7 @@ public:
 	void increase_refer();
 	void decrease_refer();
 	
-	virtual void on_handling_db();
+	virtual void on_handling_db_task(DBTask* task);
 
 	bool is_valid(uint64_t session_id);
 

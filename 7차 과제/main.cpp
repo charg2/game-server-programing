@@ -27,42 +27,50 @@
 #include <memory>
 
 using namespace c2;
+#include "DBManager.h"
 #include "db_statement.h"
 void main()
 {
 	setlocale(LC_ALL, "");
 
-	g_server = new MMOServer();
+	g_server		= new MMOServer();
 
 	g_server->setup_dump();
 
 	g_server->load_config_using_json(L"config.json");
+	
+	g_db_manager = new DBManager();
 
-	if (false == DbHelper::initialize(global::db_connection_string, global::concurrent_io_thread_count))
-		return;
-
+	if( false == g_db_manager->initialize() )
+		return; 
 
 	g_server->init_npcs();
 
 	g_server->initialize();
 
+	g_db_manager->bind_server_completion_port(g_server->get_completion_port());
+
 	g_server->start();
 
+	g_server->finalize();
+
+	//if (false == DbHelper::initialize(global::db_connection_string, global::concurrent_db_reader_thread_count))
+	//	return;
 
 
-	//c2::local::io_thread_id = 0;
+	//c2::local::db_thread_id = 0;
 
 	//{
 	//	DbHelper db_helper;
 	//	int id, level, hp, exp, y, x;
-	//	wchar_t name[100];
-	//	wchar_t password[100];
+	//	char name[50];
 
 	//	int uid = 100;
-	//	db_helper.bind_param_int(&uid);
+	//	wchar_t password[100];
+	//	db_helper.bind_param_str("actor_1");
 
 	//	db_helper.bind_result_column_int(&id);
-	//	db_helper.bind_result_column_text(name, count_of(name));
+	//	db_helper.bind_result_column_str(name, count_of(name));
 	//	db_helper.bind_result_column_int(&y);
 	//	db_helper.bind_result_column_int(&x);
 	//	db_helper.bind_result_column_int(&level);
@@ -82,14 +90,13 @@ void main()
 	//{
 	//	DbHelper db_helper;
 	//	int id, level, hp, exp, y, x;
-	//	wchar_t name[100];
-	//	wchar_t password[100];
+	//	char name[100];
 
 	//	int uid = 101;
-	//	db_helper.bind_param_int(&uid);
+	//	db_helper.bind_param_str("actor_5");
 
 	//	db_helper.bind_result_column_int(&id);
-	//	db_helper.bind_result_column_text(name, count_of(name));
+	//	db_helper.bind_result_column_str(name, count_of(name));
 	//	db_helper.bind_result_column_int(&y);
 	//	db_helper.bind_result_column_int(&x);
 	//	db_helper.bind_result_column_int(&level);
@@ -124,10 +131,10 @@ void main()
 
 	//{
 	//	DbHelper db_helper;
-	//	const wchar_t* name{ L"actor_21" };
+	//	const char* name{ "actor_21" };
 	//	wchar_t password[100];
 
-	//	db_helper.bind_param_text(name);
+	//	db_helper.bind_param_str(name);
 	//	if (true == db_helper.execute(sql_create_actor))
 	//	{
 	//		if (true == db_helper.fetch_row())
@@ -140,5 +147,4 @@ void main()
 
 
 
-	g_server->finalize();
 }

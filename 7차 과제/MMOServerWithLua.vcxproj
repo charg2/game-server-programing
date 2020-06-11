@@ -165,7 +165,7 @@
     <ClInclude Include="core\Session.h" />
     <ClInclude Include="DBHelper.h" />
     <ClInclude Include="DBManager.h" />
-    <ClInclude Include="DbTask.h" />
+    <ClInclude Include="DBTask.h" />
     <ClInclude Include="db_statement.h" />
     <ClInclude Include="IO\KeyManager.h" />
     <ClInclude Include="lua\lauxlib.h" />
@@ -175,7 +175,7 @@
     <ClInclude Include="lua\lualib.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="MMOActor.h" />
-    <ClInclude Include="MMODbTask.h" />
+    <ClInclude Include="MMODBTask.h" />
     <ClInclude Include="MMONear.h" />
     <ClInclude Include="MMONpc.h" />
     <ClInclude Include="MMONpcManager.h" />
@@ -238,9 +238,11 @@
     <ClCompile Include="core\Session.cpp" />
     <ClCompile Include="DBHelper.cpp" />
     <ClCompile Include="DBManager.cpp" />
+    <ClCompile Include="DBTask.cpp" />
     <ClCompile Include="IO\KeyManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MMOActor.cpp" />
+    <ClCompile Include="MMODBTask.cpp" />
     <ClCompile Include="MMONpc.cpp" />
     <ClCompile Include="MMONpcManager.cpp" />
     <ClCompile Include="MMOSector.cpp" />

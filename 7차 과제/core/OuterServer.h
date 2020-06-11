@@ -66,7 +66,7 @@ public:
 	const c2::enumeration::ErrorCode	get_os_last_error() const;
 	const c2::enumeration::ErrorCode	get_server_last_error() const;
 	constexpr size_t					get_ccu() const;
-
+	HANDLE								get_completion_port() const;
 	void								set_custom_last_error(c2::enumeration::ErrorCode err_code);
 
 	void								setup_dump();
