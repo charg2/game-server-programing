@@ -56,8 +56,8 @@ bool DbHelper::initialize(const wchar_t* connetion_info_str, int reader_thread_c
 
 		SQLSMALLINT resultLen = 0;
 
-		//SQLDriverConnect를 이용하여 SQL서버에 연결하고 그 핸들을 SQL_CONN의 sql_hdbc에 할당
-		SQLRETURN ret = SQLDriverConnect(
+		// SQLDriverConnect를 이용하여 SQL서버에 연결하고 그 핸들을 SQL_CONN의 sql_hdbc에 할당 // 세부 옵션은 있지만 연결이 느림.
+	/*	SQLRETURN ret = SQLDriverConnect(
 			sql_connection_pool[i].sql_hdbc,
 			NULL,
 			(SQLWCHAR*)connetion_info_str,
@@ -66,9 +66,17 @@ bool DbHelper::initialize(const wchar_t* connetion_info_str, int reader_thread_c
 			0,
 			&resultLen,
 			SQL_DRIVER_NOPROMPT
-		);
+		);*/
 
-
+		SQLRETURN ret = SQLConnect(
+			sql_connection_pool[i].sql_hdbc				//		연결 핸들... 
+			, (SQLWCHAR*)c2::global::db_server_name		//		서버(ㅇDBC) 이름.
+			, SQL_NTS									//		서버 이름 길이.
+			, (SQLWCHAR*)NULL							//		유저 이름.
+			, 0											//		유저 이름 길이.
+			, NULL										//		패스워드
+			, 0);										//		패스워드 길이.
+	
 		if (SQL_SUCCESS != ret && SQL_SUCCESS_WITH_INFO != ret)
 		{
 			SQLWCHAR sqlState[1024]{};

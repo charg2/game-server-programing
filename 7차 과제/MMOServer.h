@@ -4,7 +4,7 @@
 #include "MMOSession.h"
 //#include "MMOZone.h"
 
-#define send_packet_(s_id, pack) g_server->send_packet(s_id, pack);
+#define send_packet_macro(s_id, pack) g_server->send_packet(s_id, pack);
 
 
 struct MMOZone;
@@ -36,7 +36,6 @@ public:
 
 private:
 	MMOZone* zone;
-	uint32_t maximum_npc_count;
 };
 
 

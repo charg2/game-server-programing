@@ -54,6 +54,7 @@ namespace c2
 		extern inline int32_t	db_read_thread_count				{ - 1};
 		extern inline uint32_t	max_npc								{ };
 		extern inline int32_t	concurrent_db_reader_thread_count	{ -1 };
+		extern inline wchar_t	db_server_name[64]						{ };
 	}
 
 	namespace local

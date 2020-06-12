@@ -20,11 +20,10 @@ DBManager::~DBManager()
 
 bool DBManager::initialize()
 {
+	printf("init db...");
 	db_completion_port = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, c2::global::concurrent_db_reader_thread_count);
 	if (NULL == db_completion_port || db_completion_port == INVALID_HANDLE_VALUE)
 	{
-		//debug_code(printf("%s::%s \n", __FILE__, __LINE__));
-		//this->custom_last_os_error = c2::enumeration::ER_COMPLETION_PORT_INITIATION_FAILURE;
 		return false;
 	}
 
@@ -35,6 +34,7 @@ bool DBManager::initialize()
 
 	init_db_threads();
 
+	printf("ok\n");
 	return true;
 }
 

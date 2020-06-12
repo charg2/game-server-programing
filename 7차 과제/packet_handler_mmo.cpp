@@ -97,6 +97,8 @@ REGISTER_HANDLER(C2S_MOVE)
 		curent_sector->actors.emplace(local_actor_id, my_actor);
 		my_actor->current_sector = curent_sector;							// 타 스레드에서 접근하면 여기 일로 하고?
 		ReleaseSRWLockExclusive(&curent_sector->lock);						// 내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
+		
+		my_actor->session->request_updating_position(my_actor->y, my_actor->x);
 	}
 
 
@@ -245,6 +247,7 @@ REGISTER_HANDLER(C2S_MOVE)
 			my_actor->send_leave_packet(npc); // 이 npc 정보를 나한테 보냄.
 		}
 	}
+
 }
 
 
