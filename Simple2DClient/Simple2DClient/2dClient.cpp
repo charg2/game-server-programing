@@ -23,6 +23,7 @@ constexpr auto MAX_USER = NPC_ID_START;
 int g_left_x;
 int g_top_y;
 int g_myid;
+bool	is_logined = false;
 
 sf::RenderWindow* g_window;
 sf::Font g_font;
@@ -137,10 +138,19 @@ void ProcessPacket(char* ptr)
 	case S2C_LOGIN_OK:
 	{
 		sc_packet_login_ok* my_packet = reinterpret_cast<sc_packet_login_ok*>(ptr);
-		g_myid = my_packet->id;
+		if (my_packet->id == -1)
+		{
+			cout << "invliad id" << endl;
+			g_socket.disconnect();
+			//g_window->close();
+			return;
+		}
+
+		is_logined = true;
+		g_myid		= my_packet->id;
 		avatar.move(my_packet->x, my_packet->y);
-		g_left_x = my_packet->x - (SCREEN_WIDTH / 2);
-		g_top_y = my_packet->y - (SCREEN_HEIGHT / 2);
+		g_left_x	= my_packet->x - (SCREEN_WIDTH / 2);
+		g_top_y		= my_packet->y - (SCREEN_HEIGHT / 2);
 		avatar.show();
 	}
 	break;
@@ -306,14 +316,22 @@ void send_move_packet(unsigned char dir)
 	send_packet(&m_packet);
 }
 
+#include <iostream>
 
 int main()
 {
 	wcout.imbue(locale("korean"));
+	string id_str;
+	cout << "서버 연결전 ID를 입력해주세요 : .\n";
+	cin >> id_str;
+	cout << id_str << endl;
+
+
 	sf::Socket::Status status = g_socket.connect("127.0.0.1", SERVER_PORT);
 	g_socket.setBlocking(false);
 
-	if (status != sf::Socket::Done) {
+	if (status != sf::Socket::Done) 
+	{
 		wcout << L"서버와 연결할 수 없습니다.\n";
 		while (true);
 	}
@@ -324,13 +342,16 @@ int main()
 	l_packet.size = sizeof(l_packet);
 	l_packet.type = C2S_LOGIN;
 	int t_id = GetCurrentProcessId();
-	sprintf_s(l_packet.name, "P%03d", t_id % 1000);
+	sprintf_s(l_packet.name, "%s", id_str.c_str());
+	cout << l_packet.name << endl;
 	strcpy_s(avatar.name, l_packet.name);
 	avatar.set_name(l_packet.name);
 	send_packet(&l_packet);
 
+
 	sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH , WINDOW_HEIGHT), "2D CLIENT");
 	g_window = &window;
+
 
 	sf::View view = g_window->getView();
 	view.zoom(2.0f);
@@ -338,8 +359,17 @@ int main()
 	g_window->setView(view);
 
 
+
+
 	while (window.isOpen())
 	{
+/*
+		if (is_logined == false)
+		{
+			Sleep(1);
+			continue;
+		}
+*/
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
