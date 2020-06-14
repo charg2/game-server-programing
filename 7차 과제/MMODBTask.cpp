@@ -17,14 +17,24 @@ UpdatePositionTask::~UpdatePositionTask()
 {
 }
 
-CreateActorTask::~CreateActorTask()
+
+CreateActorTask::CreateActorTask(uint64_t session_id, const char* name)
+	: user_id{},/* y{}, x{}, hp{}, exp{}, level{}, */reason{}
 {
+	this->type = DBTaskType::DTT_CREATE_ACTOR;
+	this->session_id = session_id;
+	this->is_success = false;
+
+	memcpy(this->name, name, 50);
 }
 
+CreateActorTask::~CreateActorTask() {}
 
 
 
-LoadActorTask::LoadActorTask(uint64_t session_id, char* name) :  user_id{}, y{}, x{}, level{}, hp{}, exp{}
+
+LoadActorTask::LoadActorTask(uint64_t session_id, char* name) 
+	:  user_id{}, y{}, x{}, level{}, hp{}, exp{}
 {
 	this->type = DBTaskType::LOAD_ACTOR;
 	this->session_id = session_id;
@@ -34,6 +44,4 @@ LoadActorTask::LoadActorTask(uint64_t session_id, char* name) :  user_id{}, y{},
 }
 
 
-LoadActorTask::~LoadActorTask()
-{
-}
+LoadActorTask::~LoadActorTask(){}

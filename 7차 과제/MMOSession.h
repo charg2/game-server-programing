@@ -12,6 +12,9 @@ public :
 	~MMOSession();
 
 	MMOActor* get_actor();
+
+	void enter_zone();
+
 	void response_loginok();
 	void response_login_failure();
 

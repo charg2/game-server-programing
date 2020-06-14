@@ -28,6 +28,10 @@ REGISTER_HANDLER(C2S_LOGIN)
 
 	if (mmo_session->get_actor()->get_id() != (uint16_t)session->session_id) // 이미 나갔다 들어온 녀석.
 	{
+		printf("Session::invalid session id %d\n", my_actor->session_id );
+
+		mmo_session->request_disconnection();
+
 		return;
 	}
 
@@ -81,7 +85,7 @@ REGISTER_HANDLER(C2S_MOVE)
 	my_actor->x = local_x;
 	my_actor->y = local_y;
 
-	//mmo_session->request_updating_position(local_y, local_x);
+	mmo_session->request_updating_position(local_y, local_x);
 
 	MMOSector* prev_sector = my_actor->current_sector;					// view_list 긁어오기.
 	MMOSector* curent_sector = mmo_zone->get_sector(local_y, local_x);			// view_list 긁어오기.
@@ -98,7 +102,7 @@ REGISTER_HANDLER(C2S_MOVE)
 		my_actor->current_sector = curent_sector;							// 타 스레드에서 접근하면 여기 일로 하고?
 		ReleaseSRWLockExclusive(&curent_sector->lock);						// 내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 		
-		my_actor->session->request_updating_position(my_actor->y, my_actor->x);
+		//my_actor->session->request_updating_position(my_actor->y, my_actor->x);
 	}
 
 

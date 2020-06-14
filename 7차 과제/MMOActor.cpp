@@ -28,11 +28,6 @@ void MMOActor::enter_sector(int32_t x, int32_t y)
 }
 
 
-
-void MMOActor::move(int8_t direction)
-{
-}
-
 void MMOActor::reset()
 {
 	AcquireSRWLockExclusive(&lock);
@@ -61,7 +56,7 @@ void MMOActor::exit()
 {
 }
 
-void MMOActor::set_data(LoadActorTask* task)
+void MMOActor::reset_data(const LoadActorTask* task)
 {
 	AcquireSRWLockExclusive(&lock);
 
@@ -78,7 +73,6 @@ void MMOActor::set_data(LoadActorTask* task)
 	y = task->y;
 
 	memcpy(this->name, task->name, 50);
-	//name[0] = NULL;
 
 	view_list.clear();
 	view_list_for_npc.clear();
@@ -87,6 +81,33 @@ void MMOActor::set_data(LoadActorTask* task)
 
 	ReleaseSRWLockExclusive(&lock);
 }
+
+void MMOActor::reset_data_when_creation(const CreateActorTask* task)
+{
+	AcquireSRWLockExclusive(&lock);
+
+	session_id = task->session_id;
+	user_id = task->user_id;
+	zone = nullptr;
+
+	current_exp = 0;
+	levelup_exp = 200;
+	hp = 200;
+	level = 1;
+
+	x = fast_rand() % 800;
+	y = fast_rand() % 800;
+
+	memcpy(this->name, task->name, 50);
+
+	view_list.clear();
+	view_list_for_npc.clear();
+
+	status = ST_ACTIVE;
+
+	ReleaseSRWLockExclusive(&lock);
+}
+
 
 bool MMOActor::is_near(MMOActor* other)
 {
@@ -205,7 +226,7 @@ void MMOActor::send_enter_packet(MMONpc* other)
 	c2::Packet* enter_packet = c2::Packet::alloc();
 	enter_packet->write(&payload, sizeof(sc_packet_enter));
 
-	server->send_packet(this->session_id, enter_packet);
+	g_server->send_packet(this->session_id, enter_packet);
 }
 // 내 정보만 보냄.. 
 void MMOActor::send_enter_packet_without_updating_viewlist(MMONpc* other)
@@ -222,7 +243,7 @@ void MMOActor::send_enter_packet_without_updating_viewlist(MMONpc* other)
 	c2::Packet* enter_packet = c2::Packet::alloc();
 	enter_packet->write(&payload, sizeof(sc_packet_enter));
 
-	server->send_packet(this->session_id, enter_packet);
+	g_server->send_packet(this->session_id, enter_packet);
 }
 
 

@@ -117,31 +117,35 @@ uint32_t __stdcall DBManager::db_writer(LPVOID param)
 
 					if (true == db_helper.execute(sql_update_actor_position))
 					{
-						if (true == db_helper.fetch_row())
-						{
-							delete update_task;
-							break;
-						}
+						update_task->is_success = db_helper.fetch_row();
 					}
-					
-					wprintf(L"actor position update failure...\n");
+
+					if (false == update_task->is_success)
+					{
+						wprintf(L"actor position update failure...\n");
+					}
+
+					delete update_task;
+
 					break;
 				}
 				case DTT_CREATE_ACTOR:
 				{
-					//CreateActorTask* update_task1 = new CreateActorTask{ { DTT_UPDATE_ACTOR_POSITION, task->session_id, task->need_result }, 0, 0, 0, };
 					CreateActorTask*	create_task = reinterpret_cast<CreateActorTask*>(task);
 					DbHelper			db_helper;
 
 					db_helper.bind_param_str(create_task->name);
+
+					db_helper.bind_result_column_int(&create_task->user_id);
+
 					if (true == db_helper.execute(sql_create_actor))
 					{
-						if (true == db_helper.fetch_row())
-						{
-							// 성공인지 실패인지 결과를 알려줘야 함.
-							dbm->post_task_to_server(task);
-						}
+						// 성공인지 실패인지 결과를 알려줘야 함.
+						create_task->is_success = db_helper.fetch_row();
+							
 						// db 오류는 알려주고...
+						// 결과는 서버에서 처리함.
+						dbm->post_task_to_server(create_task);
 					}
 
 					break;

@@ -4,15 +4,16 @@
 
 struct CreateActorTask : public DBTask
 {
+	CreateActorTask(uint64_t session_id, const char* name);
 	virtual ~CreateActorTask();
 
 	char name[50];
 
 	int32_t		user_id;
-	int32_t		y, x;
-	int32_t		hp;
-	int32_t		exp;
-	int8_t		level;
+	//int32_t		y, x;
+	//int32_t		hp;
+	//int32_t		exp;
+	//int8_t		level;
 
 	int8_t		reason;
 };

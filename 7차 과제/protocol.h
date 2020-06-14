@@ -24,6 +24,28 @@ namespace c2::enumeration
 
 		PT_MAX,
 	};
+
+
+	//enum PacketType2 : char
+	//{
+	//	PT_NONE,
+
+	//	C2S_LOGIN = 1,
+	//	C2S_MOVE,
+	//	C2S_ATTACK,
+	//	C2S_CHAT,
+	//	C2S_LOGOUT,
+
+	//	S2C_LOGIN_OK = 1,
+	//	S2C_LOGIN_FAIL,
+	//	S2C_MOVE,
+	//	S2C_ENTER,
+	//	S2C_LEAVE,
+	//	S2C_CHAT,
+	//	S2C_STAT_CHANGE,
+	//	PT_MAX,
+
+	//};
 }
 
 #pragma pack(push, 1)

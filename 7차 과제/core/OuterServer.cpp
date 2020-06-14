@@ -469,6 +469,7 @@ uint32_t WINAPI OuterServer::start_thread(LPVOID param)
 
 bool OuterServer::initialize()
 {
+	printf("server init... ");
 	do
 	{
 		if (false == init_network_and_system())
@@ -481,9 +482,14 @@ bool OuterServer::initialize()
 			break;
 
 
+		printf("ok.");
+
 		return true;
 
 	} while (false);
+
+
+	printf("failure.");
 
 	return false;
 }

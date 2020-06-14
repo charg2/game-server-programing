@@ -13,6 +13,7 @@ class	MMOServer;
 class	MMOSession;
 struct	MMONpc;
 struct  LoadActorTask;
+struct  CreateActorTask;
 enum ActorStatus { ST_FREE, ST_ALLOCATED, ST_ACTIVE };
 
 using namespace c2::enumeration;
@@ -23,12 +24,12 @@ public:
 	~MMOActor();
 
 	void enter_sector(int32_t x, int32_t y);
-	void move(int8_t direction);
 	void attack();
 	void reset();
 	void exit();
 
-	void set_data(LoadActorTask* task);
+	void reset_data(const LoadActorTask* task);
+	void reset_data_when_creation(const CreateActorTask* task);
 
 	bool is_near(MMOActor* actor);
 	bool is_near(MMONpc* npc);

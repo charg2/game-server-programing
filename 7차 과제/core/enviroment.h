@@ -41,6 +41,8 @@ namespace c2
 			DR_WSA_RECV_FAILURE,
 			DR_WSA_SEND_FAILURE,
 			DR_RECV_BUFFER_FULL,
+			DR_INVALID_SESSION_ID,
+
 		};
 
 		enum SessionState

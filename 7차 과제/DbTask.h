@@ -9,7 +9,6 @@ enum DBTaskType
 	DTT_CREATE_ACTOR,
 };
 
-
 struct DBTask
 {
 	DBTask();

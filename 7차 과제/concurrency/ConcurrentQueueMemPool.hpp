@@ -132,7 +132,7 @@ namespace c2::concurrency
 				}
 			}
 
-			if (PlacementNew) // 생성자 킴.
+			if constexpr(PlacementNew) // 생성자 킴.
 				new(&local_head.node->data) Type;
 
 
@@ -156,7 +156,7 @@ namespace c2::concurrency
 				*invalid_ptr = 0xDDAAEEDDDDAAEEDD;
 			}
 
-			if (PlacementNew) // 필요하다면 소멸자 호출.
+			if constexpr(PlacementNew) // 필요하다면 소멸자 호출.
 				node->data.~Type();
 
 

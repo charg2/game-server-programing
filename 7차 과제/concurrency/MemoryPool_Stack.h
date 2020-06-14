@@ -119,7 +119,7 @@ namespace c2::concurrency
 
 			InterlockedDecrement64(&this->size);
 
-			if (PlacementNew) // 생성자 킴.
+			if constexpr(PlacementNew) // 생성자 킴.
 				new(&temp->data) Type();
 
 			return &temp->data;
@@ -142,7 +142,7 @@ namespace c2::concurrency
 			}
 
 
-			if (PlacementNew) // dtor / ctor  호출할지는정함.
+			if constexpr(PlacementNew) // dtor / ctor  호출할지는정함.
 				((BlockNode*)data)->data.~Type();
 
 			TopNode local_top{ this->top->node, this->top->stamp };
