@@ -93,19 +93,15 @@ REGISTER_HANDLER(C2S_MOVE)
 
 	if (prev_sector != curent_sector)										//섹터가 바뀐 경우.
 	{
-		AcquireSRWLockExclusive(&curent_sector->lock);						// 이전 섹터에서 나가기 위해서.
+		AcquireSRWLockExclusive(&prev_sector->lock);						// 이전 섹터에서 나가기 위해서.
 		prev_sector->actors.erase(local_actor_id);
-		ReleaseSRWLockExclusive(&curent_sector->lock);						
+		ReleaseSRWLockExclusive(&prev_sector->lock);						
 
 		AcquireSRWLockExclusive(&curent_sector->lock);						// 내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 		curent_sector->actors.emplace(local_actor_id, my_actor);
 		my_actor->current_sector = curent_sector;							// 타 스레드에서 접근하면 여기 일로 하고?
 		ReleaseSRWLockExclusive(&curent_sector->lock);						// 내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
-		
-		//my_actor->session->request_updating_position(my_actor->y, my_actor->x);
 	}
-
-
 
 
 
