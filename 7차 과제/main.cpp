@@ -102,6 +102,8 @@
 
 using namespace c2;
 #include "DBManager.h"
+
+
 void main()
 {
 	setlocale(LC_ALL, "");
@@ -126,4 +128,7 @@ void main()
 	g_server->start();
 
 	g_server->finalize();
+
+
+	
 }

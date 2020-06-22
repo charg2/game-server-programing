@@ -2,12 +2,17 @@ my_id = 9999;
 counter = 0;
 target_id = -1;
 
+-- 배치 좌표 이름 타입 레벨등 정보 스크리트로 저장.
+
+monster_peace = 0
+monster_move = 1
+monster_agro = 2
+
 function prepare_npc_script(id)
 	my_id = id;
 	counter = 0;
 	target_id = -1;
 end
-
 
 function event_palayer_move(actor_id, x, y)
 	if server_get_npc_x(my_id) == x
@@ -32,8 +37,5 @@ function update_script()
 		counter = counter + 1;
 	end
 end
-
-
-
 
 

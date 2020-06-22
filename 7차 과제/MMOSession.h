@@ -15,12 +15,14 @@ public :
 
 	void enter_zone();
 
+	void move_to(int y, int x, char direction);
+
 	void response_loginok();
 	void response_login_failure();
 
 	virtual void on_handling_db_task(DBTask* task);
 
-	void request_login_validation(char* name);
+	void request_login_validation(const wchar_t* w_name);
 	void request_updating_position(int y, int x);
 	//void has_vliad_id();
 

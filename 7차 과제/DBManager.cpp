@@ -190,10 +190,10 @@ uint32_t __stdcall DBManager::db_reader(LPVOID param)
 				
 				int id, level, hp, exp, y, x;
 
-				db_helper.bind_param_str(load_actor_db_task->name);
+				db_helper.bind_param_wstr(load_actor_db_task->name);
 
 				db_helper.bind_result_column_int(&load_actor_db_task->user_id);
-				db_helper.bind_result_column_str(load_actor_db_task->name, count_of(load_actor_db_task->name));
+				db_helper.bind_result_column_wstr(load_actor_db_task->name, count_of(load_actor_db_task->name));
 				db_helper.bind_result_column_int(&load_actor_db_task->y);
 				db_helper.bind_result_column_int(&load_actor_db_task->x);
 				db_helper.bind_result_column_int(&load_actor_db_task->level);

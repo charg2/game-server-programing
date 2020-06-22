@@ -6,6 +6,7 @@
 #include "MMOServer.h"
 #include "MMONpc.h"
 #include "MMODBTask.h"
+#include <unordered_set>
 
 MMOActor::MMOActor(MMOSession* owner)
 	: x{}, y{},
@@ -157,7 +158,7 @@ void MMOActor::send_enter_packet(MMOActor* other)
 	payload.header.type = S2C_ENTER;
 	payload.x = other->x;
 	payload.y = other->y;
-	strcpy_s(payload.name, other->name);
+	wcscpy_s(payload.name, other->name);
 	payload.o_type = 0;
 
 	AcquireSRWLockExclusive(&this->lock);
@@ -181,7 +182,7 @@ void MMOActor::send_enter_packet_without_updating_viewlist(MMOActor* other)
 	payload.header.type = S2C_ENTER;
 	payload.x = other->x;
 	payload.y = other->y;
-	strcpy_s(payload.name, other->name);
+	wcscpy_s(payload.name, other->name);
 	payload.o_type = 0;
 
 
@@ -216,7 +217,8 @@ void MMOActor::send_enter_packet(MMONpc* other)
 	payload.header.type = S2C_ENTER;
 	payload.x = other->x;
 	payload.y = other->y;
-	strcpy_s(payload.name, other->name);
+	wcscpy_s(payload.name, other->name);
+
 	payload.o_type = 1;
 
 	AcquireSRWLockExclusive(&this->lock);
@@ -237,7 +239,7 @@ void MMOActor::send_enter_packet_without_updating_viewlist(MMONpc* other)
 	payload.header.type = S2C_ENTER;
 	payload.x = other->x;
 	payload.y = other->y;
-	strcpy_s(payload.name, other->name);
+	wcscpy_s(payload.name, other->name);
 	payload.o_type = 1;
 
 	c2::Packet* enter_packet = c2::Packet::alloc();
@@ -377,10 +379,96 @@ void MMOActor::sned_chat_packet(MMOActor* other)
 
 }
 
+#include "contents_enviroment.h"
+#include "MMONpcManager.h"
 
 void MMOActor::attack()
 {
-	// 주변 범위를 공격함.
+	int ys[4];
+	int xs[4];
+	int effective_position_count {};
+
+	int y = this->y; 
+	int x = this->x;
+
+	std::unordered_set<int32_t> npc_attack_list;
+
+	// 주변 4방향 좌표를 구하고 검사를 함. 장애물이 있는 곳 or 인덱스 범위를 초과 하는 곳이면 그곳은 제외한다. (  npc만 팬다. ) 
+	if ( y - 1 >= 0 && g_zone->has_obstacle(y -1, x) == false )
+	{
+		ys[effective_position_count] = y - 1; xs[effective_position_count] = x;
+		effective_position_count += 1;
+	}
+	if (y + 1 < c2::constant::MAP_HEIGHT && g_zone->has_obstacle(y + 1, x) == false)
+	{
+		ys[effective_position_count] = y + 1; xs[effective_position_count] = x;
+		effective_position_count += 1;
+	}
+	if (x - 1 >= 0 && g_zone->has_obstacle(y, x -1) == false)
+	{
+		ys[effective_position_count] = y; xs[effective_position_count] = x - 1;
+		effective_position_count += 1;
+	}
+	if (x + 1 < c2::constant::MAP_WIDTH && g_zone->has_obstacle(y, x + 1) == false)
+	{
+		ys[effective_position_count] = y; xs[effective_position_count] = x + 1;
+		effective_position_count += 1;
+	}
+	
+
+	// 
+	const MMONear* nears = g_zone->get_near(y, x); // 
+	for (int n = 0; n < nears->count; ++n)
+	{
+		MMOSector* near_sector = nears->sectors[n];			
+		std::unordered_set<int32_t>* npcs = &near_sector->npcs;
+
+		AcquireSRWLockShared(&near_sector->lock); // 섹터에 npc에 대한 읽기 작업만.
+		for (int32_t npc_id : *npcs)
+		{
+			MMONpc* npc = g_npc_manager->get_npc(npc_id);   // npc를 구하고...
+			
+			// if (npc->state != DEATH)  					// npc 상태가 사망이 아니면 
+			// 이거를 밑에 실제로 때릴때 해도 됨.
+
+			for (int k = 0; k < effective_position_count; ++k)
+			{
+				if (ys[k] == npc->y && xs[k] == npc->x) // 좌표가 일치하면 
+				{
+					npc_attack_list.insert(npc_id);	//공격 범위에 추가.
+
+					break;	// 종료.
+				}
+			}
+		}
+		ReleaseSRWLockShared(&near_sector->lock);
+	}
+
+
+	// 락을 풀고 임시 공격 범위 리스트에게 데미지를 입힘
+	for (int32_t target_npc_id : npc_attack_list) // 피격될 NPC를 순회하면서 피격 시킴.
+	{
+		MMONpc* npc = g_npc_manager->get_npc(target_npc_id);   // npc를 구하고...
+		//
+		//if (npc->state != NPC_DEATH)  					// npc 상태가 사망이 아니면  // 사망상태여도 클라에서 적당히 처리 해줌.
+		//	continue;
+	
+		// 공격 하고 NPC 죽었으면 죽었다고 상태 바꾸기 ㅇㅇ;
+
+		// 누가 죽인건지도 나타내자.	
+		
+		// auto ret = this->hit(npc);
+		 
+		// 죽인거면 경험치를 얻고 그에 대한 처리를 한다.
+
+		// NPC도 30초 후 리스폰.
+		
+		// 전투메시지 나에 대해 경험치를 얻었다고 보냄.
+
+		// npc가 주변에 브로드 캐스팅함. // 죽거나 체력이 깍였다고 .. 
+	}
+
+
 }
 
 

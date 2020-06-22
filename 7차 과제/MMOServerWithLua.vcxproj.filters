@@ -371,12 +371,15 @@
     <ClCompile Include="DBTask.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="monster.lua">
+      <Filter>소스 파일\script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="config.json">
       <Filter>소스 파일</Filter>
     </None>
-    <None Include="script\npc.lua">
+    <None Include="scripts\npc.lua">
       <Filter>소스 파일\script</Filter>
     </None>
   </ItemGroup>

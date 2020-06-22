@@ -33,7 +33,7 @@ int l2c_send_chatting_to_target(lua_State* vm)
 {
 	int actor_id = (int)lua_tonumber(vm, -3);		// 제일 최근에 스택에 넣은 값.
 	int my_id = (int)lua_tonumber(vm, -2);		// 제일 최근에 스택에 넣은 값.
-	char* msg = (char*)lua_tostring(vm, -1);
+	wchar_t* msg = (wchar_t*)lua_tostring(vm, -1);
 
 	lua_pop(vm, 4);			
 	

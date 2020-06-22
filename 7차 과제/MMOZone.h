@@ -3,7 +3,8 @@
 #include "contents_enviroment.h"
 using namespace c2::enumeration;
 class MMOServer;
-struct MMOACtor;
+struct MMOActor;
+struct MMONear;
 struct MMOZone //
 {
 public:
@@ -14,9 +15,13 @@ public:
 
 	void enter_actor(MMOActor* actor);		//  for login
 
+	void load_obstacles();
 	
 	MMOSector* get_sector(int32_t y, int32_t x);
-	MMOSector* get_sector(MMOActor* actor);
+	
+	MMOSector*		get_sector(MMOActor* actor);
+	const MMONear*	get_near( int32_t y, int32_t x) const;
+	bool			has_obstacle(int32_t y , int32_t x);
 
 public:
 	MMOSector						sectors[MAP_NAX_HEIGHT_INDEX][MAP_NAX_WIDTH_INDEX];

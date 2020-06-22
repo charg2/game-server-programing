@@ -124,6 +124,7 @@ namespace c2::util
 			return false;
 		}
 
+
 		out_data = document[tag.data()].GetDouble();
 		return true;
 	}

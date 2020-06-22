@@ -249,6 +249,7 @@
     <ClCompile Include="MMOServer.cpp" />
     <ClCompile Include="MMOSession.cpp" />
     <ClCompile Include="MMOZone.cpp" />
+    <ClCompile Include="monster.lua" />
     <ClCompile Include="network\SocketAddress.cpp" />
     <ClCompile Include="packet_handler_base.cpp" />
     <ClCompile Include="packet_handler_mmo.cpp" />
@@ -260,7 +261,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="config.json" />
-    <None Include="script\npc.lua" />
+    <None Include="scripts\npc.lua" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="lua53.lib" />

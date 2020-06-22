@@ -2,7 +2,7 @@
 #include "MMOActor.h"
 #include "MMOZone.h"
 #include "MMOServer.h"
-
+#include <bitset>
 MMOZone::MMOZone()
 {
 	// position to idx table
@@ -61,6 +61,18 @@ void MMOZone::enter_actor(MMOActor* actor)
 	ReleaseSRWLockExclusive(&current_sector->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 }
 
+void MMOZone::load_obstacles()
+{
+	for (int y = 0; y < 800; ++y)
+	{
+		for (int x = 0; x < 800; ++x)
+		{
+			MMOSector::obstacle_table[y].set(x);
+			MMOSector::obstacle_table[y].reset(x);
+			MMOSector::obstacle_table[y][x];
+		}
+	}
+}
 
 
 
@@ -68,6 +80,19 @@ void MMOZone::enter_actor(MMOActor* actor)
 MMOSector* MMOZone::get_sector(MMOActor* actor)
 {
 	return &this->sectors[postion_width_mapling_table[actor->y]][postion_width_mapling_table[actor->x]];
+}
+
+const MMONear* MMOZone::get_near(int32_t y, int32_t x) const
+{
+	const MMOSector* sector = &this->sectors[postion_width_mapling_table[y]][postion_width_mapling_table[x]];
+	
+	return sector->get_near(y, x);
+}
+
+
+bool MMOZone::has_obstacle(int32_t y, int32_t x)
+{
+	return MMOSector::obstacle_table[y][x];
 }
 
 MMOSector* MMOZone::get_sector(int32_t y, int32_t x)

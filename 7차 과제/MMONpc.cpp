@@ -332,18 +332,23 @@ void MMONpc::move_to_anywhere()
 	ReleaseSRWLockExclusive(&vm_lock);
 }
 	
-void MMONpc::send_chatting_to_actor(int32_t actor_id ,char* message)
+void MMONpc::send_chatting_to_actor(int32_t actor_id ,wchar_t* message)
 {
 	sc_packet_chat chat_payload;
 	chat_payload.header.length = sizeof(sc_packet_chat);
 	chat_payload.header.type = S2C_CHAT;
 	chat_payload.id = this->id;
-	strcpy(chat_payload.chat, message);
+	wcscpy_s(chat_payload.chat, message);
 	
 	c2::Packet* chat_packet = c2::Packet::alloc();
 	chat_packet->write(&chat_payload, sizeof(sc_packet_chat));
 
 	zone->server->send_packet(actor_id, chat_packet);
+}
+
+void MMONpc::hit(MMOActor* actor)
+{
+	// actor->
 }
 
 void MMONpc::update_entering_actor(MMOActor* other)

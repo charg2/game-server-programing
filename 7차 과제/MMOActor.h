@@ -28,11 +28,13 @@ public:
 	void reset();
 	void exit();
 
+	// 체력이 깍이면 do_auto_recovery
 	void reset_data(const LoadActorTask* task);
 	void reset_data_when_creation(const CreateActorTask* task);
 
 	bool is_near(MMOActor* actor);
 	bool is_near(MMONpc* npc);
+
 	void get_login_packet_info(sc_packet_login_ok& out_packet);
 
 	int16_t get_id();
@@ -58,7 +60,7 @@ public:
 
 public:
 	int32_t							x, y;
-	char							name[50];
+	wchar_t							name[50];
 	int16_t							hp;
 	int16_t							level;
 	int32_t							current_exp;

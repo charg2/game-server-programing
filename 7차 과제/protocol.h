@@ -8,45 +8,50 @@
 
 namespace c2::enumeration
 {
+	//enum PacketType : char
+	//{
+	//	PT_NONE,
+
+	//	C2S_LOGIN = 1,
+	//	C2S_MOVE,
+	//	C2S_CHAT,
+
+	//	S2C_LOGIN_OK = 1,
+	//	S2C_MOVE,
+	//	S2C_ENTER,
+	//	S2C_LEAVE,
+	//	S2C_CHAT,
+
+	//	PT_MAX,
+	//};
+
+
 	enum PacketType : char
 	{
 		PT_NONE,
 
 		C2S_LOGIN = 1,
 		C2S_MOVE,
+		C2S_ATTACK,
 		C2S_CHAT,
+		C2S_LOGOUT,
 
 		S2C_LOGIN_OK = 1,
+		S2C_LOGIN_FAIL,
 		S2C_MOVE,
 		S2C_ENTER,
 		S2C_LEAVE,
 		S2C_CHAT,
-
+		S2C_STAT_CHANGE,
 		PT_MAX,
+
 	};
 
 
-	//enum PacketType2 : char
-	//{
-	//	PT_NONE,
-
-	//	C2S_LOGIN = 1,
-	//	C2S_MOVE,
-	//	C2S_ATTACK,
-	//	C2S_CHAT,
-	//	C2S_LOGOUT,
-
-	//	S2C_LOGIN_OK = 1,
-	//	S2C_LOGIN_FAIL,
-	//	S2C_MOVE,
-	//	S2C_ENTER,
-	//	S2C_LEAVE,
-	//	S2C_CHAT,
-	//	S2C_STAT_CHANGE,
-	//	PT_MAX,
-
-	//};
+	
 }
+
+
 
 #pragma pack(push, 1)
 
@@ -74,6 +79,12 @@ struct sc_packet_login_ok // 2 4 4 2 2 4
 	int		exp;
 };
 
+struct sc_packet_login_fail 
+{
+	PacketHeader header;
+};
+
+
 struct sc_packet_move
 {
 	PacketHeader header;
@@ -88,7 +99,7 @@ struct sc_packet_enter
 	PacketHeader header;
 
 	int id;
-	char name[MAX_ID_LEN];
+	wchar_t name[MAX_ID_LEN];
 	char o_type;
 	short x, y;
 };
@@ -105,14 +116,22 @@ struct sc_packet_chat
 	PacketHeader header;
 
 	int	 id;
-	char chat[MAX_CHAT_LEN];
+	wchar_t chat[MAX_CHAT_LEN];
+};
+
+struct sc_packet_stat_change {
+	PacketHeader header;
+
+	short hp;
+	short level;
+	int	exp;
 };
 
 struct cs_packet_login
 {
 	PacketHeader header;
 
-	char	name[MAX_ID_LEN];
+	wchar_t 	name[MAX_ID_LEN];
 };
 
 
@@ -124,12 +143,22 @@ struct cs_packet_move
 	unsigned	move_time;
 };
 
+struct cs_packet_attack 
+{
+	PacketHeader header;
+};
+
 struct cs_packet_chat
 {
 	PacketHeader header;
 
-	int	 id;
-	char chat[MAX_CHAT_LEN];
+	int		id;
+	wchar_t chat[MAX_CHAT_LEN];
+};
+
+struct cs_packet_logout 
+{
+	PacketHeader header;
 };
 
 #pragma pack(pop)

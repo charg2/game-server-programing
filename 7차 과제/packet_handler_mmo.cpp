@@ -60,7 +60,7 @@ REGISTER_HANDLER(C2S_MOVE)
 	int local_x = my_actor->x;
 	int local_actor_id = my_actor->get_id();
 
-	
+
 	// 장애물 체크 등등.
 	switch (cs_move_payload.direction)
 	{
@@ -77,15 +77,13 @@ REGISTER_HANDLER(C2S_MOVE)
 		if (local_y > 0) local_y--;
 		break;
 	default:
-		size_t* invalid_ptr{}; *invalid_ptr = 0;
+		size_t* invalid_ptr{}; *invalid_ptr = 02;
 		break;
 	}
 
 
 	my_actor->x = local_x;
 	my_actor->y = local_y;
-
-	mmo_session->request_updating_position(local_y, local_x);
 
 	MMOSector* prev_sector = my_actor->current_sector;					// view_list 긁어오기.
 	MMOSector* curent_sector = mmo_zone->get_sector(local_y, local_x);			// view_list 긁어오기.
@@ -101,6 +99,8 @@ REGISTER_HANDLER(C2S_MOVE)
 		curent_sector->actors.emplace(local_actor_id, my_actor);
 		my_actor->current_sector = curent_sector;							// 타 스레드에서 접근하면 여기 일로 하고?
 		ReleaseSRWLockExclusive(&curent_sector->lock);						// 내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
+
+		mmo_session->request_updating_position(local_y, local_x);
 	}
 
 
@@ -251,6 +251,19 @@ REGISTER_HANDLER(C2S_MOVE)
 }
 
 
+REGISTER_HANDLER(C2S_ATTACK)
+{
+	MMOSession*		mmo_session	{ (MMOSession*)session };
+	MMOActor*		my_actor	{ mmo_session->get_actor() };
+	//MMOServer*		mmo_server	{ (MMOServer*)session->server };
+	//MMOSector*		sector		{ my_actor->current_sector };
+	
+	//g_server;
+	//
+	my_actor->attack();
+}
+
+// 뷰리스트 반영을 할지에 대해 생각을 해봐야할듯.
 REGISTER_HANDLER(C2S_CHAT)
 {
 	MMOSession* mmo_session		{ (MMOSession*)session };
@@ -261,17 +274,14 @@ REGISTER_HANDLER(C2S_CHAT)
 	cs_packet_chat chat_payload; 								// id check
 	in_packet.read(&chat_payload, sizeof(cs_packet_chat));
 
-
-	//static thread_local 
-
-	std::unordered_map<int16_t, MMOActor*> local_view_list;
-	local_view_list.clear();
+	std::unordered_map<int16_t, MMOActor*> local_view_list;		// 임시 뷰리스트.
+	//local_view_list.clear();									// ??? 아마 스태틱으로 만들고 테스트를 안해본듯.
 
 
-	MMOSector* current_sector = mmo_server->get_zone()->get_sector(my_actor);			// view_list 긁어오기.
-	const MMONear* nears = current_sector->get_near(my_actor->y, my_actor->x); // 주벽 섹터들.
+
+	MMOSector* current_sector = mmo_server->get_zone()->get_sector(my_actor);		// chat을 날릴 view_list 긁어오기.
+	const MMONear* nears	= current_sector->get_near(my_actor->y, my_actor->x);	// 주벽 섹터들.
 	int near_cnt = nears->count;
-
 	for (int i = 0; i < near_cnt; ++i)
 	{
 		AcquireSRWLockShared(&nears->sectors[i]->lock);
@@ -298,5 +308,48 @@ REGISTER_HANDLER(C2S_CHAT)
 	}
 
 	out_packet->decrease_ref_count();
+}
+
+
+REGISTER_HANDLER(C2S_LOGOUT)
+{
+	MMOSession* mmo_session = (MMOSession*)session;
+	MMOActor* my_actor = mmo_session->get_actor();
+	MMOServer* mmo_server = (MMOServer*)session->server;
+	MMOZone* mmo_zone = mmo_server->get_zone();
+
+	my_actor->session->request_updating_position(my_actor->y, my_actor->x); // 종료 전 플레이어 좌표 업데이트 
+
+	int			my_actor_id = my_actor->get_id(); // 
+
+	MMOSector* my_actor_sector = my_actor->current_sector; 
+	if (my_actor_sector == nullptr)							// 
+	{
+		return;
+	}
+	AcquireSRWLockExclusive(&my_actor->lock);				// 내 락.
+
+	AcquireSRWLockExclusive(&my_actor_sector->lock);		//  view lsit 에 제거 .
+	my_actor_sector->actors.erase(my_actor_id);
+	ReleaseSRWLockExclusive(&my_actor_sector->lock);
+
+	auto& view_list = my_actor->view_list;					// 
+	for (auto& actor_iter : view_list)
+	{
+		//if (actor_iter.second == my_actor) continue;
+		AcquireSRWLockExclusive(&actor_iter.second->lock); 
+		if (0 != actor_iter.second->view_list.count(my_actor_id))
+		{
+			ReleaseSRWLockExclusive(&actor_iter.second->lock);
+			actor_iter.second->send_leave_packet(my_actor);
+		}
+		else
+		{
+			ReleaseSRWLockExclusive(&actor_iter.second->lock);
+		}
+	}
+	view_list.clear();
+
+	ReleaseSRWLockExclusive(&my_actor->lock);
 }
 

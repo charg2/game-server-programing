@@ -92,7 +92,8 @@ void MMOSession::on_handling_db_task(DBTask* task)
 	delete task;
 }
 
-void MMOSession::request_login_validation(char* name)
+
+void MMOSession::request_login_validation(const wchar_t* name)
 {
 	LoadActorTask* load_actor_task = new LoadActorTask(this->session_id, name);
 	
@@ -186,4 +187,55 @@ void MMOSession::enter_zone()
 	actor.view_list = local_view_list;
 	actor.view_list_for_npc = local_view_list_for_npc;
 	ReleaseSRWLockExclusive(&actor.lock);
+}
+
+void MMOSession::move_to(int y, int x, char direction)
+{
+	int local_y = y;
+	int local_x = x;
+	int local_actor_id = actor.get_id();
+
+
+	// 장애물 체크 등등.
+	switch (direction)
+	{
+	case c2::constant::D_DOWN:
+		if (local_y < MAP_HEIGHT - 1)	local_y++;
+		break;
+	case c2::constant::D_LEFT:
+		if (local_x > 0) local_x--;
+		break;
+	case c2::constant::D_RIGHT:
+		if (local_x < MAP_WIDTH - 1) local_x++;
+		break;
+	case c2::constant::D_UP:
+		if (local_y > 0) local_y--;
+		break;
+	default:
+		size_t* invalid_ptr{}; *invalid_ptr = 0;
+		break;
+	}
+
+	actor.x = local_x;
+	actor.y = local_y;
+
+	MMOSector* prev_sector = actor.current_sector;					// view_list 긁어오기.
+	MMOSector* curent_sector = g_server->get_zone()->get_sector(local_y, local_x);			// view_list 긁어오기.
+
+
+	if (prev_sector != curent_sector)										//섹터가 바뀐 경우.
+	{
+		AcquireSRWLockExclusive(&prev_sector->lock);						// 이전 섹터에서 나가기 위해서.
+		prev_sector->actors.erase(local_actor_id);
+		ReleaseSRWLockExclusive(&prev_sector->lock);
+
+		AcquireSRWLockExclusive(&curent_sector->lock);						// 내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
+		curent_sector->actors.emplace(local_actor_id, &actor);
+		actor.current_sector = curent_sector;							// 타 스레드에서 접근하면 여기 일로 하고?
+		ReleaseSRWLockExclusive(&curent_sector->lock);						// 내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
+
+		this->request_updating_position(local_y, local_x);
+	}
+
+
 }

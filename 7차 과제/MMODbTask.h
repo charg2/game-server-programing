@@ -4,7 +4,7 @@
 
 struct CreateActorTask : public DBTask
 {
-	CreateActorTask(uint64_t session_id, const char* name);
+	CreateActorTask(uint64_t session_id, const wchar_t* name);
 	virtual ~CreateActorTask();
 
 	char name[50];
@@ -29,11 +29,11 @@ struct UpdatePositionTask : public DBTask
 
 struct LoadActorTask : public DBTask
 {
-	LoadActorTask(uint64_t session_id, char* name);
+	LoadActorTask(uint64_t session_id, const wchar_t* name);
 	LoadActorTask(const LoadActorTask& other) = delete;
 	virtual ~LoadActorTask();
 
-	char name[50];		// id
+	wchar_t name[50];		// id
 
 	int32_t user_id;
 	int32_t y, x;

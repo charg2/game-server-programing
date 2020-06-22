@@ -32,13 +32,17 @@ struct MMONpc
 	void prepare_virtual_machine();
 	void move();
 	void move_to_anywhere();
-	void send_chatting_to_actor(int32_t actor_id, char* message);
-	
+	void send_chatting_to_actor(int32_t actor_id, wchar_t* message);
+	void hit(MMOActor* actor);
+
 	int16_t		hp;
 	int16_t		max_hp;
+	int16_t		level;
 	int32_t		x, y;
-	char		name[50];
+	wchar_t		name[50];
 	uint64_t	id;
+
+	uint64_t	state; 
 	MMOSector*	current_sector;
 	MMOActor*	target;
 	MMOZone*	zone;

@@ -805,6 +805,8 @@ void OuterServer::load_config_using_json(const wchar_t* file_name)
 	if(false == on_load_config(&json_parser))
 		c2::util::crash_assert();
 
+
+
 	return;
 }
 
