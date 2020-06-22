@@ -119,7 +119,8 @@ struct sc_packet_chat
 	wchar_t chat[MAX_CHAT_LEN];
 };
 
-struct sc_packet_stat_change {
+struct sc_packet_stat_change 
+{
 	PacketHeader header;
 
 	short hp;

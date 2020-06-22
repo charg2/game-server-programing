@@ -33,13 +33,17 @@ int l2c_send_chatting_to_target(lua_State* vm)
 {
 	int actor_id = (int)lua_tonumber(vm, -3);		// 제일 최근에 스택에 넣은 값.
 	int my_id = (int)lua_tonumber(vm, -2);		// 제일 최근에 스택에 넣은 값.
-	wchar_t* msg = (wchar_t*)lua_tostring(vm, -1);
+	char* msg = (char*)lua_tostring(vm, -1);
 
-	lua_pop(vm, 4);			
+
+	wchar_t w_msg_buffer[81]; // 현재 컨텐츠상 채팅은 최대 80바이트임.
+	MultiByteToWideChar(CP_ACP, 0, msg, -1, w_msg_buffer, _countof(w_msg_buffer));
+
+	lua_pop(vm, 4);			 // 빼기전에 ㅣ리 해놔야 함.
 	
 	MMONpc* npc = g_npc_manager->get_npc(my_id);
 
-	npc->send_chatting_to_actor(actor_id, msg);
+	npc->send_chatting_to_actor(actor_id, w_msg_buffer);
 
 	return 1;
 }

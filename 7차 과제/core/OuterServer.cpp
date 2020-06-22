@@ -75,7 +75,6 @@ bool OuterServer::init_network_and_system()
 		setsockopt(this->listen_sock, IPPROTO_TCP, TCP_NODELAY, (const char*)&option, sizeof(option));
 	}
 
-
 	DWORD bytesReturned{ 0 };
 	tcp_keepalive option{ true, 10000, 1000 };
 	WSAIoctl(listen_sock, SIO_KEEPALIVE_VALS, &option, sizeof(tcp_keepalive), 0, 0, &bytesReturned, NULL, NULL);
@@ -83,6 +82,7 @@ bool OuterServer::init_network_and_system()
 	SocketAddress sock_addr{ this->ip, this->port };
 	if (SOCKET_ERROR == ::bind(this->listen_sock, sock_addr.get_as_sockaddr(), sock_addr.size()))
 	{
+		printf("server initation... bind error : %d\n", GetLastError());
 		return false;
 	}
 
@@ -473,14 +473,22 @@ bool OuterServer::initialize()
 	do
 	{
 		if (false == init_network_and_system())
+		{
+			printf("n");
 			break;
+		}
 
 		if (false == init_sessions())
-			break;
+		{
+			printf("s");
 
+			break;
+		}
 		if (false == init_threads())
+		{
+			printf("t");
 			break;
-
+		}
 
 		printf("ok.");
 

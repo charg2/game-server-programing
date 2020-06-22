@@ -7,7 +7,7 @@
 
 #define count_of(arr)						sizeof(arr) / sizeof(arr[0])
 
-//#define release_mode
+//#define debug_mode
 #ifdef release_mode
 	#define debug_code( a )			/##/ { (a); }
 	#define debug_console( a )		/##/ { (a); }

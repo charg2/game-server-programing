@@ -7,7 +7,7 @@
 using namespace std;
 using namespace chrono;
 
-#include "protocol.h"
+#include "..\..\IOCPGameServer\IOCPGameServer\protocol.h"
 
 sf::TcpSocket g_socket;
 
@@ -17,7 +17,7 @@ constexpr auto SCREEN_HEIGHT = 21;
 constexpr auto TILE_WIDTH = 65;
 constexpr auto WINDOW_WIDTH = TILE_WIDTH * SCREEN_WIDTH / 2 + 10;   // size of window
 constexpr auto WINDOW_HEIGHT = TILE_WIDTH * SCREEN_WIDTH / 2 + 10;
-constexpr auto BUF_SIZE = 200;
+constexpr auto BUF_SIZE = 400;
 constexpr auto MAX_USER = NPC_ID_START;
 
 int g_left_x;
@@ -33,14 +33,14 @@ private:
 	bool m_showing;
 	sf::Sprite m_sprite;
 
-	char m_mess[MAX_STR_LEN];
+	wchar_t m_mess[MAX_STR_LEN];
 	high_resolution_clock::time_point m_time_out;
 	sf::Text m_text;
 	sf::Text m_name;
 
 public:
 	int m_x, m_y;
-	char name[MAX_ID_LEN];
+	wchar_t name[MAX_ID_LEN];
 	OBJECT(sf::Texture& t, int x, int y, int x2, int y2) {
 		m_showing = false;
 		m_sprite.setTexture(t);
@@ -85,13 +85,13 @@ public:
 			g_window->draw(m_text);
 		}
 	}
-	void set_name(char str[]) {
+	void set_name(wchar_t str[]) {
 		m_name.setFont(g_font);
 		m_name.setString(str);
 		m_name.setFillColor(sf::Color(255, 255, 0));
 		m_name.setStyle(sf::Text::Bold);
 	}
-	void add_chat(char chat[]) {
+	void add_chat(wchar_t chat[]) {
 		m_text.setFont(g_font);
 		m_text.setString(chat);
 		m_text.setFillColor(sf::Color(255, 0, 0));
@@ -130,19 +130,21 @@ void client_finish()
 	delete pieces;
 }
 
-void ProcessPacket(char* ptr)
+void ProcessPacket(unsigned char* ptr)
 {
 	static bool first_time = true;
+	printf("ptr[1] : %d \n", ptr[1]);
 	switch (ptr[1])
 	{
 	case S2C_LOGIN_OK:
 	{
+		printf("s2c_loginok\n");
+
 		sc_packet_login_ok* my_packet = reinterpret_cast<sc_packet_login_ok*>(ptr);
 		if (my_packet->id == -1)
 		{
 			cout << "invliad id" << endl;
 			g_socket.disconnect();
-			//g_window->close();
 			return;
 		}
 
@@ -157,6 +159,7 @@ void ProcessPacket(char* ptr)
 
 	case S2C_ENTER:
 	{
+		printf("s2c_enter\n");
 		sc_packet_enter* my_packet = reinterpret_cast<sc_packet_enter*>(ptr);
 		int id = my_packet->id;
 
@@ -171,7 +174,7 @@ void ProcessPacket(char* ptr)
 				npcs[id] = OBJECT{ *pieces, 64, 0, 64, 64 };
 			else
 				npcs[id] = OBJECT{ *pieces, 0, 0, 64, 64 };
-			strcpy_s(npcs[id].name, my_packet->name);
+			wcscpy_s(npcs[id].name, my_packet->name);
 			npcs[id].set_name(my_packet->name);
 			npcs[id].move(my_packet->x, my_packet->y);
 			npcs[id].show();
@@ -180,6 +183,7 @@ void ProcessPacket(char* ptr)
 	break;
 	case S2C_MOVE:
 	{
+		printf("s2c_move\n");
 		sc_packet_move* my_packet = reinterpret_cast<sc_packet_move*>(ptr);
 		int other_id = my_packet->id;
 		if (other_id == g_myid) {
@@ -196,6 +200,7 @@ void ProcessPacket(char* ptr)
 
 	case S2C_LEAVE:
 	{
+		printf("s2c_leave\n");
 		sc_packet_leave* my_packet = reinterpret_cast<sc_packet_leave*>(ptr);
 		int other_id = my_packet->id;
 		if (other_id == g_myid) {
@@ -208,11 +213,13 @@ void ProcessPacket(char* ptr)
 	}
 	break;
 	case S2C_CHAT: {
+		printf("s2c_chat\n");
+
 		sc_packet_chat *my_packet = reinterpret_cast<sc_packet_chat*>(ptr);
-		int o_id = my_packet->id;
-		if (0 != npcs.count(o_id)) {
-			npcs[o_id].add_chat(my_packet->mess);
-		}
+		//int o_id = my_packet->id;
+		//if (0 != npcs.count(o_id)) {
+		//	npcs[o_id].add_chat(my_packet->chat);
+		//}
 	}
 				   break;
 	default:
@@ -221,16 +228,18 @@ void ProcessPacket(char* ptr)
 	}
 }
 
-void process_data(char* net_buf, size_t io_byte)
+void process_data(unsigned char* net_buf, size_t io_byte)
 {
-	char* ptr = net_buf;
+	unsigned char* ptr = net_buf;
 	static size_t in_packet_size = 0;
 	static size_t saved_packet_size = 0;
-	static char packet_buffer[BUF_SIZE];
+	static unsigned char packet_buffer[BUF_SIZE];
 
-	while (0 != io_byte) {
+	while (0 != io_byte) 
+	{
 		if (0 == in_packet_size) in_packet_size = ptr[0];
-		if (io_byte + saved_packet_size >= in_packet_size) {
+		if (io_byte + saved_packet_size >= in_packet_size) 
+		{
 			memcpy(packet_buffer + saved_packet_size, ptr, in_packet_size - saved_packet_size);
 			ProcessPacket(packet_buffer);
 			ptr += in_packet_size - saved_packet_size;
@@ -238,7 +247,8 @@ void process_data(char* net_buf, size_t io_byte)
 			in_packet_size = 0;
 			saved_packet_size = 0;
 		}
-		else {
+		else 
+		{
 			memcpy(packet_buffer + saved_packet_size, ptr, io_byte);
 			saved_packet_size += io_byte;
 			io_byte = 0;
@@ -248,7 +258,7 @@ void process_data(char* net_buf, size_t io_byte)
 
 void client_main()
 {
-	char net_buf[BUF_SIZE];
+	unsigned char net_buf[BUF_SIZE];
 	size_t	received;
 
 	auto recv_result = g_socket.receive(net_buf, BUF_SIZE, received);
@@ -258,6 +268,9 @@ void client_main()
 		while (true);
 	}
 
+	if(received != 0)
+		printf("%d \n", received);
+	
 	if (recv_result == sf::Socket::Disconnected)
 	{
 		wcout << L"서버 접속 종료.";
@@ -302,7 +315,7 @@ void client_main()
 
 void send_packet(void* packet)
 {
-	char* p = reinterpret_cast<char*>(packet);
+	unsigned char* p = reinterpret_cast<unsigned char*>(packet);
 	size_t sent;
 	g_socket.send(p, p[0], sent);
 }
@@ -321,10 +334,10 @@ void send_move_packet(unsigned char dir)
 int main()
 {
 	wcout.imbue(locale("korean"));
-	string id_str;
+	wstring id_str;
 	cout << "서버 연결전 ID를 입력해주세요 : .\n";
-	cin >> id_str;
-	cout << id_str << endl;
+	wcin >> id_str;
+	wcout << id_str << endl;
 
 
 	sf::Socket::Status status = g_socket.connect("127.0.0.1", SERVER_PORT);
@@ -342,9 +355,10 @@ int main()
 	l_packet.size = sizeof(l_packet);
 	l_packet.type = C2S_LOGIN;
 	int t_id = GetCurrentProcessId();
-	sprintf_s(l_packet.name, "%s", id_str.c_str());
-	cout << l_packet.name << endl;
-	strcpy_s(avatar.name, l_packet.name);
+	wsprintfW(l_packet.name, L"%s", id_str.c_str());
+	//cout << l_packet.name << endl;
+
+	wcscpy_s(avatar.name, l_packet.name);
 	avatar.set_name(l_packet.name);
 	send_packet(&l_packet);
 

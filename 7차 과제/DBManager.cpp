@@ -134,7 +134,7 @@ uint32_t __stdcall DBManager::db_writer(LPVOID param)
 					CreateActorTask*	create_task = reinterpret_cast<CreateActorTask*>(task);
 					DbHelper			db_helper;
 
-					db_helper.bind_param_str(create_task->name);
+					db_helper.bind_param_wstr(create_task->name);
 
 					db_helper.bind_result_column_int(&create_task->user_id);
 

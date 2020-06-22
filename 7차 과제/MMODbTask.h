@@ -7,7 +7,7 @@ struct CreateActorTask : public DBTask
 	CreateActorTask(uint64_t session_id, const wchar_t* name);
 	virtual ~CreateActorTask();
 
-	char name[50];
+	wchar_t		name[50];
 
 	int32_t		user_id;
 	//int32_t		y, x;

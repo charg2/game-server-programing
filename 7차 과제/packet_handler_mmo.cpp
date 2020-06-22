@@ -300,6 +300,7 @@ REGISTER_HANDLER(C2S_CHAT)
 	c2::Packet* out_packet = c2::Packet::alloc();
 	// 프로토콜이 형식이 똑같음 타입만 바꿔주면 됨.
 	chat_payload.header.type = S2C_CHAT;
+	chat_payload.header.length = sizeof(cs_packet_chat);
 	out_packet->write(&chat_payload, sizeof(cs_packet_chat));	//여기가 좀 병목인가;
 	out_packet->add_ref( local_view_list.size() );
 	for (auto& it : local_view_list)

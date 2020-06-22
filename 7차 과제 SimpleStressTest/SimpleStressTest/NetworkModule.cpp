@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <iostream>
 #include <thread>
+#include <wchar.h>
 #include <vector>
 #include <unordered_set>
 #include <mutex>
@@ -319,7 +320,7 @@ void Adjust_Number_Of_Client()
 	cs_packet_login l_packet;
 
 	int temp = num_connections;
-	sprintf_s(l_packet.name, "%d", temp);
+	wsprintf(l_packet.name, L"%d", temp);
 	l_packet.size = sizeof(l_packet);
 	l_packet.type = C2S_LOGIN;
 	SendPacket(num_connections, &l_packet);
