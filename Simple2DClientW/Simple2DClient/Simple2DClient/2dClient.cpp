@@ -340,7 +340,6 @@ void send_move_packet(unsigned char dir)
 
 void send_chat_packet(int id)
 {
-	cout << "void send_chat_packet(int id)1\n";
 	cs_packet_chat c_packet;
 	c_packet.type = C2S_CHAT;
 	c_packet.size = sizeof(c_packet);
@@ -349,7 +348,6 @@ void send_chat_packet(int id)
 	wcscpy_s(c_packet.chat, L"dddd");
 
 	send_packet(&c_packet);
-	cout << "void send_chat_packet(int id)2\n";
 }
 
 void send_attack_packet()

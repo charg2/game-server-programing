@@ -205,6 +205,7 @@ void Session::recv_completion(size_t transfered_bytes)
 		return;
 	}
 
+	printf("[%d][%s] recved : %d \n", __LINE__, __FILE__, transfered_bytes);
 
 	this->parse_packet();
 	//this->parse_packet_echo();

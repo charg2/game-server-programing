@@ -26,7 +26,7 @@ namespace c2::enumeration
 	//};
 
 
-	enum PacketType : char
+	enum PacketType : unsigned char
 	{
 		PT_NONE,
 
@@ -60,8 +60,8 @@ using namespace c2::constant;
 
 struct PacketHeader
 {
-	char		length;
-	PacketType	type;
+	unsigned char	length;
+	PacketType		type;
 
 	static constexpr size_t header_length{ sizeof(uint16_t) + sizeof(PacketType) };
 };
