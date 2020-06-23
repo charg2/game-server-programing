@@ -50,6 +50,8 @@ void MMOActor::reset()
 
 	status = ST_ACTIVE;
 
+	is_alive = true;
+
 	ReleaseSRWLockExclusive(&lock);
 }
 
@@ -126,7 +128,121 @@ bool MMOActor::is_near(MMONpc* other)
 	return true;
 }
 
+void MMOActor::increase_exp(int32_t exp)
+{
+	AcquireSRWLockExclusive(&this->lock);
+	this->current_exp += exp;
+	if (current_exp >= levelup_exp)
+	{
+		current_exp -= levelup_exp;
+		levelup_exp *= 2;
+	}
 
+	sc_packet_stat_change stat_payload;
+	
+	stat_payload.hp					= this->hp;
+	stat_payload.level				= this->level;
+	stat_payload.exp				= this->current_exp;
+
+	ReleaseSRWLockExclusive(&this->lock);
+
+	stat_payload.header.type = S2C_STAT_CHANGE;
+	stat_payload.header.length = sizeof(sc_packet_stat_change);
+
+	c2::Packet* exp_packet = c2::Packet::alloc();
+	exp_packet->write(&stat_payload, sizeof(sc_packet_stat_change));
+
+	g_server->send_packet(this->session_id, exp_packet);
+}
+
+void MMOActor::decrease_exp(int32_t exp) // 사망시..
+{
+	AcquireSRWLockExclusive(&this->lock);
+	this->current_exp -= exp;
+	if (current_exp <= 0)
+	{
+		current_exp = 0;
+	}
+
+	sc_packet_stat_change stat_payload;
+	stat_payload.header.type = S2C_STAT_CHANGE;
+	stat_payload.header.length = sizeof(sc_packet_stat_change);
+	stat_payload.hp = this->hp;
+	stat_payload.level = this->level;
+	stat_payload.exp = this->current_exp;
+
+	c2::Packet* exp_packet = c2::Packet::alloc();
+	exp_packet->write(&stat_payload, sizeof(sc_packet_stat_change));
+
+	g_server->send_packet(this->session_id, exp_packet);
+
+	ReleaseSRWLockExclusive(&this->lock);
+}
+
+void MMOActor::increase_hp(int32_t hp)
+{
+	AcquireSRWLockExclusive(&this->lock);
+	this->hp += hp;
+	if (hp > 200)
+	{
+		current_exp = 200;
+	}
+
+	sc_packet_stat_change stat_payload;
+	stat_payload.hp = this->hp;
+	stat_payload.level = this->level;
+	stat_payload.exp = this->current_exp;
+
+	ReleaseSRWLockExclusive(&this->lock); // 여기까지만 락이 필요함.
+
+	stat_payload.header.type = S2C_STAT_CHANGE;
+	stat_payload.header.length = sizeof(sc_packet_stat_change);
+
+	c2::Packet* exp_packet = c2::Packet::alloc();
+	exp_packet->write(&stat_payload, sizeof(sc_packet_stat_change));
+
+	g_server->send_packet(this->session_id, exp_packet);
+}
+
+void MMOActor::decrease_hp(MMONpc* npc, int32_t damage)
+{
+	AcquireSRWLockExclusive(&this->lock);
+
+	// 공격 하고 NPC 죽었으면 죽었다고 상태 바꾸기 ㅇㅇ;
+	if (this->is_alive == false) // 죽은 상태면  고인 건들지 말고 사라진다.
+	{
+		ReleaseSRWLockExclusive(&this->lock);
+	}
+
+	// 체력 처리.
+	hp -= damage;
+	if (hp <= 0)
+	{
+		// 사망시 처리. 
+		is_alive = false;
+
+		local_timer->push_timer_task(session_id, TTT_RESPAWN_NPC, 30'000, 0);
+	}
+	else
+	{
+		// 아닐시 해야 하는거.
+
+		sc_packet_stat_change stat_payload;
+		stat_payload.header.type = S2C_STAT_CHANGE;
+		stat_payload.header.length = sizeof(sc_packet_stat_change);
+		stat_payload.hp = this->hp;
+		stat_payload.level = this->level;
+		stat_payload.exp = this->current_exp;
+
+		c2::Packet* exp_packet = c2::Packet::alloc();
+		exp_packet->write(&stat_payload, sizeof(sc_packet_stat_change));
+
+		g_server->send_packet(this->session_id, exp_packet);
+
+	}
+
+	ReleaseSRWLockExclusive(&this->lock);
+}
 
 
 void MMOActor::get_login_packet_info(sc_packet_login_ok& out_payload)
@@ -430,12 +546,11 @@ void MMOActor::attack()
 			
 			// if (npc->state != DEATH)  					// npc 상태가 사망이 아니면 
 			// 이거를 밑에 실제로 때릴때 해도 됨.
-
 			for (int k = 0; k < effective_position_count; ++k)
 			{
 				if (ys[k] == npc->y && xs[k] == npc->x) // 좌표가 일치하면 
 				{
-					npc_attack_list.insert(npc_id);	//공격 범위에 추가.
+					npc_attack_list.insert(npc_id);	//공격 대상에 추가.
 
 					break;	// 종료.
 				}
@@ -449,26 +564,9 @@ void MMOActor::attack()
 	for (int32_t target_npc_id : npc_attack_list) // 피격될 NPC를 순회하면서 피격 시킴.
 	{
 		MMONpc* npc = g_npc_manager->get_npc(target_npc_id);   // npc를 구하고...
-		//
-		//if (npc->state != NPC_DEATH)  					// npc 상태가 사망이 아니면  // 사망상태여도 클라에서 적당히 처리 해줌.
-		//	continue;
-	
-		// 공격 하고 NPC 죽었으면 죽었다고 상태 바꾸기 ㅇㅇ;
 
-		// 누가 죽인건지도 나타내자.	
-		
-		// auto ret = this->hit(npc);
-		 
-		// 죽인거면 경험치를 얻고 그에 대한 처리를 한다.
-
-		// NPC도 30초 후 리스폰.
-		
-		// 전투메시지 나에 대해 경험치를 얻었다고 보냄.
-
-		// npc가 주변에 브로드 캐스팅함. // 죽거나 체력이 깍였다고 .. 
+		npc->decrease_hp(this, c2::constant::TEST_DMG);
 	}
-
-
 }
 
 

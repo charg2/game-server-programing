@@ -14,6 +14,7 @@ public:
 	~MMOZone();
 
 	void enter_actor(MMOActor* actor);		//  for login
+	void enter_npc(MMONpc* actor);		//  for login
 
 	void load_obstacles();
 	

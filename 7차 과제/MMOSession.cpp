@@ -151,7 +151,7 @@ void MMOSession::enter_zone()
 	////////// 내정보를 상대방에 보내고 나는 상대방 정보를 받는다. 
 	c2::Packet* my_info_packet = c2::Packet::alloc();				// 주변에 보내기 위한 내정보 
 	sc_packet_enter my_info_payload{ {sizeof(sc_packet_enter), S2C_ENTER}, (int16_t)this->session_id, {}, 0, actor.x , actor.y };
-	memcpy(my_info_payload.name, actor.name, 50);
+	memcpy(my_info_payload.name, actor.name, 50 * sizeof(wchar_t));
 	my_info_packet->write(&my_info_payload, sizeof(sc_packet_enter));
 
 
@@ -184,8 +184,8 @@ void MMOSession::enter_zone()
 	}
 
 	AcquireSRWLockExclusive(&actor.lock);							//내 view_list 에 접근하기 읽기 위해서 락을 얻고 
-	actor.view_list = local_view_list;
-	actor.view_list_for_npc = local_view_list_for_npc;
+	actor.view_list = std::move(local_view_list);
+	actor.view_list_for_npc = std::move(local_view_list_for_npc);
 	ReleaseSRWLockExclusive(&actor.lock);
 }
 

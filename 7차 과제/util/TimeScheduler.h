@@ -11,7 +11,7 @@ enum TimerTaskType
 	TTT_NPC_SCRIPT2,
 
 	TTT_USER_RECOVER_HP,
-		
+	TTT_RESPAWN_NPC,
 };
 
 struct TimerTask

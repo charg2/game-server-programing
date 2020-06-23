@@ -14,23 +14,7 @@ void MMONpcManager::initilize()
 
 	for (size_t n{}; n < MMONpcManager::max_npc_count; ++n)
 	{
-		npcs[n].current_sector = nullptr;
-		npcs[n].hp = 200;
-		npcs[n].id = n + c2::constant::NPC_ID_OFFSET;
-		npcs[n].max_hp = 200;
-		
-
-		const char* tt = "NPC";
-		char ttt[10];
-		memcpy(npcs[n].name, tt, 4);
-
-		npcs[n].target = nullptr;
-		npcs[n].x = rand() % c2::constant::MAP_WIDTH;
-		npcs[n].y = rand() % c2::constant::MAP_HEIGHT;
-		npcs[n].zone = this->zone;
-		npcs[n].is_active = 0;
-
-		npcs[n].prepare_virtual_machine();
+		npcs[n].initialize(n);
 	}
 }
 

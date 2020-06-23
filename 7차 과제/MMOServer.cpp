@@ -134,6 +134,15 @@ void MMOServer::on_timer_service(const TimerTask& task)
 			break;
 		}
 
+		case TTT_RESPAWN_NPC: // ÇÑ¸í¸¸ ¤·¤·.
+		{
+			MMONpc* npc = g_npc_manager->get_npc(task.actor_id);
+			
+			npc->respawn();
+
+			break;
+		}
+
 		default:
 		{
 			size_t* invliad_ptr{}; *invliad_ptr = 0;

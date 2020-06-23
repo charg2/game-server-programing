@@ -23,9 +23,8 @@ struct MMOSector
 
 	void calculate_serctor_idx();
 	void broadcaset();
+
 	const MMONear* const get_near(int y, int x) const;
-
-
 
 ///////////////////
 	std::unordered_map<int16_t, MMOActor*>	actors;

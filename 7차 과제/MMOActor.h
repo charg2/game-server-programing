@@ -35,6 +35,11 @@ public:
 	bool is_near(MMOActor* actor);
 	bool is_near(MMONpc* npc);
 
+	void increase_exp(int32_t exp);
+	void decrease_exp(int32_t exp);
+	void increase_hp(int32_t hp);
+	void decrease_hp(MMONpc* npc, int32_t hp);
+
 	void get_login_packet_info(sc_packet_login_ok& out_packet);
 
 	int16_t get_id();
@@ -76,6 +81,7 @@ public:
 	MMOServer*						server;
 	MMOSector*						current_sector; 
 	MMOSession* const				session;
+	bool							is_alive;
 
 	std::unordered_map<int32_t, MMOActor*>	view_list;
 	std::unordered_set<int32_t>				view_list_for_npc;

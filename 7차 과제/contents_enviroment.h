@@ -6,6 +6,7 @@ namespace c2
 {
 	namespace constant
 	{
+
 		constexpr unsigned char D_UP = 0;
 		constexpr unsigned char D_DOWN = 1;
 		constexpr unsigned char D_LEFT = 2;
@@ -33,7 +34,7 @@ namespace c2
 		constexpr int MAP_WIDTH = 800;
 		constexpr int MAP_HEIGHT = 800;
 
-
+		constexpr unsigned char TEST_DMG = 50;
 
 		constexpr int NPC_ID_OFFSET = 10'000;
 		constexpr size_t MAP_NAX_HEIGHT_INDEX = calc_static_map_index<MAP_HEIGHT, SECTOR_HEIGHT>();
@@ -55,6 +56,8 @@ namespace c2
 			ACS_BEFORE_LOGIN,
 			ACS_AFTER_LOGIN,
 			ACS_PLAYING,
+
+
 		};
 	}
 

@@ -1,5 +1,6 @@
 #include "pre_compile.h"
 #include "MMOActor.h"
+#include "MMONpc.h"
 #include "MMOZone.h"
 #include "MMOServer.h"
 #include <bitset>
@@ -58,6 +59,19 @@ void MMOZone::enter_actor(MMOActor* actor)
 	AcquireSRWLockExclusive(&current_sector->lock);							//내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 	actor->current_sector = current_sector;
 	current_sector->actors.emplace(actor->get_id(), actor);
+	ReleaseSRWLockExclusive(&current_sector->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
+}
+
+
+// 로그인시 사용.
+void MMOZone::enter_npc(MMONpc* npc)
+{
+	MMOSector* current_sector = get_sector(npc->y, npc->x);			// view_list 긁어오기.
+
+
+	AcquireSRWLockExclusive(&current_sector->lock);							//내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
+	npc->current_sector = current_sector;
+	current_sector->npcs.emplace(npc->id);
 	ReleaseSRWLockExclusive(&current_sector->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 }
 

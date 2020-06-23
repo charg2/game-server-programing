@@ -17,7 +17,7 @@ constexpr auto SCREEN_HEIGHT = 21;
 constexpr auto TILE_WIDTH = 65;
 constexpr auto WINDOW_WIDTH = TILE_WIDTH * SCREEN_WIDTH / 2 + 10;   // size of window
 constexpr auto WINDOW_HEIGHT = TILE_WIDTH * SCREEN_WIDTH / 2 + 10;
-constexpr auto BUF_SIZE = 400;
+constexpr auto BUF_SIZE = 200;
 constexpr auto MAX_USER = NPC_ID_START;
 
 int g_left_x;
@@ -212,16 +212,21 @@ void ProcessPacket(unsigned char* ptr)
 		}
 	}
 	break;
-	case S2C_CHAT: {
-		printf("s2c_chat\n");
-
+	case S2C_CHAT: 
+	{
 		sc_packet_chat *my_packet = reinterpret_cast<sc_packet_chat*>(ptr);
-		//int o_id = my_packet->id;
-		//if (0 != npcs.count(o_id)) {
-		//	npcs[o_id].add_chat(my_packet->chat);
-		//}
+		int o_id = my_packet->id;
+		if (0 != npcs.count(o_id)) 
+		{
+			npcs[o_id].add_chat(my_packet->chat);
+		}
 	}
-				   break;
+	break;
+	case S2C_STAT_CHANGE :
+	{
+		cout << "stat changed " << endl;
+	}
+	break;
 	default:
 		printf("Unknown PACKET type [%d]\n", ptr[1]);
 
@@ -317,7 +322,11 @@ void send_packet(void* packet)
 {
 	unsigned char* p = reinterpret_cast<unsigned char*>(packet);
 	size_t sent;
-	g_socket.send(p, p[0], sent);
+	
+	size_t tt = p[0];
+	std::cout << " 보낸거  " << tt;
+	g_socket.send(p, tt, sent);
+	std::cout << ": 실제 보낸거 " << sent << endl;
 }
 
 void send_move_packet(unsigned char dir)
@@ -327,6 +336,29 @@ void send_move_packet(unsigned char dir)
 	m_packet.size = sizeof(m_packet);
 	m_packet.direction = dir;
 	send_packet(&m_packet);
+}
+
+void send_chat_packet(int id)
+{
+	cout << "void send_chat_packet(int id)1\n";
+	cs_packet_chat c_packet;
+	c_packet.type = C2S_CHAT;
+	c_packet.size = sizeof(c_packet);
+
+	c_packet.id = id;
+	wcscpy_s(c_packet.chat, L"dddd");
+
+	send_packet(&c_packet);
+	cout << "void send_chat_packet(int id)2\n";
+}
+
+void send_attack_packet()
+{
+	cs_packet_attack a_packet;
+	a_packet.type = C2S_ATTACK;
+	a_packet.size = sizeof(a_packet);
+
+	send_packet(&a_packet);
 }
 
 #include <iostream>
@@ -406,6 +438,14 @@ int main()
 					break;
 				case sf::Keyboard::Escape:
 					window.close();
+					break;
+
+				case sf::Keyboard::Enter:
+					send_chat_packet(g_myid);
+					break;
+
+				case sf::Keyboard::Space:
+					send_attack_packet();
 					break;
 				}
 			}

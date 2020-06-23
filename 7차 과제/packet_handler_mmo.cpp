@@ -91,9 +91,12 @@ REGISTER_HANDLER(C2S_MOVE)
 
 	if (prev_sector != curent_sector)										//섹터가 바뀐 경우.
 	{
-		AcquireSRWLockExclusive(&prev_sector->lock);						// 이전 섹터에서 나가기 위해서.
-		prev_sector->actors.erase(local_actor_id);
-		ReleaseSRWLockExclusive(&prev_sector->lock);						
+		if (nullptr != prev_sector)
+		{
+			AcquireSRWLockExclusive(&prev_sector->lock);						// 이전 섹터에서 나가기 위해서.
+			prev_sector->actors.erase(local_actor_id);
+			ReleaseSRWLockExclusive(&prev_sector->lock);
+		}
 
 		AcquireSRWLockExclusive(&curent_sector->lock);						// 내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 		curent_sector->actors.emplace(local_actor_id, my_actor);
@@ -102,8 +105,6 @@ REGISTER_HANDLER(C2S_MOVE)
 
 		mmo_session->request_updating_position(local_y, local_x);
 	}
-
-
 
 
 	AcquireSRWLockShared(&my_actor->lock);
@@ -259,7 +260,7 @@ REGISTER_HANDLER(C2S_ATTACK)
 	//MMOSector*		sector		{ my_actor->current_sector };
 	
 	//g_server;
-	//
+
 	my_actor->attack();
 }
 
@@ -319,7 +320,7 @@ REGISTER_HANDLER(C2S_LOGOUT)
 	MMOServer* mmo_server = (MMOServer*)session->server;
 	MMOZone* mmo_zone = mmo_server->get_zone();
 
-	my_actor->session->request_updating_position(my_actor->y, my_actor->x); // 종료 전 플레이어 좌표 업데이트 
+	my_actor->session->request_updating_position(my_actor->y, my_actor->x); // 종료 전 DB 업뎃.
 
 	int			my_actor_id = my_actor->get_id(); // 
 

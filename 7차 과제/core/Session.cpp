@@ -305,6 +305,7 @@ void Session::parse_packet()
 
 		local_packet->write(recv_buffer.get_rear_buffer(), header.length);
 
+		//printf("pakcet type : %d \n", header.type);
 		handler_table[header.type](this, header, *local_packet);
 
 		local_packet->rewind();

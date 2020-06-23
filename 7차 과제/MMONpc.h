@@ -32,8 +32,12 @@ struct MMONpc
 	void prepare_virtual_machine();
 	void move();
 	void move_to_anywhere();
+	void reset();
+	void respawn();
+	void initialize(size_t n);
 	void send_chatting_to_actor(int32_t actor_id, wchar_t* message);
-	void hit(MMOActor* actor);
+	
+	void decrease_hp(MMOActor* actor, int32_t damage);
 
 	int16_t		hp;
 	int16_t		max_hp;
@@ -41,6 +45,7 @@ struct MMONpc
 	int32_t		x, y;
 	wchar_t		name[50];
 	uint64_t	id;
+	int8_t		is_alive;
 
 	uint64_t	state; 
 	MMOSector*	current_sector;
@@ -48,6 +53,7 @@ struct MMONpc
 	MMOZone*	zone;
 	uint64_t	is_active;
 	int32_t		target_id;
+	int32_t		exp;
 
 	std::unordered_map<int32_t, MMOActor*>	view_list;
 	SRWLOCK									lock;

@@ -46,8 +46,6 @@ void MMONpc::move()
 	int local_x = x;
 	int local_actor_id = id;
 
-
-
 	// 장애물 체크 등등.
 	switch (fast_rand() % 4)
 	{
@@ -221,7 +219,7 @@ void MMONpc::move_to_anywhere()
 	x = local_x;
 	y = local_y;
 
-	MMOSector* new_sector = zone->get_sector(local_y, local_x);			// view_list 긁어오기.
+	MMOSector* new_sector = g_zone->get_sector(local_y, local_x);			// view_list 긁어오기.
 	// 섹터가 변경되면 바꾸기.
 	if (current_sector != new_sector)
 	{
@@ -331,6 +329,88 @@ void MMONpc::move_to_anywhere()
 	lua_pcall(this->lua_vm, 0, 0, 0);
 	ReleaseSRWLockExclusive(&vm_lock);
 }
+
+void MMONpc::initialize(size_t n)
+{
+	current_sector = nullptr;
+	hp = 200;
+	id = n + c2::constant::NPC_ID_OFFSET;
+	max_hp = 200;
+
+	is_alive = true;
+
+	const wchar_t* npc_tag = L"NPC";
+	memcpy(this->name, npc_tag, 8);
+
+	target = nullptr;
+	x = rand() % c2::constant::MAP_WIDTH;
+	y = rand() % c2::constant::MAP_HEIGHT;
+	zone = g_zone;
+	is_active = 0;
+
+	this->prepare_virtual_machine();
+}
+
+void MMONpc::reset()
+{
+	current_sector = nullptr;
+	hp = 200;
+	max_hp = 200;
+
+	target = nullptr;
+
+	this->view_list.clear();
+
+	//x = rand() % c2::constant::MAP_WIDTH;
+	//y = rand() % c2::constant::MAP_HEIGHT;
+
+	zone = this->zone;
+	is_alive = true;
+	is_active = 0;
+}
+
+void MMONpc::respawn() // 근데 이때는 아무도 모르는 상태이기 때문에 락을 안걸고 해도 되긴하는데...
+{
+	reset();
+
+	zone->enter_npc(this);
+
+	// 주변 시야 얻고.
+	MMOSector*		current_sector = zone->get_sector(y , x);
+	const MMONear*	nears		= g_zone->get_near(this->y, this->x);
+	int				near_cnt	= nears->count;
+
+	std::unordered_map<int32_t, MMOActor*>	local_view_list;
+	for (size_t n{ }; n < nears->count; ++n)
+	{
+		MMOSector* near_sector = nears->sectors[n];
+		AcquireSRWLockShared(&near_sector->lock); //sector에 읽기 위해서 락을 얻고 
+		
+		for (auto& other_iter : near_sector->actors)
+		{
+			if (other_iter.second->is_near(this) == true) // 근처가 맞다면 넣음.
+				local_view_list.insert(other_iter);
+		}
+
+		//NPC 처리 로직.
+		ReleaseSRWLockShared(&near_sector->lock);
+	}
+
+
+	// 유저들에게 접소을 알리고 내 뷰리스트에 추가함.
+	for (auto& iter : local_view_list)
+	{
+		MMOActor* other = iter.second;
+		
+		other->send_enter_packet(this); // NPC 정보를 상대방한테 보내고 뷰리스트추가..
+		// 내 뷰리스트 추가는 뒤로 미룸.
+	}
+
+	// 내 뷰리스트 업뎃
+	AcquireSRWLockExclusive(&this->lock);							//내 view_list 에 접근하기 읽기 위해서 락을 얻고 
+	this->view_list = std::move(local_view_list);
+	ReleaseSRWLockExclusive(&this->lock);
+}
 	
 void MMONpc::send_chatting_to_actor(int32_t actor_id ,wchar_t* message)
 {
@@ -343,13 +423,54 @@ void MMONpc::send_chatting_to_actor(int32_t actor_id ,wchar_t* message)
 	c2::Packet* chat_packet = c2::Packet::alloc();
 	chat_packet->write(&chat_payload, sizeof(sc_packet_chat));
 
-	zone->server->send_packet(actor_id, chat_packet);
+	g_zone->server->send_packet(actor_id, chat_packet);
 }
 
-void MMONpc::hit(MMOActor* actor)
+
+void MMONpc::decrease_hp(MMOActor* actor, int32_t damage)
 {
-	// actor->
+	AcquireSRWLockExclusive(&this->lock);
+	// 공격 하고 NPC 죽었으면 죽었다고 상태 바꾸기 ㅇㅇ;
+	if (this->is_alive == false) // 죽은 상태면  고인 건들지 말고 사라진다.
+	{
+		ReleaseSRWLockExclusive(&this->lock);
+		return;
+	}
+	
+	hp -= damage;
+	if (hp <= 0)
+	{
+		is_active = false; // 공격 하고 NPC 죽었으면 죽었다고 상태 바꾸기 ㅇㅇ
+		
+		AcquireSRWLockExclusive(&current_sector->lock); // 현재 섹터 나가기. // 다른 클라접근 하기 힘들게..
+		current_sector->npcs.erase(id);
+		ReleaseSRWLockExclusive(&current_sector->lock);
+
+		actor->increase_exp(exp);// 죽인거면 경험치를 얻고 그에 대한 처리를 한다.
+
+		for (auto& iter : view_list)	// npc가 주변에 브로드 캐스팅함. 죽어서 나갔다고 
+		{
+			MMOActor* neighbor = iter.second;
+			
+			printf("zz\n");
+
+			neighbor->send_leave_packet(this); // 내 시야리스트 플레이어게 나간다고 알림.
+		}
+
+		ReleaseSRWLockExclusive(&this->lock); // 여기선 락을 푼다.
+
+		local_timer->push_timer_task(id, TTT_RESPAWN_NPC, 30'000, 0);
+	}
+	else
+	{
+		printf("안죽음zz\n");
+
+		// 마지막으로 타이머에 30초후 리스폰 이벤트를 추가.
+		//else  // 현재 프로토콜상 체력 깍이는건 안알랴줘도 된다.//{//}
+		ReleaseSRWLockExclusive(&this->lock); // 여기선 락을 푼다.
+	}
 }
+
 
 void MMONpc::update_entering_actor(MMOActor* other)
 {
