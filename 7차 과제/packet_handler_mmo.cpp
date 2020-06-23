@@ -232,9 +232,13 @@ REGISTER_HANDLER(C2S_MOVE)
 			
 			my_actor->send_enter_packet(npc); // 이 npc 정보를 나한테 보냄.
 
+			AcquireSRWLockExclusive(&npc->lock);
+			npc->view_list.emplace(my_actor->get_id(), my_actor);
+			ReleaseSRWLockExclusive(&npc->lock);
 		}
 	}
 
+// 기존 시야에 있었고 이동후 없어진 녀석은 제거.
 	for (int32_t old_npc_id : local_old_view_list_for_npc)
 	{
 		if (0 == local_new_view_list_for_npc.count(old_npc_id))
@@ -246,6 +250,10 @@ REGISTER_HANDLER(C2S_MOVE)
 			MMONpc* npc = mmo_npc_mgr->get_npc(old_npc_id);
 
 			my_actor->send_leave_packet(npc); // 이 npc 정보를 나한테 보냄.
+
+			AcquireSRWLockExclusive(&npc->lock);
+			npc->view_list.erase(my_actor->get_id());
+			ReleaseSRWLockExclusive(&npc->lock);
 		}
 	}
 
