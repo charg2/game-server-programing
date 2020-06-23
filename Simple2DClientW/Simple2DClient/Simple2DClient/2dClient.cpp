@@ -214,12 +214,16 @@ void ProcessPacket(unsigned char* ptr)
 	break;
 	case S2C_CHAT: 
 	{
+		wcout << L"chat : " << endl;
+
 		sc_packet_chat *my_packet = reinterpret_cast<sc_packet_chat*>(ptr);
 		int o_id = my_packet->id;
-		if (0 != npcs.count(o_id)) 
+		/*if (0 != npcs.count(o_id)) 
 		{
-			npcs[o_id].add_chat(my_packet->chat);
-		}
+*/
+		npcs[g_myid].add_chat(my_packet->chat);
+		//}
+		wcout << my_packet->chat << endl;
 	}
 	break;
 	case S2C_STAT_CHANGE :
