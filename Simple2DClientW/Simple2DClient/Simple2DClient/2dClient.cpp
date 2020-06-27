@@ -133,7 +133,7 @@ void client_finish()
 void ProcessPacket(unsigned char* ptr)
 {
 	static bool first_time = true;
-	printf("ptr[1] : %d \n", ptr[1]);
+	//printf("ptr[1] : %d \n", ptr[1]);
 	switch (ptr[1])
 	{
 	case S2C_LOGIN_OK:
@@ -183,7 +183,7 @@ void ProcessPacket(unsigned char* ptr)
 	break;
 	case S2C_MOVE:
 	{
-		printf("s2c_move\n");
+		//printf("s2c_move\n");
 		sc_packet_move* my_packet = reinterpret_cast<sc_packet_move*>(ptr);
 		int other_id = my_packet->id;
 		if (other_id == g_myid) {
@@ -200,7 +200,7 @@ void ProcessPacket(unsigned char* ptr)
 
 	case S2C_LEAVE:
 	{
-		printf("s2c_leave\n");
+		//printf("s2c_leave\n");
 		sc_packet_leave* my_packet = reinterpret_cast<sc_packet_leave*>(ptr);
 		int other_id = my_packet->id;
 		if (other_id == g_myid) {
@@ -277,8 +277,8 @@ void client_main()
 		while (true);
 	}
 
-	if(received != 0)
-		printf("%d \n", received);
+	//if(received != 0)
+	//	printf("%d \n", received);
 	
 	if (recv_result == sf::Socket::Disconnected)
 	{
@@ -328,9 +328,9 @@ void send_packet(void* packet)
 	size_t sent;
 	
 	size_t tt = p[0];
-	std::cout << " 보낸거  " << tt;
+	//std::cout << " 보낸거  " << tt;
 	g_socket.send(p, tt, sent);
-	std::cout << ": 실제 보낸거 " << sent << endl;
+	//std::cout << ": 실제 보낸거 " << sent << endl;
 }
 
 void send_move_packet(unsigned char dir)

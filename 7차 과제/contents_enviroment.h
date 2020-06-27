@@ -30,9 +30,8 @@ namespace c2
 		constexpr int FOV_HALF_HEIGHT = FOV_HEIGHT / 2;
 
 
-		constexpr int FOV_AGRO_MOB_HALF_WIDTH = 5;
-		constexpr int FOV_AGRO_MOB_HALF_HEIGHT = 5;
-
+		constexpr int FOV_HALF_WIDTH_FOR_COMBAT_MOB = 5;
+		constexpr int FOV_HALF_HEIGHT_FOR_COMBAT_MOB = 5;
 
 		constexpr int BROADCAST_HEIGHT = 11;
 		constexpr int BROADCAST_WIDTH = 11;

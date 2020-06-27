@@ -103,50 +103,63 @@ void MMOServer::on_timer_service(const TimerTask& task)
 {
 	switch (task.task_type)
 	{
-		case TTT_NPC_SCRIPT:
+		case TTT_ON_WAKE_FOR_NPC:
 		{
-			MMONPC*		npc		= g_npc_manager->get_npc(task.actor_id);
-			MMOActor*	actor	= this->get_actor(task.target_id);
-			lua_State*	vm		= npc->lua_vm;
+			MMONPC* npc = g_npc_manager->get_npc(task.actor_id);
 			
-			//if (npc->is_alive == false)
-			//{
-			//	return;
-			//}
-
-			AcquireSRWLockExclusive(&npc->vm_lock); // 여러명이 실행 가능 함.
-			
-			lua_getglobal(vm, "event_palayer_move"); // 
-			lua_pushnumber(vm, actor->session_id);
-			lua_pushnumber(vm, actor->x);
-			lua_pushnumber(vm, actor->y);
-
-			lua_pcall(vm, 3, 0, 0);
-			
-			ReleaseSRWLockExclusive(&npc->vm_lock);
+			local_timer->push_timer_task(task.actor_id, TTT_UPDATE_FOR_NPC, 0, task.target_id );
 
 			break;
 		}
-
-		case TTT_NPC_SCRIPT2: // 한명만 ㅇㅇ.
+		case TTT_UPDATE_FOR_NPC:
 		{
-			MMONPC*		npc		= g_npc_manager->get_npc(task.actor_id);
-			//MMOActor*	actor	= this->get_actor(task.target_id);
-			lua_State*  vm		= npc->lua_vm;
+			MMONPC* npc = g_npc_manager->get_npc(task.actor_id);
 
-			npc->move_to_anywhere();
+			switch (npc->type)
+			{
+			case NT_PEACE_FIXED:
+				break;
+				;
+
+			case NT_PEACE_ROAMING:
+				npc->move_to_anywhere();
+				break;
+			case NT_COMBAT_FIXED:
+				break;;
+
+			case NT_COMBAT_ROAMING:
+				npc->move_to_anywhere();
+				break;
+			default:
+				break;
+			}
+
+			break;
+		}
+		/*case TTT_DO_PATH_FINDING_FOR_NPC:
+		{
+			break;
+		}*/
+
+		case TTT_ON_SLEEP_FOR_NPC:
+		{
+			MMONPC* npc = g_npc_manager->get_npc(task.actor_id);
 
 			break;
 		}
 		case TTT_USER_RECOVER_HP:
 		{
+			MMONPC* npc = g_npc_manager->get_npc(task.actor_id);
+
 			break;
 		}
-		case TTT_RESPAWN_PLAYER: // 한명만 ㅇㅇ.
+		case TTT_RESPAWN_FOR_PLAYER: // 한명만 ㅇㅇ.
 		{
+			/*MMONPC* npc = g_npc_manager->get_npc(task.actor_id);*/
+
 			break;
 		}
-		case TTT_RESPAWN_NPC: // 한명만 ㅇㅇ.
+		case TTT_RESPAWN_FOR_NPC: // 한명만 ㅇㅇ.
 		{
 			MMONPC* npc = g_npc_manager->get_npc(task.actor_id);
 			

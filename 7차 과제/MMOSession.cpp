@@ -177,7 +177,8 @@ void MMOSession::enter_zone()
 		npc->view_list.emplace(actor.get_id(), &actor);		// 서로 시야 리스트에 넣어줌.
 		ReleaseSRWLockExclusive(&npc->lock);						//내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 
-		local_timer->push_timer_task(npc->id, TTT_NPC_SCRIPT, 1, actor.session_id);
+		actor.wake_up_npc(npc);
+		//local_timer->push_timer_task(npc->id, TTT_UPDATE_FOR_NPC, 1, actor.session_id);
 
 		// move에서도./// 나한테 npc 정보 보내기 하셈. 
 		actor.send_enter_packet_without_updating_viewlist(npc);

@@ -13,14 +13,17 @@ void MMONpcManager::initilize()
 	npcs = new MMONPC[MMONpcManager::max_npc_count]{};
 
 
-	int npc_type_divider[NT_MAX]{};
+	int npc_type_dividers[NT_MAX]{};
 
-	int z = 0;
-	for (int& a : npc_type_divider)
+	int dived_counter = 0;
+	for (int& a : npc_type_dividers)
 	{
-		a = ( MMONpcManager::max_npc_count / NT_MAX ) * NPCType(z + 1);
+		a = ( MMONpcManager::max_npc_count / NT_MAX ) * NPCType(dived_counter + 1);
+		dived_counter += 1;
+		printf(" a : %d\n", a);
 	}
 
+	
 
 	NPCType prev_npc_type{ NT_PEACE_FIXED };
 	for (size_t idx{}; idx < MMONpcManager::max_npc_count; ++idx)
@@ -28,7 +31,7 @@ void MMONpcManager::initilize()
 		NPCType npc_type;
 		for (npc_type = prev_npc_type; npc_type < NPCType( NT_MAX - 1 ); npc_type = NPCType( npc_type + 1 ))
 		{
-			if ( idx < npc_type_divider[npc_type] )
+			if ( idx < npc_type_dividers[npc_type] )
 				break;
 		}
 
@@ -46,7 +49,7 @@ void MMONpcManager::place_npc_in_zone()
 
 	for (size_t n{}; n < MMONpcManager::max_npc_count; ++n)
 	{
-		MMOSector* sector =  zone->get_sector(npcs[n].y, npcs[n].x);
+		MMOSector* sector = zone->get_sector(npcs[n].y, npcs[n].x);
 		
 		sector->npcs.insert(npcs[n].id);
 

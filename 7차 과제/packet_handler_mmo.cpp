@@ -143,8 +143,8 @@ REGISTER_HANDLER(C2S_MOVE)
 			MMONPC* npc = mmo_npc_mgr->get_npc(npc_id);
 			if (my_actor->is_near(npc) == true) // 내 근처가 맞다면 넣음.
 			{
-				//my_actor->wake_up_npc(npc);
-				local_timer->push_timer_task(npc->id, TTT_NPC_SCRIPT, 1, my_actor->session_id);
+				my_actor->wake_up_npc(npc);
+				//local_timer->push_timer_task(npc->id, TTT_ON_WAKE_FOR_NPC, 1, my_actor->session_id);
 
 				local_new_view_list_for_npc.insert(npc_id);
 			}

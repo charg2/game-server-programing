@@ -3,6 +3,7 @@
 #include "MMOZone.h"
 #include "MMOActor.h"
 #include "util/TimeScheduler.h"
+#include "MMONPCManager.h"
 #include "MMOServer.h"
 #include "MMONpc.h"
 #include "MMODBTask.h"
@@ -152,8 +153,8 @@ void MMOActor::move(char direction)
 			MMONPC* npc = mmo_npc_mgr->get_npc(npc_id);
 			if (this->is_near(npc) == true) // 내 근처가 맞다면 넣음.
 			{
-				//this->wake_up_npc(npc);
-				local_timer->push_timer_task(npc->id, TTT_NPC_SCRIPT, 1, this->session_id);
+				this->wake_up_npc(npc);
+				//local_timer->push_timer_task(npc->id, TTT_ON_WAKE_FOR_NPC, 1, this->session_id);
 
 				local_new_view_list_for_npc.insert(npc_id);
 			}
@@ -430,7 +431,7 @@ void MMOActor::decrease_hp(MMONPC* npc, int32_t damage)
 		// 사망시 처리. 
 		is_alive = false;
 
-		local_timer->push_timer_task(session_id, TTT_RESPAWN_NPC, 30'000, 0);
+		local_timer->push_timer_task(session_id, TTT_RESPAWN_FOR_NPC, 30'000, 0);
 	}
 	else
 	{
@@ -592,11 +593,16 @@ void MMOActor::wake_up_npc(MMONPC* npc)
 {
 	if (npc->is_active == NPC_SLEEP) // false
 	{
+		//if (npc->is_alive == false)
+		//{
+		//	return;
+		//}
+
 		if (NPC_SLEEP == InterlockedExchange(&npc->is_active, NPC_WORKING) )		// 이전 상태가 자고 있었다면 꺠움.
 		{
-			// 내가 꺠운 상태.
-			// 내가 책임지고 일을 시켜야 함.
-			local_timer->push_timer_task(npc->id, TTT_MOVE_NPC, 1000, session_id);
+
+			// 내가 꺠운 상태.	// 내가 책임지고 일을 시켜야 함.
+			local_timer->push_timer_task(npc->id, TTT_ON_WAKE_FOR_NPC, 1000, session_id);
 		}
 		else 
 		{
@@ -773,7 +779,14 @@ void MMOActor::attack()
 	{
 		MMONPC* npc = g_npc_manager->get_npc(target_npc_id);   // npc를 구하고...
 
-		npc->decrease_hp(this, c2::constant::TEST_DMG);
+		if (npc->is_active == true)
+		{
+			npc->decrease_hp(this, c2::constant::TEST_DMG);
+			if (npc->type > NT_COMBAT_FIXED) // 평화 몹이면
+			{
+				wake_up_npc(npc);
+			}
+		}
 	}
 }
 

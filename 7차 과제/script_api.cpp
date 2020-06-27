@@ -48,26 +48,26 @@ int l2c_send_chatting_to_target(lua_State* vm)
 	return 1;
 }
 
-int l2c_npc_move_to_anywhere(lua_State* vm)
-{
-	int npc_id = (int)lua_tonumber(vm, -1);		// 제일 최근에 스택에 넣은 값.
-	lua_pop(vm, 2);								// 
-
-	MMONPC* npc = g_npc_manager->get_npc(npc_id);	// 
-	
-	//printf("1");
-	if (npc->is_active == NPC_SLEEP)
-	{
-		//printf("2");
-		if (NPC_SLEEP == InterlockedExchange(&npc->is_active, NPC_WORKING))	// 이전 상태가 자고 있었다면 꺠움.
-		{
-			//printf("3\n");
-			local_timer->push_timer_task(npc->id, TTT_NPC_SCRIPT2, 1000, 0);
-		}
-	}
-
-	return 1;
-}
+//int l2c_npc_move_to_anywhere(lua_State* vm)
+//{
+//	int npc_id = (int)lua_tonumber(vm, -1);		// 제일 최근에 스택에 넣은 값.
+//	lua_pop(vm, 2);								// 
+//
+//	MMONPC* npc = g_npc_manager->get_npc(npc_id);	// 
+//	
+//	//printf("1");
+//	if (npc->is_active == NPC_SLEEP)
+//	{
+//		//printf("2");
+//		if (NPC_SLEEP == InterlockedExchange(&npc->is_active, NPC_WORKING))	// 이전 상태가 자고 있었다면 꺠움.
+//		{
+//			//printf("3\n");
+//			local_timer->push_timer_task(npc->id, TTT_NPC_SCRIPT2, 1000, 0);
+//		}
+//	}
+//
+//	return 1;
+//}
 
 int l2c_npc_go_sleep(lua_State* vm)
 {

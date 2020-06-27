@@ -1,5 +1,4 @@
 my_id = 9999;
-
 target_id = -1;
 
 -- 배치 좌표 이름 타입 레벨등 정보 스크리트로 저장.
@@ -19,46 +18,45 @@ function prepare_npc_script(id)
 end
 
 function load_mob_data(mob_type)
-	local x, y, hp, dmg, exp, roaming;
-
 	if monster_peace_fixed == mob_type
 	then
-		x = math.random(10, 20);
-		y = 2;
-		exp = 10;
+		x = math.random(0, 400 -1);
+		y = math.random(0, 400 -1);
+
+		level = 1;
 		hp = 55;
 		dmg = 20;
-		roaming = false;
 
 	elseif monster_peace_roaming == mob_type
 	then
-		x = 2;
-		y = 2;
-		exp = 10;
+		x = math.random(0, 400 -1);
+		y = math.random(400 -1, 800 -1);
+		
+		level = 2;
 		hp = 55;
 		dmg = 20;
-		roaming = true;
 
-	elseif monster_combat_fixed  == mob_type
+	elseif monster_combat_fixed == mob_type
 	then
-		x = 2;
-		y = 2;
-		exp = 10;
+		x = math.random(400 -1, 800 -1);
+		y = math.random(0, 400-1);
+		
+		level = 3;
 		hp = 55;
 		dmg = 20;
-		roaming = false;
 
 	elseif monster_combat_roaming == mob_type
 	then
-		x = 2;
-		y = 2;
-		exp = 10;
+		x = math.random(400 -1, 800 - 1);
+		y = math.random(400 -1, 800 - 1);
+		
+		level = 4;
 		hp = 55;
 		dmg = 20;
-		roaming = true;
 	end
 
-	return x, y, hp, dmg, exp, roaming;
+	exp = level * 5;
+	return x, y, hp, dmg, level, exp;
 end
 
 -- 플레이어가 깨우면. 

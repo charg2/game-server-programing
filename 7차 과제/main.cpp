@@ -98,12 +98,12 @@
 - 알림 창
 */
 
-//#include <memory>
-//
-//using namespace c2;
-//#include "DBManager.h"
-//
-//
+#include <memory>
+
+using namespace c2;
+#include "DBManager.h"
+
+
 void main()
 {
 	setlocale(LC_ALL, "");

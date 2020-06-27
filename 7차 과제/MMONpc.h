@@ -20,10 +20,10 @@ enum NPCState
 
 enum NPCType
 {
-	NT_PEACE_FIXED,
-	NT_PEACE_ROAMING,
-	NT_COMBAT_FIXED,
-	NT_COMBAT_ROAMING,
+	NT_PEACE_FIXED,		// 0000		
+	NT_PEACE_ROAMING,	// 0001
+	NT_COMBAT_FIXED,	// 0010
+	NT_COMBAT_ROAMING,	// 0011
 
 	NT_MAX
 };
@@ -37,7 +37,7 @@ struct MMONPC
 	void update_entering_actor(MMOActor* actor);
 	void update_leaving_actor(MMOActor* actor);
 
-	void initialize();
+	void initialize_vm_and_load_data();
 	void move();
 	void move_to_anywhere();
 	void reset();
@@ -52,6 +52,7 @@ struct MMONPC
 	int16_t		max_hp;
 	int16_t		level;
 	int32_t		x, y;
+	int32_t		initial_x, initial_y;
 	wchar_t		name[50];
 	uint64_t	id;
 	int8_t		is_alive;
