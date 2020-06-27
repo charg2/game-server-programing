@@ -255,12 +255,6 @@
     <ClInclude Include="MMONear.h">
       <Filter>소스 파일\contents</Filter>
     </ClInclude>
-    <ClInclude Include="MMONpc.h">
-      <Filter>소스 파일\contents</Filter>
-    </ClInclude>
-    <ClInclude Include="MMONpcManager.h">
-      <Filter>소스 파일\contents</Filter>
-    </ClInclude>
     <ClInclude Include="MMOSector.h">
       <Filter>소스 파일\contents</Filter>
     </ClInclude>
@@ -293,6 +287,12 @@
     </ClInclude>
     <ClInclude Include="MMODBTask.h">
       <Filter>소스 파일\db</Filter>
+    </ClInclude>
+    <ClInclude Include="MMONPCManager.h">
+      <Filter>소스 파일\contents</Filter>
+    </ClInclude>
+    <ClInclude Include="MMONPC.h">
+      <Filter>소스 파일\contents</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -341,12 +341,6 @@
     <ClCompile Include="MMOActor.cpp">
       <Filter>소스 파일\contents</Filter>
     </ClCompile>
-    <ClCompile Include="MMONpc.cpp">
-      <Filter>소스 파일\contents</Filter>
-    </ClCompile>
-    <ClCompile Include="MMONpcManager.cpp">
-      <Filter>소스 파일\contents</Filter>
-    </ClCompile>
     <ClCompile Include="MMOSector.cpp">
       <Filter>소스 파일\contents</Filter>
     </ClCompile>
@@ -373,6 +367,12 @@
     </ClCompile>
     <ClCompile Include="monster.lua">
       <Filter>소스 파일\script</Filter>
+    </ClCompile>
+    <ClCompile Include="MMONPCManager.cpp">
+      <Filter>소스 파일\contents</Filter>
+    </ClCompile>
+    <ClCompile Include="MMONPC.cpp">
+      <Filter>소스 파일\contents</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

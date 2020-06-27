@@ -1,4 +1,4 @@
-#include "MMONpcManager.h"
+#include "MMONPCManager.h"
 #include "MMOZone.h"
 
 #include <string>
@@ -10,20 +10,41 @@ MMONpcManager::MMONpcManager()
 
 void MMONpcManager::initilize()
 {
-	npcs = new MMONpc[MMONpcManager::max_npc_count]{};
+	npcs = new MMONPC[MMONpcManager::max_npc_count]{};
 
-	for (size_t n{}; n < MMONpcManager::max_npc_count; ++n)
+
+	int npc_type_divider[NT_MAX]{};
+
+	int z = 0;
+	for (int& a : npc_type_divider)
 	{
-		npcs[n].initialize(n);
+		a = ( MMONpcManager::max_npc_count / NT_MAX ) * NPCType(z + 1);
+	}
+
+
+	NPCType prev_npc_type{ NT_PEACE_FIXED };
+	for (size_t idx{}; idx < MMONpcManager::max_npc_count; ++idx)
+	{
+		NPCType npc_type;
+		for (npc_type = prev_npc_type; npc_type < NPCType( NT_MAX - 1 ); npc_type = NPCType( npc_type + 1 ))
+		{
+			if ( idx < npc_type_divider[npc_type] )
+				break;
+		}
+
+		npcs[idx].type = npc_type;
+		npcs[idx].initialize(idx);
+		npcs[idx].initialize_vm_and_load_data();
+
+		prev_npc_type = npc_type;
 	}
 }
 
 void MMONpcManager::place_npc_in_zone()
 {
-	MMOZone* zone = this->zone;
-	
+	MMOZone* zone = this->zone; 
+
 	for (size_t n{}; n < MMONpcManager::max_npc_count; ++n)
-		//for (size_t n{}; n < c2::constant::MAX_NPC; ++n)
 	{
 		MMOSector* sector =  zone->get_sector(npcs[n].y, npcs[n].x);
 		
@@ -33,7 +54,7 @@ void MMONpcManager::place_npc_in_zone()
 	}
 }
 
-MMONpc* MMONpcManager::get_npc(uint64_t server_id)
+MMONPC* MMONpcManager::get_npc(uint64_t server_id)
 {
 	return &npcs[server_id- c2::constant::NPC_ID_OFFSET];
 }

@@ -14,7 +14,7 @@ public:
 	~MMOZone();
 
 	void enter_actor(MMOActor* actor);		//  for login
-	void enter_npc(MMONpc* actor);		//  for login
+	void enter_npc(MMONPC* actor);		//  for login
 
 	void load_obstacles();
 	
@@ -22,7 +22,9 @@ public:
 	
 	MMOSector*		get_sector(MMOActor* actor);
 	const MMONear*	get_near( int32_t y, int32_t x) const;
-	bool			has_obstacle(int32_t y , int32_t x);
+	static bool		has_obstacle(int32_t y , int32_t x);
+
+
 
 public:
 	MMOSector						sectors[MAP_NAX_HEIGHT_INDEX][MAP_NAX_WIDTH_INDEX];

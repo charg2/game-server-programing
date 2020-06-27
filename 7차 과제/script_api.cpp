@@ -41,7 +41,7 @@ int l2c_send_chatting_to_target(lua_State* vm)
 
 	lua_pop(vm, 4);			 // 빼기전에 ㅣ리 해놔야 함.
 	
-	MMONpc* npc = g_npc_manager->get_npc(my_id);
+	MMONPC* npc = g_npc_manager->get_npc(my_id);
 
 	npc->send_chatting_to_actor(actor_id, w_msg_buffer);
 
@@ -53,7 +53,7 @@ int l2c_npc_move_to_anywhere(lua_State* vm)
 	int npc_id = (int)lua_tonumber(vm, -1);		// 제일 최근에 스택에 넣은 값.
 	lua_pop(vm, 2);								// 
 
-	MMONpc* npc = g_npc_manager->get_npc(npc_id);	// 
+	MMONPC* npc = g_npc_manager->get_npc(npc_id);	// 
 	
 	//printf("1");
 	if (npc->is_active == NPC_SLEEP)
@@ -73,7 +73,7 @@ int l2c_npc_go_sleep(lua_State* vm)
 {
 	int npc_id = (int)lua_tonumber(vm, -1);		// 제일 최근에 스택에 넣은 값.
 	lua_pop(vm, 2);								// 
-	MMONpc* npc = g_npc_manager->get_npc(npc_id);	// 
+	MMONPC* npc = g_npc_manager->get_npc(npc_id);	// 
 	npc->is_active = false;
 
 	return 1;

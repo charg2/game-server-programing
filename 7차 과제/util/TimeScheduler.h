@@ -12,6 +12,7 @@ enum TimerTaskType
 
 	TTT_USER_RECOVER_HP,
 	TTT_RESPAWN_NPC,
+	TTT_RESPAWN_PLAYER
 };
 
 struct TimerTask
@@ -42,8 +43,8 @@ public:
 	void do_timer_job();
 
 private:	
-	using TimerJobQueue = std::priority_queue<TimerTask, std::vector<TimerTask>, TimerTaskComparer>;
-	TimerJobQueue	timer_job_queue;
+	using TimerTaskQueue = std::priority_queue<TimerTask, std::vector<TimerTask>, TimerTaskComparer>;
+	TimerTaskQueue	timer_job_queue;
 	uint64_t		current_tick; 
 	OuterServer*	server;
 };

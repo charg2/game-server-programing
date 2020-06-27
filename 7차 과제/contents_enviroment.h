@@ -29,6 +29,11 @@ namespace c2
 		constexpr int FOV_HALF_WIDTH = FOV_WIDTH / 2;
 		constexpr int FOV_HALF_HEIGHT = FOV_HEIGHT / 2;
 
+
+		constexpr int FOV_AGRO_MOB_HALF_WIDTH = 5;
+		constexpr int FOV_AGRO_MOB_HALF_HEIGHT = 5;
+
+
 		constexpr int BROADCAST_HEIGHT = 11;
 		constexpr int BROADCAST_WIDTH = 11;
 		constexpr int MAP_WIDTH = 800;
@@ -45,6 +50,7 @@ namespace c2
 
 		constexpr int INITIAL_HP = 200;
 		constexpr int LEVEL_MAXIMUM_EXP = 200;  // level * LEVLE_MAXIMUM_EXPÇÏ¸é µÊ.
+
 	}
 
 

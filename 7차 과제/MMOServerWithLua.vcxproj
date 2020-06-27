@@ -177,8 +177,8 @@
     <ClInclude Include="MMOActor.h" />
     <ClInclude Include="MMODBTask.h" />
     <ClInclude Include="MMONear.h" />
-    <ClInclude Include="MMONpc.h" />
-    <ClInclude Include="MMONpcManager.h" />
+    <ClInclude Include="MMONPC.h" />
+    <ClInclude Include="MMONPCManager.h" />
     <ClInclude Include="MMOSector.h" />
     <ClInclude Include="MMOServer.h" />
     <ClInclude Include="MMOSession.h" />
@@ -243,8 +243,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MMOActor.cpp" />
     <ClCompile Include="MMODBTask.cpp" />
-    <ClCompile Include="MMONpc.cpp" />
-    <ClCompile Include="MMONpcManager.cpp" />
+    <ClCompile Include="MMONPC.cpp" />
+    <ClCompile Include="MMONPCManager.cpp" />
     <ClCompile Include="MMOSector.cpp" />
     <ClCompile Include="MMOServer.cpp" />
     <ClCompile Include="MMOSession.cpp" />

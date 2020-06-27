@@ -10,7 +10,7 @@
 
 struct MMOActor;
 struct MMOZone;
-struct MMONpc;
+struct MMONPC;
 using namespace c2::constant;
 
 struct MMOSector 

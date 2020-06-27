@@ -16,17 +16,16 @@ REGISTER_HANDLER(C2S_LOGIN)
 	MMOServer*	mmo_server		= (MMOServer*)session->server;
 	my_actor->zone				= mmo_server->get_zone();
 	my_actor->server			= mmo_server;
-	MMOZone*	mmo_zone		= (MMOZone*)my_actor->zone;
-	MMONpcManager* mmo_npc_mgr	= g_npc_manager;
 
 ////////////////////////////////// 들어온 정보로 클라이언트 업데이트.
 	cs_packet_login login_payload;
 	in_packet.read(&login_payload, sizeof(cs_packet_login));
 	
 	my_actor->reset();
-	memcpy(my_actor->name, login_payload.name, c2::constant::MAX_ID_LEN); // 어차피 여기서만 write 함. and 나갈 때;;
 
-	if (mmo_session->get_actor()->get_id() != (uint16_t)session->session_id) // 이미 나갔다 들어온 녀석.
+	memcpy(my_actor->name, login_payload.name, c2::constant::MAX_ID_LEN * 2); // 어차피 여기서만 write 함. and 나갈 때;;
+
+	if (my_actor->get_id() != (uint16_t)session->session_id) // 이미 나갔다 들어온 녀석.
 	{
 		printf("Session::invalid session id %d\n", my_actor->session_id );
 
@@ -141,7 +140,7 @@ REGISTER_HANDLER(C2S_MOVE)
 		{
 			//if (actor_iter.second->status != ST_ACTIVE) 
 				//continue;
-			MMONpc* npc = mmo_npc_mgr->get_npc(npc_id);
+			MMONPC* npc = mmo_npc_mgr->get_npc(npc_id);
 			if (my_actor->is_near(npc) == true) // 내 근처가 맞다면 넣음.
 			{
 				//my_actor->wake_up_npc(npc);
@@ -228,7 +227,7 @@ REGISTER_HANDLER(C2S_MOVE)
 	{
 		if (0 == local_old_view_list_for_npc.count(npc_id)) // 이동후 새로 보이는 NPC
 		{
-			MMONpc* npc = mmo_npc_mgr->get_npc(npc_id);
+			MMONPC* npc = mmo_npc_mgr->get_npc(npc_id);
 			
 			my_actor->send_enter_packet(npc); // 이 npc 정보를 나한테 보냄.
 
@@ -247,7 +246,7 @@ REGISTER_HANDLER(C2S_MOVE)
 			//my_actor->view_list_for_npc.erase(old_npc_id);
 			//ReleaseSRWLockExclusive(&my_actor->lock);
 			// 떠나는건 npc가 알아서 해줌. // 얘는 1초에 한번이기도 하고 내가 반영을 안함.
-			MMONpc* npc = mmo_npc_mgr->get_npc(old_npc_id);
+			MMONPC* npc = mmo_npc_mgr->get_npc(old_npc_id);
 
 			my_actor->send_leave_packet(npc); // 이 npc 정보를 나한테 보냄.
 
@@ -264,10 +263,6 @@ REGISTER_HANDLER(C2S_ATTACK)
 {
 	MMOSession*		mmo_session	{ (MMOSession*)session };
 	MMOActor*		my_actor	{ mmo_session->get_actor() };
-	//MMOServer*		mmo_server	{ (MMOServer*)session->server };
-	//MMOSector*		sector		{ my_actor->current_sector };
-	
-	//g_server;
 
 	my_actor->attack();
 }
@@ -285,8 +280,6 @@ REGISTER_HANDLER(C2S_CHAT)
 
 	std::unordered_map<int16_t, MMOActor*> local_view_list;		// 임시 뷰리스트.
 	//local_view_list.clear();									// ??? 아마 스태틱으로 만들고 테스트를 안해본듯.
-
-
 
 	MMOSector* current_sector = mmo_server->get_zone()->get_sector(my_actor);		// chat을 날릴 view_list 긁어오기.
 	const MMONear* nears	= current_sector->get_near(my_actor->y, my_actor->x);	// 주벽 섹터들.

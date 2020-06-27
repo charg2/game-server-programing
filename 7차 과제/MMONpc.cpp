@@ -2,7 +2,7 @@
 #include "pre_compile.h"
 #include "MMOServer.h"
 #include "mmo_function.hpp"
-#include "MMONpc.h"
+#include "MMONPC.h"
 #include "MMOActor.h"
 #include "MMONpcManager.h"
 #include "MMOZone.h"
@@ -14,17 +14,21 @@
 using namespace c2::constant;
 
 
-void MMONpc::prepare_virtual_machine()
+void MMONPC::initialize_vm_and_load_data()
 {
-	lua_vm = luaL_newstate();
+	lua_State* lua_vm = luaL_newstate();
 	luaL_openlibs(lua_vm);
 
-	int error = luaL_loadfile(lua_vm, "scripts\\npc.lua");
+	int error = luaL_loadfile(lua_vm, "scripts\\monster.lua");
 	if (error != 0)
+	{
 		printf("1lua error %s \n", lua_tostring(lua_vm, -1));
+	}
 	error = lua_pcall(lua_vm, 0, 0, 0);
-	if (error != 0) 
-		printf( "2lua error %s \n", lua_tostring(lua_vm, -1));
+	if (error != 0)
+	{
+		printf("2lua error %s \n", lua_tostring(lua_vm, -1));
+	}
 
 	// 
 	lua_getglobal(lua_vm, "prepare_npc_script");
@@ -32,14 +36,35 @@ void MMONpc::prepare_virtual_machine()
 	lua_pcall(lua_vm, 1, 0, 0);
 
 
-	lua_register(lua_vm, "server_send_chatting",		l2c_send_chatting_to_target);
-	lua_register(lua_vm, "server_get_npc_x",			l2c_get_npc_pos_x);
-	lua_register(lua_vm, "server_get_npc_y",			l2c_get_npc_pos_y);
-	lua_register(lua_vm, "server_npc_move_to_anywhere", l2c_npc_move_to_anywhere);
-	lua_register(lua_vm, "server_npc_go_sleep",			l2c_npc_go_sleep);
+	//lua_register(lua_vm, "server_send_chatting",		l2c_send_chatting_to_target);
+	//lua_register(lua_vm, "server_get_npc_x",			l2c_get_npc_pos_x);
+	//lua_register(lua_vm, "server_get_npc_y",			l2c_get_npc_pos_y);
+	//lua_register(lua_vm, "server_npc_move_to_anywhere", l2c_npc_move_to_anywhere);
+	//lua_register(lua_vm, "server_npc_go_sleep",			l2c_npc_go_sleep);
+
+
+
+	lua_getglobal(lua_vm, "load_mob_data");
+	lua_pushnumber(lua_vm, this->type);		// 함수의 인자로 넣고 
+	lua_pcall(lua_vm, 1, 6, 0);		// 1 파라미터, 6리턴;
+	 
+	// return 값
+	this->x =		lua_tonumber(lua_vm, -6);
+	this->y =		lua_tonumber(lua_vm, -5);
+	this->hp =		lua_tonumber(lua_vm, -4);
+	this->dmg =		lua_tonumber(lua_vm, -3);
+	this->level =	lua_tonumber(lua_vm, -2);
+	this->exp =		lua_tonumber(lua_vm, -1);
+
+	lua_pop(lua_vm, 6); // 다 비워냄.
+
+
+	// 현상황에서는 더이상 lua를 안씀.
+	//this->lua_vm = lua_vm;
+	lua_close(lua_vm);
 }
 
-void MMONpc::move()
+void MMONPC::move()
 {
 	bool is_isolated = true;
 	int local_y = y;
@@ -190,7 +215,7 @@ void MMONpc::move()
 	}
 }
 
-void MMONpc::move_to_anywhere()
+void MMONPC::move_to_anywhere()
 {
 	bool is_isolated = true;
 	int local_y = y;
@@ -237,14 +262,14 @@ void MMONpc::move_to_anywhere()
 
 	// 뷰리스트 수정.
 	AcquireSRWLockExclusive(&lock); // // 락 걸고...
-	std::unordered_map<int32_t, MMOActor*> local_old_view_list = view_list;
+	std::unordered_map<int32_t, MMOActor*> local_old_view_list = view_list; // deep copy 
 	ReleaseSRWLockExclusive(&lock); // // 락 걸고...
 
 
 	// 주변에 뿌리기.
-	MMOSector* current_sector = new_sector;
-	const MMONear* nears = current_sector->get_near(local_y, local_x);
-	int				near_cnt = nears->count;
+	MMOSector*		current_sector	= new_sector;
+	const MMONear*	nears			= current_sector->get_near(local_y, local_x);
+	int				near_cnt		= nears->count;
 
 
 	// 내 주변 정보를 긁어 모음.
@@ -330,11 +355,11 @@ void MMONpc::move_to_anywhere()
 	ReleaseSRWLockExclusive(&vm_lock);
 }
 
-void MMONpc::initialize(size_t n)
+void MMONPC::initialize(size_t id_base)
 {
 	current_sector = nullptr;
-	hp = 200;
-	id = n + c2::constant::NPC_ID_OFFSET;
+	
+	id = id_base + c2::constant::NPC_ID_OFFSET;
 	max_hp = 200;
 
 	is_alive = true;
@@ -343,15 +368,14 @@ void MMONpc::initialize(size_t n)
 	memcpy(this->name, npc_tag, 8);
 
 	target = nullptr;
-	x = rand() % c2::constant::MAP_WIDTH;
-	y = rand() % c2::constant::MAP_HEIGHT;
+	//hp = 200;
+	//x = rand() % c2::constant::MAP_WIDTH;
+	//y = rand() % c2::constant::MAP_HEIGHT;
 	zone = g_zone;
 	is_active = 0;
-
-	this->prepare_virtual_machine();
 }
 
-void MMONpc::reset()
+void MMONPC::reset()
 {
 	current_sector = nullptr;
 	hp = 200;
@@ -369,9 +393,9 @@ void MMONpc::reset()
 	is_active = 0;
 }
 
-void MMONpc::respawn() // 근데 이때는 아무도 모르는 상태이기 때문에 락을 안걸고 해도 되긴하는데...
+void MMONPC::respawn() // 근데 이때는 아무도 모르는 상태이기 때문에 락을 안걸고 해도 되긴하는데...
 {
-	reset();
+
 
 	zone->enter_npc(this);
 
@@ -412,7 +436,7 @@ void MMONpc::respawn() // 근데 이때는 아무도 모르는 상태이기 때문에 락을 안걸고 
 	ReleaseSRWLockExclusive(&this->lock);
 }
 	
-void MMONpc::send_chatting_to_actor(int32_t actor_id ,wchar_t* message)
+void MMONPC::send_chatting_to_actor(int32_t actor_id ,wchar_t* message)
 {
 	sc_packet_chat chat_payload;
 	chat_payload.header.length = sizeof(sc_packet_chat);
@@ -427,7 +451,7 @@ void MMONpc::send_chatting_to_actor(int32_t actor_id ,wchar_t* message)
 }
 
 
-void MMONpc::decrease_hp(MMOActor* actor, int32_t damage)
+void MMONPC::decrease_hp(MMOActor* actor, int32_t damage)
 {
 	AcquireSRWLockExclusive(&this->lock);
 	// 공격 하고 NPC 죽었으면 죽었다고 상태 바꾸기 ㅇㅇ;
@@ -451,8 +475,6 @@ void MMONpc::decrease_hp(MMOActor* actor, int32_t damage)
 		for (auto& iter : view_list)	// npc가 주변에 브로드 캐스팅함. 죽어서 나갔다고 
 		{
 			MMOActor* neighbor = iter.second;
-			
-			printf("zz\n");
 
 			neighbor->send_leave_packet(this); // 내 시야리스트 플레이어게 나간다고 알림.
 		}
@@ -463,23 +485,27 @@ void MMONpc::decrease_hp(MMOActor* actor, int32_t damage)
 	}
 	else
 	{
-		printf("안죽음zz\n");
-
 		// 마지막으로 타이머에 30초후 리스폰 이벤트를 추가.
 		//else  // 현재 프로토콜상 체력 깍이는건 안알랴줘도 된다.//{//}
 		ReleaseSRWLockExclusive(&this->lock); // 여기선 락을 푼다.
 	}
 }
 
+bool MMONPC::is_near(MMOActor* actor)
+{
 
-void MMONpc::update_entering_actor(MMOActor* other)
+	return false;
+}
+
+
+void MMONPC::update_entering_actor(MMOActor* other)
 {
 	AcquireSRWLockExclusive(&this->lock);
 	this->view_list.emplace(other->get_id(), other);
 	ReleaseSRWLockExclusive(&this->lock);
 }
 
-void MMONpc::update_leaving_actor(MMOActor* actor)
+void MMONPC::update_leaving_actor(MMOActor* actor)
 {
 	AcquireSRWLockExclusive(&this->lock);
 	this->view_list.erase(actor->get_id());

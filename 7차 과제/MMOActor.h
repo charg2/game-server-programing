@@ -11,7 +11,7 @@ struct	MMOZone;
 struct	MMOSector;
 class	MMOServer;
 class	MMOSession;
-struct	MMONpc;
+struct	MMONPC;
 struct  LoadActorTask;
 struct  CreateActorTask;
 enum ActorStatus { ST_FREE, ST_ALLOCATED, ST_ACTIVE };
@@ -27,18 +27,19 @@ public:
 	void attack();
 	void reset();
 	void exit();
+	void move(char direction);
 
 	// 체력이 깍이면 do_auto_recovery
 	void reset_data(const LoadActorTask* task);
 	void reset_data_when_creation(const CreateActorTask* task);
 
 	bool is_near(MMOActor* actor);
-	bool is_near(MMONpc* npc);
+	bool is_near(MMONPC* npc);
 
 	void increase_exp(int32_t exp);
 	void decrease_exp(int32_t exp);
 	void increase_hp(int32_t hp);
-	void decrease_hp(MMONpc* npc, int32_t hp);
+	void decrease_hp(MMONPC* npc, int32_t hp);
 
 	void get_login_packet_info(sc_packet_login_ok& out_packet);
 
@@ -46,22 +47,22 @@ public:
 
 	void send_enter_packet(MMOActor* other);
 	void send_enter_packet(MMOActor* other, c2::Packet* enter_packet);
-	void send_enter_packet(MMONpc* other);
+	void send_enter_packet(MMONPC* other);
 	void send_enter_packet_without_updating_viewlist(MMOActor* other);
-	void send_enter_packet_without_updating_viewlist(MMONpc* other);
+	void send_enter_packet_without_updating_viewlist(MMONPC* other);
 
 	void send_move_packet(MMOActor* other);
 	void send_move_packet(MMOActor* other, c2::Packet* enter_packet);
-	void send_move_packet(MMONpc* other);
+	void send_move_packet(MMONPC* other);
 
 	void send_leave_packet(MMOActor* other);
 	void send_leave_packet(MMOActor* other, c2::Packet* enter_packet);
-	void send_leave_packet(MMONpc* other);
+	void send_leave_packet(MMONPC* other);
 
 	void sned_chat_packet(MMOActor* other);
 	void send_login_ok_packet();
 
-	void wake_up_npc(MMONpc* npc);
+	void wake_up_npc(MMONPC* npc);
 
 public:
 	int32_t							x, y;

@@ -105,11 +105,16 @@ void MMOServer::on_timer_service(const TimerTask& task)
 	{
 		case TTT_NPC_SCRIPT:
 		{
-			MMONpc*		npc		= g_npc_manager->get_npc(task.actor_id);
+			MMONPC*		npc		= g_npc_manager->get_npc(task.actor_id);
 			MMOActor*	actor	= this->get_actor(task.target_id);
 			lua_State*	vm		= npc->lua_vm;
 			
-			AcquireSRWLockExclusive(&npc->vm_lock); // 여러명이 실행해야함.
+			//if (npc->is_alive == false)
+			//{
+			//	return;
+			//}
+
+			AcquireSRWLockExclusive(&npc->vm_lock); // 여러명이 실행 가능 함.
 			
 			lua_getglobal(vm, "event_palayer_move"); // 
 			lua_pushnumber(vm, actor->session_id);
@@ -125,7 +130,7 @@ void MMOServer::on_timer_service(const TimerTask& task)
 
 		case TTT_NPC_SCRIPT2: // 한명만 ㅇㅇ.
 		{
-			MMONpc*		npc		= g_npc_manager->get_npc(task.actor_id);
+			MMONPC*		npc		= g_npc_manager->get_npc(task.actor_id);
 			//MMOActor*	actor	= this->get_actor(task.target_id);
 			lua_State*  vm		= npc->lua_vm;
 
@@ -133,10 +138,19 @@ void MMOServer::on_timer_service(const TimerTask& task)
 
 			break;
 		}
-
+		case TTT_USER_RECOVER_HP:
+		{
+			break;
+		}
+		case TTT_RESPAWN_PLAYER: // 한명만 ㅇㅇ.
+		{
+			break;
+		}
 		case TTT_RESPAWN_NPC: // 한명만 ㅇㅇ.
 		{
-			MMONpc* npc = g_npc_manager->get_npc(task.actor_id);
+			MMONPC* npc = g_npc_manager->get_npc(task.actor_id);
+			
+			npc->reset();
 			
 			npc->respawn();
 

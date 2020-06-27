@@ -29,7 +29,13 @@
   "maximum_npc_count": 20000,
   "monster": [],
 
+
+  "map_width": 800,
+  "map_height": 800,
   "map": []
+
+
+
 } 
 
 

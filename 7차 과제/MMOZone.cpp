@@ -37,6 +37,9 @@ MMOZone::MMOZone()
 		}
 	}
 
+
+	load_obstacles();
+
 	printf("init map... Ok\n ");
 	printf("MMOZone Ready... Ok\n ");
 }
@@ -64,7 +67,7 @@ void MMOZone::enter_actor(MMOActor* actor)
 
 
 // 로그인시 사용.
-void MMOZone::enter_npc(MMONpc* npc)
+void MMOZone::enter_npc(MMONPC* npc)
 {
 	MMOSector* current_sector = get_sector(npc->y, npc->x);			// view_list 긁어오기.
 
@@ -80,7 +83,7 @@ void MMOZone::load_obstacles()
 	for (int y = 0; y < 800; ++y)
 	{
 		for (int x = 0; x < 800; ++x)
-		{
+		{	
 			MMOSector::obstacle_table[y].set(x);
 			MMOSector::obstacle_table[y].reset(x);
 			MMOSector::obstacle_table[y][x];

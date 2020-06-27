@@ -139,7 +139,7 @@ void MMOSession::enter_zone()
 		//NPC 처리 로직.
 		for (auto other_iter : nears->sectors[n]->npcs)
 		{
-			MMONpc* npc = g_npc_manager->get_npc(other_iter);
+			MMONPC* npc = g_npc_manager->get_npc(other_iter);
 			if (actor.is_near(npc) == true) // 근처가 맞다면 넣음.
 			{
 				local_view_list_for_npc.insert(other_iter);			// 배 npc용 시야 리스트에 넣어줌.
@@ -172,7 +172,7 @@ void MMOSession::enter_zone()
 ////// NPC 처리.
 	for (auto npc_id : local_view_list_for_npc)
 	{
-		MMONpc* npc = g_npc_manager->get_npc(npc_id);
+		MMONPC* npc = g_npc_manager->get_npc(npc_id);
 		AcquireSRWLockExclusive(&npc->lock);						//내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 		npc->view_list.emplace(actor.get_id(), &actor);		// 서로 시야 리스트에 넣어줌.
 		ReleaseSRWLockExclusive(&npc->lock);						//내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
