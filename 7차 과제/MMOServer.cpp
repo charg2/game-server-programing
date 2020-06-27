@@ -118,19 +118,23 @@ void MMOServer::on_timer_service(const TimerTask& task)
 			switch (npc->type)
 			{
 			case NT_PEACE_FIXED:
+				npc->update_for_fixed_peace();
 				break;
-				;
 
 			case NT_PEACE_ROAMING:
+				npc->update_for_peace();
 				npc->move_to_anywhere();
 				break;
+
 			case NT_COMBAT_FIXED:
+				npc->update_for_fixed_combat();
 				break;;
 
 			case NT_COMBAT_ROAMING:
-				npc->move_to_anywhere();
+				npc->update_for_combat();
 				break;
 			default:
+				printf("invalid obj type");
 				break;
 			}
 

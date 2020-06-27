@@ -779,11 +779,12 @@ void MMOActor::attack()
 	{
 		MMONPC* npc = g_npc_manager->get_npc(target_npc_id);   // npc를 구하고...
 
-		if (npc->is_active == true)
+		if (npc->is_alive == true)
 		{
 			npc->decrease_hp(this, c2::constant::TEST_DMG);
-			if (npc->type > NT_COMBAT_FIXED) // 평화 몹이면
+			if (npc->type < NT_COMBAT_FIXED) // 평화 몹이면
 			{
+				npc->set_target(this);
 				wake_up_npc(npc);
 			}
 		}

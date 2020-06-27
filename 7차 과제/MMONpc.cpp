@@ -44,8 +44,8 @@ void MMONPC::initialize_vm_and_load_data()
 	}
 
 	// return 값
-	this->x =		lua_tonumber(lua_vm, -6);
-	this->y =		lua_tonumber(lua_vm, -5);
+	this->x = this->initial_x =	lua_tonumber(lua_vm, -6);
+	this->y = this->initial_y = lua_tonumber(lua_vm, -5);
 	this->hp =		lua_tonumber(lua_vm, -4);
 	this->dmg =		lua_tonumber(lua_vm, -3);
 	this->level =	lua_tonumber(lua_vm, -2);
@@ -215,7 +215,6 @@ void MMONPC::move_to_anywhere()
 		return; 
 	}
 
-
 	bool is_isolated = true;
 	int local_y = y;
 	int local_x = x;
@@ -260,10 +259,12 @@ void MMONPC::move_to_anywhere()
 
 
 	// 뷰리스트 수정.
-	AcquireSRWLockExclusive(&lock); // // 락 걸고...
+	AcquireSRWLockShared(&lock); // read 락 걸고...
 	std::unordered_map<int32_t, MMOActor*> local_old_view_list = view_list; // deep copy 
-	ReleaseSRWLockExclusive(&lock); // // 락 걸고...
+	ReleaseSRWLockShared(&lock);
 
+
+	// 여기 이후로 사망하면... 
 
 	// 주변에 뿌리기.
 	MMOSector*		current_sector	= new_sector;
@@ -382,6 +383,10 @@ void MMONPC::initialize(size_t id_base)
 void MMONPC::reset()
 {
 	current_sector = nullptr;
+	target = nullptr;
+	has_target = false;
+
+
 	hp = 200;
 	max_hp = 200;
 
@@ -452,51 +457,422 @@ void MMONPC::send_chatting_to_actor(int32_t actor_id ,wchar_t* message)
 	g_zone->server->send_packet(actor_id, chat_packet);
 }
 
+void MMONPC::update_for_fixed_peace()
+{
+	
+}
+
+void MMONPC::update_for_peace()
+{
+
+}
+
+void MMONPC::update_for_fixed_combat()
+{
+	if (false == this->is_alive)
+	{
+		return;
+	}
+
+	MMOActor* local_target = this->target;
+
+	if (nullptr != local_target) // 타겟이 있을시에만 날 찾아옴.
+	{
+		bool is_isolated = true;
+		int local_y = y;
+		int local_x = x;
+		int local_actor_id = id;
+
+		if (local_x > local_target->x)
+		{
+			local_x -= 1;
+		}
+		else if (local_x < local_target->x)
+		{
+			local_x += 1;
+		}
+
+		if (local_y > local_target->y)
+		{
+			local_y -= 1;
+		}
+		else if (local_y < local_target->y)
+		{
+			local_y += 1;
+		}
+
+		x = local_x;
+		y = local_y;
+
+		MMOSector* new_sector = g_zone->get_sector(local_y, local_x);			// view_list 긁어오기.
+		// 섹터가 변경되면 바꾸기.
+		if (current_sector != new_sector)
+		{
+			AcquireSRWLockExclusive(&current_sector->lock); // 이전 섹터 나가기
+			current_sector->npcs.erase(id);
+			ReleaseSRWLockExclusive(&current_sector->lock);
+
+			// 지금 섹터 들가기.
+			AcquireSRWLockExclusive(&new_sector->lock);
+			this->current_sector = new_sector;
+			new_sector->npcs.insert(id);
+			ReleaseSRWLockExclusive(&new_sector->lock);
+		}
+
+
+		// 뷰리스트 수정.
+		AcquireSRWLockShared(&lock); // read 락 걸고...
+		std::unordered_map<int32_t, MMOActor*> local_old_view_list = view_list; // deep copy 
+		ReleaseSRWLockShared(&lock);
+
+
+		// 여기 이후로 사망하면... 
+
+		// 주변에 뿌리기.
+		MMOSector* current_sector = new_sector;
+		const MMONear* nears = current_sector->get_near(local_y, local_x);
+		int				near_cnt = nears->count;
+
+
+		// 내 주변 정보를 긁어 모음.
+		std::unordered_map<int32_t, MMOActor*>	local_new_view_list;
+		for (int n = 0; n < near_cnt; ++n)
+		{
+			AcquireSRWLockShared(&nears->sectors[n]->lock); // sector에 읽기 위해서 락을 얻고 
+			for (auto& actor_iter : nears->sectors[n]->actors)
+			{
+				//if (actor_iter.second->status != ST_ACTIVE) 		//continue;
+				if (actor_iter.second->is_near(this) == true) // 내 근처가 맞다면 넣음.
+				{
+					is_isolated = false;
+					local_new_view_list.insert(actor_iter);
+				}
+			}
+			ReleaseSRWLockShared(&nears->sectors[n]->lock);
+		}
+
+		for (auto& new_actor : local_new_view_list)
+		{
+			if (0 == local_old_view_list.count(new_actor.first))	// 이동후 새로 보이는 유저.
+			{
+				this->update_entering_actor(new_actor.second);		// 새로 보이는 유저 정보를 NPC한테 업데이트 함.
+
+				AcquireSRWLockShared(&new_actor.second->lock);
+				if (0 == new_actor.second->view_list_for_npc.count(this->id)) // 타 스레드에서 시야 처리 안 된경우.
+				{
+					ReleaseSRWLockShared(&new_actor.second->lock);
+
+					new_actor.second->send_enter_packet(this);
+				}
+				else // 처리 된경우
+				{
+					ReleaseSRWLockShared(&new_actor.second->lock);
+
+					new_actor.second->send_move_packet(this);   // 상대 시야 리스트에 내가 있는 경우 뷰리스트만 업데이트 한다.
+				}
+			}
+			else  // 기존 뷰리스트에 있던 유저들 
+			{
+				AcquireSRWLockShared(&new_actor.second->lock);					//
+				if (0 != new_actor.second->view_list_for_npc.count(this->id))	// 
+				{
+					ReleaseSRWLockShared(&new_actor.second->lock);
+
+					new_actor.second->send_move_packet(this);
+				}
+				else	// 이미 나간 경우.
+				{
+					ReleaseSRWLockShared(&new_actor.second->lock);
+
+					new_actor.second->send_enter_packet(this);
+				}
+			}
+
+			if (true == is_near(new_actor.second))
+			{
+				set_target(new_actor.second);
+			}
+		}
+
+
+		//시야에서 벗어난 플레이어
+		for (auto& old_it : local_old_view_list)
+		{
+			if (0 == local_new_view_list.count(old_it.first))		// 현재 내 시야에 없는 플레이어.
+			{														// 
+				this->update_leaving_actor(old_it.second);			// npc 시야에서 유저가 나간것을 업뎃 해줌.
+
+				AcquireSRWLockShared(&old_it.second->lock);			// 
+				if (0 != old_it.second->view_list_for_npc.count(this->id)) // 클라 시야에 내가 있는 경우
+				{
+					ReleaseSRWLockShared(&old_it.second->lock);
+					old_it.second->send_leave_packet(this);
+				}
+				else	// 이미 다른 스레드에서 지워준 경우.
+				{
+					ReleaseSRWLockShared(&old_it.second->lock);
+				}
+			}
+		}
+
+		if (is_isolated == true)
+		{
+			is_active = NPC_SLEEP;
+			target = nullptr;
+			has_target = false;
+			// 최후 확인용 작업 // 이작업중에 누가 
+			//local_timer->push_timer_task(this->id, TTT_ON_SLEEP, 1000, 0);
+		}
+		else // 있다면 업데이트 계속.
+		{
+			local_timer->push_timer_task(this->id, TTT_UPDATE_FOR_NPC, 1000, 0);
+		}
+	}
+}
+
+void MMONPC::update_for_combat()
+{
+	if (false == this->is_alive)
+	{
+		return;
+	}
+
+	bool is_isolated = true;
+	int local_y = y;
+	int local_x = x;
+	int local_actor_id = id;
+
+	MMOActor* local_target = this->target;
+	
+	if(nullptr != local_target) // path finding
+	{
+		if ( local_x > local_target->x)
+		{
+			local_x -= 1;
+		}
+		else if (local_x < local_target->x)
+		{
+			local_x += 1;
+		}
+
+		if (local_y > local_target->y)
+		{
+			local_y -= 1;
+		}
+		else if (local_y < local_target->y)
+		{
+			local_y += 1;
+		}
+	}
+	else
+	{		// roaming
+		switch (fast_rand() % 4)
+		{
+		case D_DOWN:
+			if (local_y < MAP_HEIGHT - 1)	local_y++;
+			break;
+		case D_LEFT:
+			if (local_x > 0) local_x--;
+			break;
+		case D_RIGHT:
+			if (local_x < MAP_WIDTH - 1) local_x++;
+			break;
+		case D_UP:
+			if (local_y > 0) local_y--;
+			break;
+		default:
+			size_t* invalid_ptr{}; *invalid_ptr = 0;
+			break;
+		}
+	}
+	x = local_x;
+	y = local_y;
+
+	MMOSector* new_sector = g_zone->get_sector(local_y, local_x);			// view_list 긁어오기.
+	// 섹터가 변경되면 바꾸기.
+	if (current_sector != new_sector)
+	{
+		AcquireSRWLockExclusive(&current_sector->lock); // 이전 섹터 나가기
+		current_sector->npcs.erase(id);
+		ReleaseSRWLockExclusive(&current_sector->lock);
+
+		// 지금 섹터 들가기.
+		AcquireSRWLockExclusive(&new_sector->lock);
+		this->current_sector = new_sector;
+		new_sector->npcs.insert(id);
+		ReleaseSRWLockExclusive(&new_sector->lock);
+	}
+
+
+	// 뷰리스트 수정.
+	AcquireSRWLockShared(&lock); // read 락 걸고...
+	std::unordered_map<int32_t, MMOActor*> local_old_view_list = view_list; // deep copy 
+	ReleaseSRWLockShared(&lock);
+
+
+	// 여기 이후로 사망하면... 
+
+	// 주변에 뿌리기.
+	MMOSector* current_sector = new_sector;
+	const MMONear* nears = current_sector->get_near(local_y, local_x);
+	int				near_cnt = nears->count;
+
+
+	// 내 주변 정보를 긁어 모음.
+	std::unordered_map<int32_t, MMOActor*>	local_new_view_list;
+	for (int n = 0; n < near_cnt; ++n)
+	{
+		AcquireSRWLockShared(&nears->sectors[n]->lock); // sector에 읽기 위해서 락을 얻고 
+		for (auto& actor_iter : nears->sectors[n]->actors)
+		{
+			//if (actor_iter.second->status != ST_ACTIVE) 		//continue;
+			if (actor_iter.second->is_near(this) == true) // 내 근처가 맞다면 넣음.
+			{
+				is_isolated = false;
+				local_new_view_list.insert(actor_iter);
+			}
+		}
+		ReleaseSRWLockShared(&nears->sectors[n]->lock);
+	}
+
+	for (auto& new_actor : local_new_view_list)
+	{
+		if (0 == local_old_view_list.count(new_actor.first))	// 이동후 새로 보이는 유저.
+		{
+			this->update_entering_actor(new_actor.second);		// 새로 보이는 유저 정보를 NPC한테 업데이트 함.
+
+			AcquireSRWLockShared(&new_actor.second->lock);
+			if (0 == new_actor.second->view_list_for_npc.count(this->id)) // 타 스레드에서 시야 처리 안 된경우.
+			{
+				ReleaseSRWLockShared(&new_actor.second->lock);
+
+				new_actor.second->send_enter_packet(this);
+			}
+			else // 처리 된경우
+			{
+				ReleaseSRWLockShared(&new_actor.second->lock);
+
+				new_actor.second->send_move_packet(this);   // 상대 시야 리스트에 내가 있는 경우 뷰리스트만 업데이트 한다.
+			}
+		}
+		else  // 기존 뷰리스트에 있던 유저들 
+		{
+			AcquireSRWLockShared(&new_actor.second->lock);					//
+			if (0 != new_actor.second->view_list_for_npc.count(this->id))	// 
+			{
+				ReleaseSRWLockShared(&new_actor.second->lock);
+
+				new_actor.second->send_move_packet(this);
+			}
+			else	// 이미 나간 경우.
+			{
+				ReleaseSRWLockShared(&new_actor.second->lock);
+
+				new_actor.second->send_enter_packet(this);
+			}
+		}
+
+		if (true == is_near(new_actor.second))
+		{
+			set_target(new_actor.second);
+		}
+	}
+
+
+	//시야에서 벗어난 플레이어
+	for (auto& old_it : local_old_view_list)
+	{
+		if (0 == local_new_view_list.count(old_it.first))		// 현재 내 시야에 없는 플레이어.
+		{														// 
+			this->update_leaving_actor(old_it.second);			// npc 시야에서 유저가 나간것을 업뎃 해줌.
+
+			AcquireSRWLockShared(&old_it.second->lock);			// 
+			if (0 != old_it.second->view_list_for_npc.count(this->id)) // 클라 시야에 내가 있는 경우
+			{
+				ReleaseSRWLockShared(&old_it.second->lock);
+				old_it.second->send_leave_packet(this);
+			}
+			else	// 이미 다른 스레드에서 지워준 경우.
+			{
+				ReleaseSRWLockShared(&old_it.second->lock);
+			}
+		}
+	}
+
+	if (is_isolated == true)
+	{
+		is_active = NPC_SLEEP;
+		// 최후 확인용 작업 // 이작업중에 누가 
+		//local_timer->push_timer_task(this->id, TTT_ON_SLEEP, 1000, 0);
+	}
+	else // 있다면 업데이트 계속.
+	{
+		local_timer->push_timer_task(this->id, TTT_UPDATE_FOR_NPC, 1000, 0);
+	}
+}
+
+void MMONPC::set_target(MMOActor* actor)
+{
+	if (false == has_target && false == InterlockedExchange8((volatile char*)&has_target, true))
+	{
+		printf("%d target : %d \n", this->type, actor->session_id);
+		this->target = actor;
+	}
+}
+
 
 void MMONPC::decrease_hp(MMOActor* actor, int32_t damage)
 {
 	AcquireSRWLockExclusive(&this->lock);
 	// 공격 하고 NPC 죽었으면 죽었다고 상태 바꾸기 ㅇㅇ;
-	if (this->is_alive == false) // 죽은 상태면  고인 건들지 말고 사라진다.
-	{
-		ReleaseSRWLockExclusive(&this->lock);
-		return;
-	}
+	//if (this->is_alive == false) // 죽은 상태면  고인 건들지 말고 사라진다.
+	//{
+
+	//}
 	
 	hp -= damage;
 	if (hp <= 0)
 	{
-		is_active = false; // 공격 하고 NPC 죽었으면 죽었다고 상태 바꾸기 ㅇㅇ
-		
-		AcquireSRWLockExclusive(&current_sector->lock); // 현재 섹터 나가기. // 다른 클라접근 하기 힘들게..
-		current_sector->npcs.erase(id);
-		ReleaseSRWLockExclusive(&current_sector->lock);
-
-		actor->increase_exp(exp);// 죽인거면 경험치를 얻고 그에 대한 처리를 한다.
-
-		for (auto& iter : view_list)	// npc가 주변에 브로드 캐스팅함. 죽어서 나갔다고 
+		if ( this->is_active != false && true == InterlockedExchange8((volatile CHAR*)&is_alive, 0))// = false; // 공격 하고 NPC 죽었으면 죽었다고 상태 바꾸기 ㅇㅇ
 		{
-			MMOActor* neighbor = iter.second;
+			AcquireSRWLockExclusive(&current_sector->lock); // 현재 섹터 나가기. // 다른 클라접근 하기 힘들게..
+			current_sector->npcs.erase(id);
+			ReleaseSRWLockExclusive(&current_sector->lock);
 
-			neighbor->send_leave_packet(this); // 내 시야리스트 플레이어게 나간다고 알림.
+			actor->increase_exp(exp);// 죽인거면 경험치를 얻고 그에 대한 처리를 한다.
+
+			for (auto& iter : view_list)	// npc가 주변에 브로드 캐스팅함. 죽어서 나갔다고 
+			{
+				MMOActor* neighbor = iter.second;
+
+				neighbor->send_leave_packet(this); // 내 시야리스트 플레이어게 나간다고 알림.
+			}
+
+			ReleaseSRWLockExclusive(&this->lock); // 여기선 락을 푼다.
+
+			local_timer->push_timer_task(id, TTT_RESPAWN_FOR_NPC, 30'000, 0);
 		}
-
-		ReleaseSRWLockExclusive(&this->lock); // 여기선 락을 푼다.
-
-		local_timer->push_timer_task(id, TTT_RESPAWN_FOR_NPC, 30'000, 0);
+		else
+		{
+			ReleaseSRWLockExclusive(&this->lock);
+			return;
+		}
 	}
 	else
 	{
 		// 마지막으로 타이머에 30초후 리스폰 이벤트를 추가.
 		//else  // 현재 프로토콜상 체력 깍이는건 안알랴줘도 된다.//{//}
 		ReleaseSRWLockExclusive(&this->lock); // 여기선 락을 푼다.
+		return;
 	}
 }
 
 bool MMONPC::is_near(MMOActor* actor)
 {
-	
-	return false;
+	if (abs(this->x - actor->x) > FOV_HALF_WIDTH_FOR_COMBAT_MOB) return false;
+	if (abs(this->y - actor->y) > FOV_HALF_HEIGHT_FOR_COMBAT_MOB) return false;
+
+	return true;
 }
 
 

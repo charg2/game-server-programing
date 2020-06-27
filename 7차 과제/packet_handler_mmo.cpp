@@ -145,7 +145,6 @@ REGISTER_HANDLER(C2S_MOVE)
 			{
 				my_actor->wake_up_npc(npc);
 				//local_timer->push_timer_task(npc->id, TTT_ON_WAKE_FOR_NPC, 1, my_actor->session_id);
-
 				local_new_view_list_for_npc.insert(npc_id);
 			}
 		}
@@ -222,18 +221,28 @@ REGISTER_HANDLER(C2S_MOVE)
 
 
 // 유저가 npc한테 하는 동작 추가.
-	///////////////////
 	for (int32_t npc_id : local_new_view_list_for_npc)
 	{
+		MMONPC* npc = mmo_npc_mgr->get_npc(npc_id);
+
+
 		if (0 == local_old_view_list_for_npc.count(npc_id)) // 이동후 새로 보이는 NPC
 		{
-			MMONPC* npc = mmo_npc_mgr->get_npc(npc_id);
-			
 			my_actor->send_enter_packet(npc); // 이 npc 정보를 나한테 보냄.
 
 			AcquireSRWLockExclusive(&npc->lock);
 			npc->view_list.emplace(my_actor->get_id(), my_actor);
 			ReleaseSRWLockExclusive(&npc->lock);
+		}
+
+		if (NT_COMBAT_FIXED <= npc->type && true == npc->is_near(my_actor)) // 컴뱃 공격 대상으로 시도 해봄.
+		{
+			if (npc->has_target == false)
+			{
+				printf("[%d] %d  \n", npc->type, npc->id);
+			}
+
+			npc->set_target(my_actor);							
 		}
 	}
 
@@ -255,7 +264,6 @@ REGISTER_HANDLER(C2S_MOVE)
 			ReleaseSRWLockExclusive(&npc->lock);
 		}
 	}
-
 }
 
 

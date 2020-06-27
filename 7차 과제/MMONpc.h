@@ -38,14 +38,21 @@ struct MMONPC
 	void update_leaving_actor(MMOActor* actor);
 
 	void initialize_vm_and_load_data();
-	void move();
 	void move_to_anywhere();
 	void reset();
 	void respawn();
 	void initialize(size_t id_base);
 	void send_chatting_to_actor(int32_t actor_id, wchar_t* message);
 	
+	void update_for_fixed_peace();
+	void update_for_peace();
+	void update_for_fixed_combat();
+	void update_for_combat();
+
+	void set_target(MMOActor* actor);
+
 	void decrease_hp(MMOActor* actor, int32_t damage);
+	
 	bool is_near(MMOActor* actor);
 
 	int16_t		hp;
@@ -56,6 +63,7 @@ struct MMONPC
 	wchar_t		name[50];
 	uint64_t	id;
 	int8_t		is_alive;
+	int8_t		has_target;
 
 	uint64_t	state; 
 	MMOSector*	current_sector;
