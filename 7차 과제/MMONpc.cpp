@@ -628,6 +628,12 @@ void MMONPC::update_for_fixed_combat()
 			local_timer->push_timer_task(this->id, TTT_UPDATE_FOR_NPC, 1000, 0);
 		}
 	}
+	else
+	{
+	is_active = NPC_SLEEP;
+	target = nullptr;
+	has_target = false;
+	}
 }
 
 void MMONPC::update_for_combat()
