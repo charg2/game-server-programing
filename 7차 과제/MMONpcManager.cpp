@@ -12,7 +12,6 @@ void MMONpcManager::initilize()
 {
 	npcs = new MMONPC[MMONpcManager::max_npc_count]{};
 
-
 	int npc_type_dividers[NT_MAX]{};
 
 	int dived_counter = 0;

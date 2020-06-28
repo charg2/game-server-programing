@@ -7,6 +7,7 @@ enum DBTaskType
 	DTT_UPDATE_ACTOR_POSITION = 0,
 
 	DTT_CREATE_ACTOR,
+	CHANGE_STAT,
 };
 
 struct DBTask

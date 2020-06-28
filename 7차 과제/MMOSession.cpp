@@ -58,6 +58,8 @@ void MMOSession::on_handling_db_task(DBTask* task)
 			{
 				actor.reset_data(load_task);
 
+				this->response_loginok();		// 로그인 처리 및 응답
+
 				enter_zone();
 			}
 			else // ID가 없을시 ID 새로 생성함.
@@ -111,8 +113,6 @@ void MMOSession::request_updating_position(int y, int x)
 void MMOSession::enter_zone()
 {
 	MMOZone* zone = g_server->get_zone();
-
-	this->response_loginok();		// 로그인 처리 및 응답
 
 	zone->enter_actor(&actor);
 

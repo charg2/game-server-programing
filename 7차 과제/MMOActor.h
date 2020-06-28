@@ -26,7 +26,9 @@ public:
 	void enter_sector(int32_t x, int32_t y);
 	void attack();
 	void reset();
+	void reset_when_respawn();
 	void exit();
+	void respawn();
 	void move(char direction);
 
 	// 체력이 깍이면 do_auto_recovery
@@ -58,9 +60,13 @@ public:
 	void send_leave_packet(MMOActor* other);
 	void send_leave_packet(MMOActor* other, c2::Packet* enter_packet);
 	void send_leave_packet(MMONPC* other);
+	void send_leave_packet_without_updating_viewlist(MMOActor* other);
+	void send_leave_packet_without_updating_viewlist(MMONPC* other);
 
 	void sned_chat_packet(MMOActor* other);
 	void send_login_ok_packet();
+
+	void send_stat_change();
 
 	void wake_up_npc(MMONPC* npc);
 

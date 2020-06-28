@@ -53,6 +53,8 @@ REGISTER_HANDLER(C2S_MOVE)
 	cs_packet_move cs_move_payload;								//	들어온 이동정보.
 	in_packet.read(&cs_move_payload, sizeof(cs_packet_move));	// 
 
+	if (my_actor->is_alive == false)
+		return;
 
 	// 사본 만들기.
 	int local_y = my_actor->y;
@@ -271,6 +273,9 @@ REGISTER_HANDLER(C2S_ATTACK)
 {
 	MMOSession*		mmo_session	{ (MMOSession*)session };
 	MMOActor*		my_actor	{ mmo_session->get_actor() };
+
+	if (my_actor->is_alive == false)
+		return;
 
 	my_actor->attack();
 }

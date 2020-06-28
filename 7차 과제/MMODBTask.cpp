@@ -47,3 +47,13 @@ LoadActorTask::LoadActorTask(uint64_t session_id, const wchar_t* name)
 
 
 LoadActorTask::~LoadActorTask(){}
+
+ChangeStatTask::ChangeStatTask(uint64_t session_id, int32_t user_id, int32_t level, int32_t hp, int32_t exp)
+	: user_id{ user_id }, level{ level }, hp{ hp }, exp{exp}
+{
+	this->type = DBTaskType::CHANGE_STAT;
+	this->session_id = session_id;
+	this->is_success = false;
+}
+
+ChangeStatTask::~ChangeStatTask() {}

@@ -119,11 +119,12 @@ void MMOServer::on_timer_service(const TimerTask& task)
 			{
 			case NT_PEACE_FIXED:
 				npc->update_for_fixed_peace();
+				npc->attack(); 
 				break;
 
 			case NT_PEACE_ROAMING:
 				npc->update_for_peace();
-				npc->move_to_anywhere();
+				npc->attack();
 				break;
 
 			case NT_COMBAT_FIXED:
@@ -160,6 +161,8 @@ void MMOServer::on_timer_service(const TimerTask& task)
 		case TTT_RESPAWN_FOR_PLAYER: // ÇÑ¸í¸¸ ¤·¤·.
 		{
 			/*MMONPC* npc = g_npc_manager->get_npc(task.actor_id);*/
+			MMOActor* user = g_server->get_actor(task.actor_id);
+			user->respawn();
 
 			break;
 		}

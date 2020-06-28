@@ -41,3 +41,16 @@ struct LoadActorTask : public DBTask
 	int32_t hp;
 	int32_t exp;
 };
+
+
+struct ChangeStatTask : public DBTask
+{
+	ChangeStatTask(uint64_t session_id, int32_t user_id, int32_t level, int32_t hp, int32_t exp);
+	ChangeStatTask(const LoadActorTask& other) = delete;
+	virtual ~ChangeStatTask();
+
+	int32_t user_id;
+	int32_t level;
+	int32_t hp;
+	int32_t exp;
+};
