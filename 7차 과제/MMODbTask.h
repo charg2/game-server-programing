@@ -9,6 +9,7 @@ struct CreateActorTask : public DBTask
 
 	wchar_t		name[50];
 
+// result
 	int32_t		user_id;
 	//int32_t		y, x;
 	//int32_t		hp;
@@ -23,8 +24,11 @@ struct UpdatePositionTask : public DBTask
 	UpdatePositionTask(uint64_t session_id, int32_t user_id, int32_t y, int32_t x);
 	virtual ~UpdatePositionTask();
 
+	
 	int32_t		user_id;
 	int32_t		y, x;
+
+	// no result
 };
 
 struct LoadActorTask : public DBTask
@@ -53,4 +57,18 @@ struct ChangeStatTask : public DBTask
 	int32_t level;
 	int32_t hp;
 	int32_t exp;
+};
+
+
+struct UpdateAllTask : public DBTask
+{
+	UpdateAllTask(uint64_t session_id, int32_t user_id, int32_t y, int32_t x, int32_t level, int32_t hp, int32_t exp);
+	virtual ~UpdateAllTask();
+
+
+	int32_t		user_id;
+	int32_t		y, x;
+	int32_t		level;
+	int32_t		hp;
+	int32_t		exp;
 };

@@ -334,7 +334,8 @@ REGISTER_HANDLER(C2S_LOGOUT)
 	MMOServer* mmo_server = (MMOServer*)session->server;
 	MMOZone* mmo_zone = mmo_server->get_zone();
 
-	my_actor->session->request_updating_position(my_actor->y, my_actor->x); // 종료 전 DB 업뎃.
+	//my_actor->session->request_updating_position(my_actor->y, my_actor->x); // 종료 전 DB 업뎃.
+	my_actor->session->request_updating_all(my_actor->y, my_actor->x, my_actor->hp, my_actor->level, my_actor->current_exp); // 추가 정보..
 
 	int			my_actor_id = my_actor->get_id(); // 
 

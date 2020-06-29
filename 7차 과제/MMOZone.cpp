@@ -84,9 +84,9 @@ void MMOZone::load_obstacles()
 	{
 		for (int x = 0; x < 800; ++x)
 		{	
-			MMOSector::obstacle_table[y].set(x);
-			MMOSector::obstacle_table[y].reset(x);
-			MMOSector::obstacle_table[y][x];
+			MMOSector::obstacle_table[y].set(1);
+			//MMOSector::obstacle_table[y].reset(x);
+			//MMOSector::obstacle_table[y][x];
 		}
 	}
 }

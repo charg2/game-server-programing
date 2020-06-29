@@ -285,14 +285,17 @@
     <ClInclude Include="DBTask.h">
       <Filter>소스 파일\db</Filter>
     </ClInclude>
-    <ClInclude Include="MMODBTask.h">
-      <Filter>소스 파일\db</Filter>
-    </ClInclude>
     <ClInclude Include="MMONPCManager.h">
       <Filter>소스 파일\contents</Filter>
     </ClInclude>
     <ClInclude Include="MMONPC.h">
       <Filter>소스 파일\contents</Filter>
+    </ClInclude>
+    <ClInclude Include="MMODBTask.h">
+      <Filter>소스 파일\contents</Filter>
+    </ClInclude>
+    <ClInclude Include="PathFinder.h">
+      <Filter>소스 파일\extlib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -359,9 +362,6 @@
     <ClCompile Include="DBManager.cpp">
       <Filter>소스 파일\db</Filter>
     </ClCompile>
-    <ClCompile Include="MMODBTask.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="DBTask.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -374,6 +374,12 @@
     <ClCompile Include="MMONPC.cpp">
       <Filter>소스 파일\contents</Filter>
     </ClCompile>
+    <ClCompile Include="MMODBTask.cpp">
+      <Filter>소스 파일\contents</Filter>
+    </ClCompile>
+    <ClCompile Include="PathFinder.cpp">
+      <Filter>소스 파일\extlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="config.json">
@@ -381,6 +387,9 @@
     </None>
     <None Include="scripts\npc.lua">
       <Filter>소스 파일\script</Filter>
+    </None>
+    <None Include="mmo_map.json">
+      <Filter>소스 파일\contents</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

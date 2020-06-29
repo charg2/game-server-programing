@@ -7,6 +7,8 @@
 #include "../DBTask.h"
 
 
+
+
 OuterServer::OuterServer()
 	: listen_sock{ INVALID_SOCKET }, completion_port{ INVALID_HANDLE_VALUE }, accepter{ INVALID_HANDLE_VALUE }, session_heap{ INVALID_HANDLE_VALUE }
 	, io_handler{ nullptr }, ip{}, port{ 0 }, sessions{ }
@@ -322,6 +324,8 @@ void OuterServer::io_service_procedure(uint64_t custom_thread_id)
 	}
 }
 
+#include "../PathFinder.h"
+
 void OuterServer::io_and_timer_service_procedure(uint64_t custom_thread_id)
 {
 	local_timer = new TimeTaskScheduler{};
@@ -330,6 +334,8 @@ void OuterServer::io_and_timer_service_procedure(uint64_t custom_thread_id)
 	printf("%d :: worker therad start !\n", GetCurrentThreadId());
 	OuterServer::local_storage_accessor = custom_thread_id;
 	c2::local::io_thread_id = custom_thread_id;
+
+	local_path_finder = new PathFinder();
 
 	HANDLE	local_completion_port{ this->completion_port };
 	int64_t	thread_id{ GetCurrentThreadId() };

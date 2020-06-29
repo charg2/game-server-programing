@@ -8,6 +8,7 @@
 #include "MMONpc.h"
 #include "MMODBTask.h"
 #include <unordered_set>
+#include "MMOSystmeMessage.h"
 
 MMOActor::MMOActor(MMOSession* owner)
 	: x{}, y{},
@@ -80,6 +81,12 @@ void MMOActor::respawn()
 	reset_when_respawn();
 
 	session->enter_zone();
+
+	add_alarm(this->session_id, TimerTaskType::TTT_USER_RECOVER_HP, 10, 0);
+
+	session->request_change_status(hp, level, current_exp);
+
+	send_chat_packet(this, system_msg_respawn);
 }
 
 void MMOActor::reset_data(const LoadActorTask* task)
@@ -178,6 +185,7 @@ void MMOActor::increase_exp(int32_t exp)
 	g_server->send_packet(this->session_id, exp_packet);
 	// db update 
 	
+	session->request_change_status(hp, level, current_exp);
 }
 
 void MMOActor::decrease_exp(int32_t exp) // 사망시..
@@ -188,6 +196,7 @@ void MMOActor::decrease_exp(int32_t exp) // 사망시..
 	{
 		current_exp = 0;
 	}
+	ReleaseSRWLockExclusive(&this->lock);
 
 	sc_packet_stat_change stat_payload;
 	stat_payload.header.type = S2C_STAT_CHANGE;
@@ -201,7 +210,7 @@ void MMOActor::decrease_exp(int32_t exp) // 사망시..
 
 	g_server->send_packet(this->session_id, exp_packet);
 
-	ReleaseSRWLockExclusive(&this->lock);
+	session->request_change_status(hp, level, current_exp);
 }
 
 void MMOActor::increase_hp(int32_t hp)
@@ -213,13 +222,12 @@ void MMOActor::increase_hp(int32_t hp)
 		current_exp = 200;
 	}
 
+	ReleaseSRWLockExclusive(&this->lock); // 여기까지만 락이 필요함.
+
 	sc_packet_stat_change stat_payload;
 	stat_payload.hp = this->hp;
 	stat_payload.level = this->level;
 	stat_payload.exp = this->current_exp;
-
-	ReleaseSRWLockExclusive(&this->lock); // 여기까지만 락이 필요함.
-
 	stat_payload.header.type = S2C_STAT_CHANGE;
 	stat_payload.header.length = sizeof(sc_packet_stat_change);
 
@@ -227,6 +235,7 @@ void MMOActor::increase_hp(int32_t hp)
 	exp_packet->write(&stat_payload, sizeof(sc_packet_stat_change));
 
 	g_server->send_packet(this->session_id, exp_packet);
+	session->request_change_status(hp, level, current_exp);
 }
 
 void MMOActor::decrease_hp(MMONPC* npc, int32_t damage)
@@ -283,6 +292,8 @@ void MMOActor::decrease_hp(MMONPC* npc, int32_t damage)
 
 		send_stat_change();
 	}
+
+	session->request_change_status(hp, level, current_exp);
 }
 
 
@@ -440,11 +451,6 @@ void MMOActor::wake_up_npc(MMONPC* npc)
 {
 	if (npc->is_active == NPC_SLEEP) // false
 	{
-		//if (npc->is_alive == false)
-		//{
-		//	return;
-		//}
-
 		if (NPC_SLEEP == InterlockedExchange(&npc->is_active, NPC_WORKING) )		// 이전 상태가 자고 있었다면 꺠움.
 		{
 
@@ -578,9 +584,18 @@ void MMOActor::send_leave_packet_without_updating_viewlist(MMONPC* other)
 	server->send_packet(this->session_id, leave_packet);
 }
 
-void MMOActor::sned_chat_packet(MMOActor* other)
+void MMOActor::send_chat_packet(MMOActor* other, const wchar_t* msg)
 {
+	sc_packet_chat chat_payload;
+	chat_payload.header.length = sizeof(sc_packet_chat);
+	chat_payload.header.type = S2C_CHAT;
+	chat_payload.id = this->session_id;
+	wcscpy_s(chat_payload.chat, msg);
 
+	c2::Packet* chat_packet = c2::Packet::alloc();
+	chat_packet->write(&chat_payload, sizeof(sc_packet_chat));
+
+	g_zone->server->send_packet(session_id, chat_packet);
 }
 
 #include "contents_enviroment.h"
@@ -594,8 +609,6 @@ void MMOActor::attack()
 
 	int y = this->y; 
 	int x = this->x;
-
-	std::unordered_set<int32_t> npc_attack_list;
 
 	// 주변 4방향 좌표를 구하고 검사를 함. 장애물이 있는 곳 or 인덱스 범위를 초과 하는 곳이면 그곳은 제외한다. (  npc만 팬다. ) 
 	if ( y - 1 >= 0 && g_zone->has_obstacle(y -1, x) == false )
@@ -618,48 +631,30 @@ void MMOActor::attack()
 		ys[effective_position_count] = y; xs[effective_position_count] = x + 1;
 		effective_position_count += 1;
 	}
-	
 
-	// 
-	const MMONear* nears = g_zone->get_near(y, x); // 
-	for (int n = 0; n < nears->count; ++n)
+
+	AcquireSRWLockShared(&lock); // 섹터에 npc에 대한 읽기 작업만.
+	auto& local_view_list_for_npc = view_list_for_npc;
+	ReleaseSRWLockShared(&lock);
+
+
+	for (int32_t npc_id : local_view_list_for_npc)
 	{
-		MMOSector* near_sector = nears->sectors[n];			
-		std::unordered_set<int32_t>* npcs = &near_sector->npcs;
+		MMONPC* npc = g_npc_manager->get_npc(npc_id);   // npc를 구하고...
 
-		AcquireSRWLockShared(&near_sector->lock); // 섹터에 npc에 대한 읽기 작업만.
-		for (int32_t npc_id : *npcs)
+		for (int k = 0; k < effective_position_count; ++k)
 		{
-			MMONPC* npc = g_npc_manager->get_npc(npc_id);   // npc를 구하고...
-			
-			// if (npc->state != DEATH)  					// npc 상태가 사망이 아니면 
-			// 이거를 밑에 실제로 때릴때 해도 됨.
-			for (int k = 0; k < effective_position_count; ++k)
+			if (ys[k] == npc->y && xs[k] == npc->x) // 좌표가 일치하면 
 			{
-				if (ys[k] == npc->y && xs[k] == npc->x) // 좌표가 일치하면 
+				if (npc->is_alive == true)
 				{
-					npc_attack_list.insert(npc_id);	//공격 대상에 추가.
-
-					break;	// 종료.
+					npc->decrease_hp(this, c2::constant::TEST_DMG);
+					if (npc->type < NT_COMBAT_FIXED) // 평화 몹이면
+					{
+						npc->set_target(this);
+						wake_up_npc(npc);
+					}
 				}
-			}
-		}
-		ReleaseSRWLockShared(&near_sector->lock);
-	}
-
-
-	// 락을 풀고 임시 공격 범위 리스트에게 데미지를 입힘
-	for (int32_t target_npc_id : npc_attack_list) // 피격될 NPC를 순회하면서 피격 시킴.
-	{
-		MMONPC* npc = g_npc_manager->get_npc(target_npc_id);   // npc를 구하고...
-
-		if (npc->is_alive == true)
-		{
-			npc->decrease_hp(this, c2::constant::TEST_DMG);
-			if (npc->type < NT_COMBAT_FIXED) // 평화 몹이면
-			{
-				npc->set_target(this);
-				wake_up_npc(npc);
 			}
 		}
 	}

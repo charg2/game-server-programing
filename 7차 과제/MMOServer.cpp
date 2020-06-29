@@ -39,7 +39,7 @@ void MMOServer::on_connect(uint64_t session_id){}
 void MMOServer::on_disconnect(uint64_t session_id) 
 {
 	MMOActor*	my_actor = get_actor(session_id);
-	my_actor->session->request_updating_position( my_actor->y, my_actor->x);
+	my_actor->session->request_updating_all( my_actor->y, my_actor->x, my_actor->hp, my_actor->level, my_actor->current_exp);
 	
 	int			my_actor_id = my_actor->get_id();
 
@@ -154,7 +154,9 @@ void MMOServer::on_timer_service(const TimerTask& task)
 		}
 		case TTT_USER_RECOVER_HP:
 		{
-			MMONPC* npc = g_npc_manager->get_npc(task.actor_id);
+			auto* actor = g_server->get_actor(task.actor_id);
+			
+			actor->increase_hp(10);
 
 			break;
 		}
@@ -204,6 +206,21 @@ bool MMOServer::on_load_config(c2::util::JsonParser* parser)
 	c2::global::concurrent_db_reader_thread_count = c2::global::db_read_thread_count;
 
 	if (false == parser->get_raw_wstring(L"db_server_name", c2::global::db_server_name, count_of(c2::global::db_server_name)) )
+		return false;
+
+
+
+////////////////////////////////
+	parser->load_json(L"mmo_map.json");
+
+	if (false == parser->get_int32(L"mmo_map_width", c2::global::obstacle_table_width))
+		return false;
+
+	int height{};
+	if (false == parser->get_int32(L"mmo_map_height", c2::global::obstacle_table_height))
+		return false;
+
+	if (false == parser->get_map(L"mmo_map", c2::global::obstacle_table, c2::global::obstacle_table_width, c2::global::obstacle_table_height))
 		return false;
 
 	return true;

@@ -186,6 +186,7 @@
     <ClInclude Include="MMOZone.h" />
     <ClInclude Include="mmo_function.hpp" />
     <ClInclude Include="network\SocketAddress.h" />
+    <ClInclude Include="PathFinder.h" />
     <ClInclude Include="pre_compile.h" />
     <ClInclude Include="protocol.h" />
     <ClInclude Include="rapidjson\allocators.h" />
@@ -253,6 +254,7 @@
     <ClCompile Include="network\SocketAddress.cpp" />
     <ClCompile Include="packet_handler_base.cpp" />
     <ClCompile Include="packet_handler_mmo.cpp" />
+    <ClCompile Include="PathFinder.cpp" />
     <ClCompile Include="protocol.cpp" />
     <ClCompile Include="script_api.cpp" />
     <ClCompile Include="util\dump.cpp" />
@@ -261,6 +263,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="config.json" />
+    <None Include="mmo_map.json" />
     <None Include="scripts\npc.lua" />
   </ItemGroup>
   <ItemGroup>

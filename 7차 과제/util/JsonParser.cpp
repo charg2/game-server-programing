@@ -161,6 +161,24 @@ namespace c2::util
 		dest[length] = NULL;
 
 
+
+		return true;
+	}
+
+	bool JsonParser::get_map(std::wstring_view&& tag, char* map, size_t width, size_t height)
+	{
+		const auto& arr = document[tag.data()];
+
+		for (rapidjson::SizeType i = 0; i < arr.Size(); i++) // Uses SizeType instead of size_t
+		{
+			const wchar_t* str = arr[i].GetString();
+			for (int n{}; n < arr[i].GetStringLength(); ++n)
+			{
+				map[i * width + n] = (char)str[n] - '0';
+				//printf("%d", map[i * width + n]);
+			}
+			//printf("\n");
+		}
 		return true;
 	}
 

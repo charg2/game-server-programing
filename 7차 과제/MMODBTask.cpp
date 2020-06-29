@@ -36,7 +36,7 @@ CreateActorTask::~CreateActorTask() {}
 LoadActorTask::LoadActorTask(uint64_t session_id, const wchar_t* name) 
 	:  user_id{}, y{}, x{}, level{}, hp{}, exp{}
 {
-	this->type = DBTaskType::LOAD_ACTOR;
+	this->type = DBTaskType::DTT_LOAD_ACTOR;
 	this->session_id = session_id;
 	this->is_success = false;
 	
@@ -51,9 +51,23 @@ LoadActorTask::~LoadActorTask(){}
 ChangeStatTask::ChangeStatTask(uint64_t session_id, int32_t user_id, int32_t level, int32_t hp, int32_t exp)
 	: user_id{ user_id }, level{ level }, hp{ hp }, exp{exp}
 {
-	this->type = DBTaskType::CHANGE_STAT;
+	this->type = DBTaskType::DTT_CHANGE_STAT;
 	this->session_id = session_id;
 	this->is_success = false;
 }
 
 ChangeStatTask::~ChangeStatTask() {}
+
+UpdateAllTask::UpdateAllTask(uint64_t session_id, int32_t user_id, int32_t y, int32_t x, int32_t level, int32_t hp, int32_t exp)
+	: user_id{ user_id }, level{ level }, hp{ hp }, exp{ exp }
+{
+	this->y = y;
+	this->x = x;
+	this->type = DBTaskType::DTT_UPDATE_ALL;
+	this->session_id = session_id;
+	this->is_success = false;
+}
+
+UpdateAllTask::~UpdateAllTask()
+{
+}

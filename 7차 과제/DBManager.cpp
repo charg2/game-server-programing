@@ -129,6 +129,58 @@ uint32_t __stdcall DBManager::db_writer(LPVOID param)
 
 					break;
 				}
+				case DTT_UPDATE_ALL:
+				{
+					UpdateAllTask*	update_task = reinterpret_cast<UpdateAllTask*>(task);
+					DbHelper		db_helper;
+
+					db_helper.bind_param_int(&update_task->user_id);
+					db_helper.bind_param_int(&update_task->y);
+					db_helper.bind_param_int(&update_task->x);
+					db_helper.bind_param_int(&update_task->hp);
+					db_helper.bind_param_int(&update_task->level);
+					db_helper.bind_param_int(&update_task->exp);
+
+					if (true == db_helper.execute(sql_update_all))
+					{
+						update_task->is_success = db_helper.fetch_row();
+					}
+
+					if (false == update_task->is_success)
+					{
+						wprintf(L"actor all failure...\n");
+					}
+
+					delete update_task;
+
+					break;
+				}
+
+				case DTT_CHANGE_STAT:
+				{
+					ChangeStatTask* update_task = reinterpret_cast<ChangeStatTask*>(task);
+					DbHelper		db_helper;
+
+					db_helper.bind_param_int(&update_task->user_id);
+					db_helper.bind_param_int(&update_task->hp);
+					db_helper.bind_param_int(&update_task->level);
+					db_helper.bind_param_int(&update_task->exp);
+
+					if (true == db_helper.execute(sql_update_actor_stat))
+					{
+						update_task->is_success = db_helper.fetch_row();
+					}
+
+					if (false == update_task->is_success)
+					{
+						wprintf(L"actor all failure...\n");
+					}
+
+					delete update_task;
+
+					break;
+				}
+
 				case DTT_CREATE_ACTOR:
 				{
 					CreateActorTask*	create_task = reinterpret_cast<CreateActorTask*>(task);
@@ -155,7 +207,7 @@ uint32_t __stdcall DBManager::db_writer(LPVOID param)
 			}
 		}
 
-		Sleep(1);
+		Sleep(1); // 사실 이벤트로 꺠우는게 맞지 않을까 싶은데 일단 다른게 더 급하다.
 	}
 
 	return 1;
@@ -183,7 +235,7 @@ uint32_t __stdcall DBManager::db_reader(LPVOID param)
 		DBTask* db_task = reinterpret_cast<DBTask*>(overlapped_ptr);
 		switch (db_task->type)
 		{
-			case DBTaskType::LOAD_ACTOR:
+			case DBTaskType::DTT_LOAD_ACTOR:
 			{	
 				LoadActorTask*	load_actor_db_task = reinterpret_cast<LoadActorTask*>(db_task);
 				DbHelper		db_helper;

@@ -74,7 +74,9 @@ namespace c2
 		extern inline int32_t	concurrent_db_reader_thread_count	{ -1 };
 		extern inline wchar_t	db_server_name[64]					{ };
 
-		extern inline char obstacle_table[800][800]					{};
+		extern inline char			obstacle_table[800 * 800]			{};
+		extern inline int32_t		obstacle_table_width				{};
+		extern inline int32_t		obstacle_table_height				{};
 	}
 
 	namespace local

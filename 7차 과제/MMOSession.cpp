@@ -51,7 +51,7 @@ void MMOSession::on_handling_db_task(DBTask* task)
 {
 	switch (task->type)
 	{
-		case LOAD_ACTOR:
+		case DTT_LOAD_ACTOR:
 		{
 			LoadActorTask* load_task = reinterpret_cast<LoadActorTask*>(task);
 			if (load_task->is_success == true)
@@ -106,6 +106,21 @@ void MMOSession::request_updating_position(int y, int x)
 {
 	UpdatePositionTask* task = new UpdatePositionTask(this->session_id, actor.user_id, y, x);
 	
+	g_db_manager->post_db_writing_task(task);
+}
+
+void MMOSession::request_change_status(int hp, int level, int exp)
+{
+	ChangeStatTask* task = new ChangeStatTask(this->session_id, actor.user_id, level, hp, exp);
+
+	g_db_manager->post_db_writing_task(task);
+}
+
+
+void MMOSession::request_updating_all(int y, int x, int hp, int level, int exp)
+{
+	UpdateAllTask* task = new UpdateAllTask(this->session_id, actor.user_id, y, x, level, hp, exp);
+
 	g_db_manager->post_db_writing_task(task);
 }
 

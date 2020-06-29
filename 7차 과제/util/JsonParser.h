@@ -32,6 +32,8 @@ namespace c2::util
 		bool get_wstring(std::wstring_view&& tag, std::wstring& out_data);
 		bool get_raw_wstring(std::wstring_view&& tag, wchar_t* dest, size_t raw_str_length);
 
+		bool get_map(std::wstring_view&& tag, char* map, size_t width, size_t height);
+
 	private:
 		rapidjson::GenericDocument<rapidjson::UTF16LE<>> document;
 	};

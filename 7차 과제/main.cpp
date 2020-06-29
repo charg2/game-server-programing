@@ -102,11 +102,12 @@
 
 using namespace c2;
 #include "DBManager.h"
+#include "PathFinder.h"
 
-
-void main()
+int main()
 {
 	setlocale(LC_ALL, "");
+
 
 	g_server = new MMOServer();
 
@@ -114,10 +115,13 @@ void main()
 
 	g_server->load_config_using_json(L"config.json");
 	
+	if (false == PathFinder::InitAstarMap((BYTE*)c2::global::obstacle_table, c2::global::obstacle_table_width, c2::global::obstacle_table_height))
+		return -3;
+
 	g_db_manager = new DBManager();
 
 	if( false == g_db_manager->initialize() )
-		return; 
+		return -4; 
 
 	g_server->init_npcs();
 

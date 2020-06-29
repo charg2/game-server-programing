@@ -53,3 +53,5 @@ private:
 };
 
 extern inline thread_local TimeTaskScheduler* local_timer {};
+
+#define add_alarm(id, task, sec, target_id) local_timer->push_timer_task(id, task, sec * 1000, target_id)
