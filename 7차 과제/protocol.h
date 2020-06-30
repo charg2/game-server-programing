@@ -68,7 +68,7 @@ struct PacketHeader
 
 static_assert(sizeof(int32_t) == sizeof(int) && sizeof(uint32_t) == sizeof(unsigned int));
 
-struct sc_packet_login_ok // 2 4 4 2 2 4
+struct sc_packet_login_ok // 2 4 4 2 2 4  = 18
 {
 	PacketHeader header;
 
@@ -94,14 +94,15 @@ struct sc_packet_move
 	unsigned move_time;
 };
 
-struct sc_packet_enter
-{
+struct sc_packet_enter // 2 + 4 + 100 + 1 + 4
+{ 
 	PacketHeader header;
 
 	int id;
-	wchar_t name[MAX_ID_LEN];
 	char o_type;
 	short x, y;
+
+	wchar_t name[MAX_ID_LEN];
 };
 
 struct sc_packet_leave

@@ -252,6 +252,4 @@ void MMOSession::move_to(int y, int x, char direction)
 
 		this->request_updating_position(local_y, local_x);
 	}
-
-
 }

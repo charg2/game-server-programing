@@ -9,6 +9,7 @@
 #include "MMODBTask.h"
 #include <unordered_set>
 #include "MMOSystmeMessage.h"
+#include <cmath>
 
 MMOActor::MMOActor(MMOSession* owner)
 	: x{}, y{},
@@ -98,7 +99,7 @@ void MMOActor::reset_data(const LoadActorTask* task)
 	zone = nullptr;
 
 	current_exp = task->exp;
-	levelup_exp = task->level * 200;
+	levelup_exp = task->level * 100;
 	hp = task->hp;
 	level = task->level;
 
@@ -124,7 +125,7 @@ void MMOActor::reset_data_when_creation(const CreateActorTask* task)
 	zone = nullptr;
 
 	current_exp = 0;
-	levelup_exp = 200;
+	levelup_exp = 100;
 	hp = 200;
 	level = 1;
 
@@ -166,6 +167,7 @@ void MMOActor::increase_exp(int32_t exp)
 	{
 		current_exp -= levelup_exp;
 		levelup_exp *= 2;
+		level += 1;
 	}
 
 	sc_packet_stat_change stat_payload;
@@ -253,6 +255,7 @@ void MMOActor::decrease_hp(MMONPC* npc, int32_t damage)
 			current_sector->actors.erase(this->get_id());
 			ReleaseSRWLockExclusive(&current_sector->lock);
 
+			send_stat_change();
 
 			for (auto& iter : view_list)			// 뷰리스트 정리함 내가 없어졌다고. 
 			{
@@ -387,7 +390,7 @@ void MMOActor::send_enter_packet(MMONPC* other)
 	payload.y = other->y;
 	wcscpy_s(payload.name, other->name);
 
-	payload.o_type = 1;
+	payload.o_type = (other->type / 2) + 1;
 
 	AcquireSRWLockExclusive(&this->lock);
 	this->view_list_for_npc.emplace((int)other->id);
@@ -408,7 +411,7 @@ void MMOActor::send_enter_packet_without_updating_viewlist(MMONPC* other)
 	payload.x = other->x;
 	payload.y = other->y;
 	wcscpy_s(payload.name, other->name);
-	payload.o_type = 1;
+	payload.o_type = (other->type / 2) + 1;
 
 	c2::Packet* enter_packet = c2::Packet::alloc();
 	enter_packet->write(&payload, sizeof(sc_packet_enter));

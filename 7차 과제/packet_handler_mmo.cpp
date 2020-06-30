@@ -291,36 +291,22 @@ REGISTER_HANDLER(C2S_CHAT)
 	cs_packet_chat chat_payload; 								// id check
 	in_packet.read(&chat_payload, sizeof(cs_packet_chat));
 
-	std::unordered_map<int16_t, MMOActor*> local_view_list;		// 임시 뷰리스트.
+
+	AcquireSRWLockShared(&my_actor->lock); // 섹터에 npc에 대한 읽기 작업만.
+	std::unordered_map<int32_t, MMOActor*> local_view_list = my_actor->view_list;		// 임시 뷰리스트.
+	ReleaseSRWLockShared(&my_actor->lock);
 	//local_view_list.clear();									// ??? 아마 스태틱으로 만들고 테스트를 안해본듯.
 
-	MMOSector* current_sector = mmo_server->get_zone()->get_sector(my_actor);		// chat을 날릴 view_list 긁어오기.
-	const MMONear* nears	= current_sector->get_near(my_actor->y, my_actor->x);	// 주벽 섹터들.
-	int near_cnt = nears->count;
-	for (int i = 0; i < near_cnt; ++i)
-	{
-		AcquireSRWLockShared(&nears->sectors[i]->lock);
-
-		for (auto& iter : nears->sectors[i]->actors)
-		{
-			MMOActor* neighbor = iter.second;
-			if (my_actor->is_near(neighbor) == true) // 내 근처가 맞다면 넣음.
-				local_view_list.emplace(iter);
-		}
-		
-		ReleaseSRWLockShared(&nears->sectors[i]->lock);
-	}
-	
-
-	c2::Packet* out_packet = c2::Packet::alloc();
 	// 프로토콜이 형식이 똑같음 타입만 바꿔주면 됨.
+	c2::Packet* out_packet = c2::Packet::alloc();
 	chat_payload.header.type = S2C_CHAT;
 	chat_payload.header.length = sizeof(cs_packet_chat);
 	out_packet->write(&chat_payload, sizeof(cs_packet_chat));	//여기가 좀 병목인가;
 	out_packet->add_ref( local_view_list.size() );
-	for (auto& it : local_view_list)
+
+	for (auto& actor_it : local_view_list)
 	{
-		mmo_server->send_packet(it.second->session_id, out_packet);	// 
+		mmo_server->send_packet(actor_it.second->session_id, out_packet);	// 
 	}
 
 	out_packet->decrease_ref_count();

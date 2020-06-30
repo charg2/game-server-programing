@@ -40,8 +40,8 @@ public:
 
 	void increase_exp(int32_t exp);
 	void decrease_exp(int32_t exp);
-	void increase_hp(int32_t hp);
-	void decrease_hp(MMONPC* npc, int32_t hp);
+	void increase_hp(int32_t hill);
+	void decrease_hp(MMONPC* npc, int32_t dmg);
 
 	void get_login_packet_info(sc_packet_login_ok& out_packet);
 
