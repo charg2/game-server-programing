@@ -58,7 +58,11 @@ void MMOServer::on_disconnect(uint64_t session_id)
 	auto& view_list = my_actor->view_list;
 	for( auto& actor_iter : view_list)
 	{
-		//if (actor_iter.second == my_actor) continue;
+		if (actor_iter.second == my_actor)
+		{
+			actor_iter.second->send_leave_packet(my_actor); // 이미 락을 걸어놓으애ㅕ서 
+			continue;
+		}
 		AcquireSRWLockExclusive(&actor_iter.second->lock); // 데드락 가능성 있다;
 		if (0 != actor_iter.second->view_list.count(my_actor_id))
 		{
@@ -119,12 +123,19 @@ void MMOServer::on_timer_service(const TimerTask& task)
 			{
 			case NT_PEACE_FIXED:
 				npc->update_for_fixed_peace();
-				npc->attack_for_peace(); 
+				npc->attack_for_peace();
 				break;
 
 			case NT_PEACE_ROAMING:
-				npc->update_for_peace();
-				npc->attack_for_peace();
+				if (npc->has_target == false)
+				{
+					npc->move_to_anywhere();
+				}
+				else
+				{
+					npc->update_for_peace();
+					npc->attack_for_peace();
+				}
 				break;
 
 			case NT_COMBAT_FIXED:
