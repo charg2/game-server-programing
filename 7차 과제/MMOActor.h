@@ -63,7 +63,7 @@ public:
 	void send_leave_packet_without_updating_viewlist(MMOActor* other);
 	void send_leave_packet_without_updating_viewlist(MMONPC* other);
 
-	void send_chat_packet(MMOActor* other, const wchar_t* msg);
+	void send_chat_packet(const wchar_t* msg);
 	void send_login_ok_packet();
 
 	void send_stat_change();

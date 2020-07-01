@@ -69,13 +69,13 @@ int l2c_send_chatting_to_target(lua_State* vm)
 //	return 1;
 //}
 
-int l2c_npc_go_sleep(lua_State* vm)
-{
-	int npc_id = (int)lua_tonumber(vm, -1);		// 제일 최근에 스택에 넣은 값.
-	lua_pop(vm, 2);								// 
-	MMONPC* npc = g_npc_manager->get_npc(npc_id);	// 
-	npc->is_active = false;
-
-	return 1;
-}
+//int l2c_npc_go_sleep(lua_State* vm)
+//{
+//	int npc_id = (int)lua_tonumber(vm, -1);		// 제일 최근에 스택에 넣은 값.
+//	lua_pop(vm, 2);								// 
+//	MMONPC* npc = g_npc_manager->get_npc(npc_id);	// 
+//	npc->is_active = false;
+//
+//	return 1;
+//}
 

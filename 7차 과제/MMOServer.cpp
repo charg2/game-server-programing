@@ -119,12 +119,12 @@ void MMOServer::on_timer_service(const TimerTask& task)
 			{
 			case NT_PEACE_FIXED:
 				npc->update_for_fixed_peace();
-				npc->attack(); 
+				npc->attack_for_peace(); 
 				break;
 
 			case NT_PEACE_ROAMING:
 				npc->update_for_peace();
-				npc->attack();
+				npc->attack_for_peace();
 				break;
 
 			case NT_COMBAT_FIXED:

@@ -25,7 +25,7 @@ CreateActorTask::CreateActorTask(uint64_t session_id, const wchar_t* name)
 	this->session_id = session_id;
 	this->is_success = false;
 
-	memcpy(this->name, name, 50 * sizeof(wchar_t));
+	wcsncpy_s(this->name, name, 50);
 }
 
 CreateActorTask::~CreateActorTask() {}

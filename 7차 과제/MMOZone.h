@@ -16,7 +16,7 @@ public:
 	void enter_actor(MMOActor* actor);		//  for login
 	void enter_npc(MMONPC* actor);		//  for login
 
-	void load_obstacles();
+	//void load_obstacles();
 	
 	MMOSector* get_sector(int32_t y, int32_t x);
 	

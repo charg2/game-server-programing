@@ -41,7 +41,7 @@ struct MMONPC
 	void move_to_anywhere();
 	void reset();
 	void respawn();
-	void attack();
+	void attack_for_peace();
 	void die();
 	void initialize(size_t id_base);
 	void send_chatting_to_actor(int32_t actor_id, wchar_t* message);
@@ -55,9 +55,11 @@ struct MMONPC
 
 	void decrease_hp(MMOActor* actor, int32_t damage);
 	
-	bool is_near(MMOActor* actor);
+	bool is_in_attack_range(MMOActor* actor);
 
 	bool is_in_attack_scope(MMOActor* actor);
+	void send_chat_packet(const wchar_t* msg);
+	void send_chat_packet_to_target(MMOActor* target, const wchar_t* msg);
 
 	int16_t		hp;
 	int16_t		max_hp;

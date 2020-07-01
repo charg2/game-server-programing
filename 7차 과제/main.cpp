@@ -104,10 +104,10 @@ using namespace c2;
 #include "DBManager.h"
 #include "PathFinder.h"
 
+#include <iostream>
 int main()
 {
 	setlocale(LC_ALL, "");
-
 
 	g_server = new MMOServer();
 

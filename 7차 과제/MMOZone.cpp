@@ -38,8 +38,6 @@ MMOZone::MMOZone()
 	}
 
 
-	load_obstacles();
-
 	printf("init map... Ok\n ");
 	printf("MMOZone Ready... Ok\n ");
 }
@@ -78,18 +76,18 @@ void MMOZone::enter_npc(MMONPC* npc)
 	ReleaseSRWLockExclusive(&current_sector->lock); //내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 }
 
-void MMOZone::load_obstacles()
-{
-	for (int y = 0; y < 800; ++y)
-	{
-		for (int x = 0; x < 800; ++x)
-		{	
-			MMOSector::obstacle_table[y].set(1);
-			//MMOSector::obstacle_table[y].reset(x);
-			//MMOSector::obstacle_table[y][x];
-		}
-	}
-}
+//void MMOZone::load_obstacles()
+//{
+//	for (int y = 0; y < 800; ++y)
+//	{
+//		for (int x = 0; x < 800; ++x)
+//		{	
+//			MMOSector::obstacle_table[y].set(1);
+//			//MMOSector::obstacle_table[y].reset(x);
+//			//MMOSector::obstacle_table[y][x];
+//		}
+//	}
+//}
 
 
 
@@ -109,7 +107,7 @@ const MMONear* MMOZone::get_near(int32_t y, int32_t x) const
 
 bool MMOZone::has_obstacle(int32_t y, int32_t x)
 {
-	return MMOSector::obstacle_table[y][x];
+	return c2::global::obstacle_table[(y * c2::constant::MAP_HEIGHT ) + x];
 }
 
 MMOSector* MMOZone::get_sector(int32_t y, int32_t x)

@@ -7,6 +7,8 @@
 #include "MMONpcManager.h"
 #include "MMOZone.h"
 #include "MMONear.h"
+#include "PathFinder.h"
+#include "MMOSystmeMessage.h"
 
 
 #include "script_api.h"
@@ -377,7 +379,7 @@ void MMONPC::initialize(size_t id_base)
 	//x = rand() % c2::constant::MAP_WIDTH;
 	//y = rand() % c2::constant::MAP_HEIGHT;
 	zone = g_zone;
-	is_active = 0;
+	is_active = NPC_SLEEP;
 }
 
 void MMONPC::reset()
@@ -399,7 +401,7 @@ void MMONPC::reset()
 
 	zone = this->zone;
 	is_alive = true;
-	is_active = 0;
+	is_active = NPC_SLEEP;
 }
 
 void MMONPC::respawn() // 근데 이때는 아무도 모르는 상태이기 때문에 락을 안걸고 해도 되긴하는데...
@@ -443,21 +445,20 @@ void MMONPC::respawn() // 근데 이때는 아무도 모르는 상태이기 때문에 락을 안걸고 
 	ReleaseSRWLockExclusive(&this->lock);
 }
 
-void MMONPC::attack()
+void MMONPC::attack_for_peace()
 {
 	bool local_has_target = has_target;
 
-	if (false == local_has_target) // 대상이 없다면 찾아본다.
+	if (false == local_has_target || false == is_in_attack_range(target)) // 대상이 없거나... 범위에서 사라졌다면 종료.
 	{
-		is_active = NPC_SLEEP;
-
+		//is_active = NPC_SLEEP;
 		// 공격 1회 후 공격을 않마.
 		return;
 	}
 
+	int ys[5];
+	int xs[5];
 
-	int ys[4];
-	int xs[4];
 	int effective_position_count{};
 
 	int y = this->y;
@@ -487,6 +488,10 @@ void MMONPC::attack()
 		effective_position_count += 1;
 	}
 
+	ys[effective_position_count] = y;
+	xs[effective_position_count] = x;
+	effective_position_count += 1;
+
 	AcquireSRWLockShared(&lock); // 섹터에 npc에 대한 읽기 작업만.
 	auto& local_view_list = view_list;
 	ReleaseSRWLockShared(&lock);
@@ -501,8 +506,8 @@ void MMONPC::attack()
 			{
 				if (user->is_alive == true)
 				{
-					printf("a");
 					user->decrease_hp(this, this->dmg);
+					send_chat_packet_to_target(user, system_msg_log_attack);
 				}
 			}
 		}
@@ -539,7 +544,7 @@ void MMONPC::update_for_fixed_peace()
 
 	MMOActor* local_target		= this->target; 
 	bool	  local_has_target	= this->has_target;
-	if (false == has_target || false == is_near(target)) // 대상이 없거나 거리가 멀어지면 종료.
+	if (false == has_target || false == is_in_attack_range(local_target)) // 대상이 없거나 거리가 멀어지면 종료.
 	{
 		is_active = NPC_SLEEP;
 		has_target = false;
@@ -547,37 +552,103 @@ void MMONPC::update_for_fixed_peace()
 		return;
 	}
 
-	if (nullptr != target && true == target->is_alive )			// 타겟이 있을시에만 날 찾아옴.
+	if (nullptr != local_target && true == local_target->is_alive)			// 타겟이 있을시에만 날 찾아옴.
 	{
 		bool is_isolated = true;
-		int local_y = y;
-		int local_x = x;
 		int local_actor_id = id;
 
+		int temp_local_y;
+		int temp_local_x;
+		int local_y = temp_local_y = y;
+		int local_x = temp_local_x = x;
 
-		// 길찾기...
-		if (local_x > target->x)
-		{
-			local_x -= 1;
-		}
-		else if (local_x < target->x)
-		{
-			local_x += 1;
-		}
-
-		if (local_y > target->y)
-		{
-			local_y -= 1;
-		}
-		else if (local_y < target->y)
-		{
-			local_y += 1;
-		}
+		int temp_local_target_y;
+		int temp_local_target_x;
+		int local_target_y = temp_local_target_y = target->y;
+		int local_target_x = temp_local_target_x = target->x;
 
 
-		// 같은좌표가 나올수도 있음. 길찾기여서.
-		x = local_x;
-		y = local_y;
+
+		bool has_obstacle = true;
+		for (;;) // 직선 경로에 장애물이 없다면 그냥   		// 최단 경로 찾기.
+		{
+			if (temp_local_x > temp_local_target_x) // x 좌표
+			{
+				temp_local_x -= 1;
+			}
+			else if (temp_local_x < temp_local_target_x)
+			{
+				temp_local_x += 1;
+			}
+
+			if (temp_local_y > temp_local_target_y) // y 좌표
+			{
+				temp_local_y -= 1;
+			}
+			else if (temp_local_y < temp_local_target_y)
+			{
+				temp_local_y += 1;
+			}
+
+			if (c2::global::obstacle_table[(temp_local_y * c2::constant::MAP_HEIGHT) + temp_local_x]) // 중간에 장애물이 있다면?
+			{
+				break; // 종료 -> astr로 길찾기.
+			}
+
+			if (temp_local_x == temp_local_target_x && temp_local_y == temp_local_target_y) // 가는 동안 장앵물이 없었따면?
+			{
+				if (local_x > local_target_x) // x 좌표
+				{
+					local_x -= 1;
+				}
+				else if (local_x < local_target_x)
+				{
+					local_x += 1;
+				}
+
+				if (local_y > local_target_y) // y 좌표
+				{
+					local_y -= 1;
+				}
+				else if (local_y < local_target_y)
+				{
+					local_y += 1;
+				}
+
+				has_obstacle = false;
+
+				if (local_x != local_target_x || local_y != local_target_y)
+				{
+					x = local_x;
+					y = local_y;
+
+					break;
+				}
+				else
+				{
+					local_timer->push_timer_task(this->id, TTT_UPDATE_FOR_NPC, 1000, 0);
+					return;
+				}
+			}
+		}
+
+		if (true == has_obstacle)  // 장애물이 있다면 astar로 길 찾기.
+		{
+			printf("astar");
+
+			if (true == PathFindingHelper->NewPath(local_x, local_y, local_target_x, local_target_y))
+			{
+				if (true == PathFindingHelper->PathNextNode())
+				{
+					printf("---ok (%d, %d) ",local_x, local_y );
+					x = local_x = PathFindingHelper->NodeGetX();
+					y = local_y = PathFindingHelper->NodeGetY();
+					printf(" -- (%d, %d) \n", local_x, local_y);
+				}
+			}
+		}
+
+	
 
 
 		MMOSector* new_sector = g_zone->get_sector(local_y, local_x);			// view_list 긁어오기.
@@ -661,7 +732,7 @@ void MMONPC::update_for_fixed_peace()
 				}
 			}
 
-			if (true == is_near(new_actor.second))
+			if (true == is_in_attack_range(new_actor.second))
 			{
 				set_target(new_actor.second);
 			}
@@ -721,7 +792,7 @@ void MMONPC::update_for_peace()
 	MMOActor* local_target = this->target;
 	bool	  local_has_target = this->has_target;
 
-	if ( false == local_has_target || false == is_near(target) ) // 대상이 없거나 거리가 멀어지면 종료.
+	if ( false == local_has_target || false == is_in_attack_range(target) ) // 대상이 없거나 거리가 멀어지면 종료.
 	{
 		is_active = NPC_SLEEP;
 
@@ -732,32 +803,96 @@ void MMONPC::update_for_peace()
 	if (nullptr != local_target && true == local_target->is_alive)			// 타겟이 있을시에만 날 찾아옴.
 	{
 		bool is_isolated = true;
-		int local_y = y;
-		int local_x = x;
 		int local_actor_id = id;
 
-		// 길찾기...
-		if (local_x > local_target->x)
+		int temp_local_y;
+		int temp_local_x;
+		int local_y = temp_local_y = y;
+		int local_x = temp_local_x = x;
+		
+		int temp_local_target_y;
+		int temp_local_target_x;
+		int local_target_y = temp_local_target_y = target->y;
+		int local_target_x = temp_local_target_x = target->x;
+
+		
+
+		bool has_obstacle = true;
+		for (;;) // 직선 경로에 장애물이 없다면 그냥   		// 최단 경로 찾기.
 		{
-			local_x -= 1;
-		}
-		else if (local_x < local_target->x)
-		{
-			local_x += 1;
+			if (temp_local_x > temp_local_target_x) // x 좌표
+			{
+				temp_local_x -= 1;
+			}
+			else if (temp_local_x < temp_local_target_x)
+			{
+				temp_local_x += 1;
+			}
+
+			if (temp_local_y > temp_local_target_y) // y 좌표
+			{
+				temp_local_y -= 1;
+			}
+			else if (temp_local_y < temp_local_target_y)
+			{
+				temp_local_y += 1;
+			}
+
+			if (c2::global::obstacle_table[(temp_local_y * c2::constant::MAP_HEIGHT) + temp_local_x]) // 중간에 장애물이 있다면?
+			//if (c2::global::obstacle_table[(temp_local_x * c2::constant::MAP_WIDTH) + temp_local_y]) // 중간에 장애물이 있다면?
+			{
+				break; // 종료 -> astr로 길찾기.
+			}
+
+			if (temp_local_x == temp_local_target_x && temp_local_y == temp_local_target_y ) // 가는 동안 장앵물이 없었따면?
+			{
+				if (local_x > local_target_x) // x 좌표
+				{
+					local_x -= 1;
+				}
+				else if (local_x < local_target_x)
+				{
+					local_x += 1;
+				}
+
+				if (local_y > local_target_y) // y 좌표
+				{
+					local_y -= 1;
+				}
+				else if (local_y < local_target_y)
+				{
+					local_y += 1;
+				}
+
+				has_obstacle = false;
+
+				if (local_x != local_target_x || local_y != local_target_y)
+				{
+					x = local_x;
+					y = local_y;
+
+					break;
+				}
+				else
+				{
+					local_timer->push_timer_task(this->id, TTT_UPDATE_FOR_NPC, 1000, 0);
+					return;
+				}
+			}
 		}
 
-		if (local_y > local_target->y)
-		{
-			local_y -= 1;
-		}
-		else if (local_y < local_target->y)
-		{
-			local_y += 1;
-		}
 
 
-		x = local_x;
-		y = local_y;
+		if(true == has_obstacle)  // 장애물이 있다면 astar로 길 찾기.
+		{
+			printf("astars\n");
+
+			PathFindingHelper->NewPath(local_x, local_y, local_target->x, local_target->y);
+
+			x = local_x = PathFindingHelper->NodeGetX();
+			y = local_y = PathFindingHelper->NodeGetY();
+		}
+
 
 
 		MMOSector* new_sector = g_zone->get_sector(local_y, local_x);			// view_list 긁어오기.
@@ -844,7 +979,7 @@ void MMONPC::update_for_peace()
 				}
 			}
 
-			if (true == is_near(new_actor.second))
+			if (true == is_in_attack_range(new_actor.second))
 			{
 				set_target(new_actor.second);
 			}
@@ -1012,7 +1147,7 @@ void MMONPC::update_for_fixed_combat()
 				}
 			}
 
-			if (true == is_near(new_actor.second))
+			if (true == is_in_attack_range(new_actor.second))
 			{
 				set_target(new_actor.second);
 			}
@@ -1042,7 +1177,7 @@ void MMONPC::update_for_fixed_combat()
 		if (is_isolated == true)
 		{
 			is_active = NPC_SLEEP;
-			target = nullptr;
+			//target = nullptr;
 			has_target = false;
 			// 최후 확인용 작업 // 이작업중에 누가 
 			//local_timer->push_timer_task(this->id, TTT_ON_SLEEP, 1000, 0);
@@ -1202,7 +1337,7 @@ void MMONPC::update_for_combat()
 			}
 		}
 
-		if (true == is_near(new_actor.second))
+		if (true == is_in_attack_range(new_actor.second))
 		{
 			set_target(new_actor.second);
 		}
@@ -1260,7 +1395,7 @@ void MMONPC::decrease_hp(MMOActor* actor, int32_t damage)
 	hp -= damage;
 	if (hp <= 0)
 	{
-		if ( this->is_active != false && true == InterlockedExchange8((volatile CHAR*)&is_alive, 0))// = false; // 공격 하고 NPC 죽었으면 죽었다고 상태 바꾸기 ㅇㅇ
+		if ( this->is_alive != false && true == InterlockedExchange8((volatile CHAR*)&is_alive, 0))// = false; // 공격 하고 NPC 죽었으면 죽었다고 상태 바꾸기 ㅇㅇ
 		{
 			AcquireSRWLockExclusive(&current_sector->lock); // 현재 섹터 나가기. // 다른 클라접근 하기 힘들게..
 			current_sector->npcs.erase(id);
@@ -1276,17 +1411,22 @@ void MMONPC::decrease_hp(MMOActor* actor, int32_t damage)
 			}
 
 			ReleaseSRWLockExclusive(&this->lock); // 여기선 락을 푼다.
+			
+			send_chat_packet_to_target(actor, system_msg_hit);
 
 			local_timer->push_timer_task(id, TTT_RESPAWN_FOR_NPC, 30'000, 0);
 		}
 		else
 		{
 			ReleaseSRWLockExclusive(&this->lock);
+
+			send_chat_packet_to_target(actor, system_msg_hit);
 			return;
 		}
 	}
 	else
 	{
+		send_chat_packet_to_target(actor, system_msg_hit);
 		// 마지막으로 타이머에 30초후 리스폰 이벤트를 추가.
 		//else  // 현재 프로토콜상 체력 깍이는건 안알랴줘도 된다.//{//}
 		ReleaseSRWLockExclusive(&this->lock); // 여기선 락을 푼다.
@@ -1294,12 +1434,49 @@ void MMONPC::decrease_hp(MMOActor* actor, int32_t damage)
 	}
 }
 
-bool MMONPC::is_near(MMOActor* actor)
+bool MMONPC::is_in_attack_range(MMOActor* actor)
 {
 	if (abs(this->x - actor->x) > FOV_HALF_WIDTH_FOR_COMBAT_MOB) return false;
 	if (abs(this->y - actor->y) > FOV_HALF_HEIGHT_FOR_COMBAT_MOB) return false;
 
 	return true;
+}
+
+void MMONPC::send_chat_packet(const wchar_t* msg)
+{
+	AcquireSRWLockShared(&lock); // 섹터에 npc에 대한 읽기 작업만.
+	std::unordered_map<int32_t, MMOActor*> local_view_list = view_list;		// 임시 뷰리스트.
+	ReleaseSRWLockShared(&lock);
+
+	sc_packet_chat chat_payload; 	// id check
+	chat_payload.header.type = S2C_CHAT;
+	chat_payload.header.length = sizeof(sc_packet_chat);
+	wcsncpy_s(chat_payload.chat, msg, c2::constant::MAX_CHAT_LEN);
+
+
+	c2::Packet* out_packet = c2::Packet::alloc();
+	out_packet->write(&chat_payload, sizeof(sc_packet_chat));
+	out_packet->add_ref(local_view_list.size()); 
+
+	for (auto& actor_it : local_view_list)
+	{
+		g_server->send_packet(actor_it.second->session_id, out_packet);	
+	}
+
+	out_packet->decrease_ref_count();
+}
+
+void MMONPC::send_chat_packet_to_target(MMOActor* target, const wchar_t* msg)
+{
+	sc_packet_chat chat_payload; 	// id check
+	chat_payload.header.type = S2C_CHAT;
+	chat_payload.header.length = sizeof(sc_packet_chat);
+	wcsncpy_s(chat_payload.chat, msg, c2::constant::MAX_CHAT_LEN);
+
+	c2::Packet* out_packet = c2::Packet::alloc();
+	out_packet->write(&chat_payload, sizeof(sc_packet_chat));
+
+	g_server->send_packet(target->session_id, out_packet);
 }
 
 

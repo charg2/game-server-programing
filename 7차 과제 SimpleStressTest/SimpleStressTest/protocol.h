@@ -56,9 +56,11 @@ struct sc_packet_enter {
 	char size;
 	char type;
 	int id;
-	wchar_t name[MAX_ID_LEN];
+	
 	char o_type;
 	short x, y;
+
+	wchar_t name[MAX_ID_LEN];
 };
 
 struct sc_packet_leave {

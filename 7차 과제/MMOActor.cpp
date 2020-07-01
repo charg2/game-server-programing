@@ -87,7 +87,7 @@ void MMOActor::respawn()
 
 	session->request_change_status(hp, level, current_exp);
 
-	send_chat_packet(this, system_msg_respawn);
+	send_chat_packet(system_msg_respawn);
 }
 
 void MMOActor::reset_data(const LoadActorTask* task)
@@ -168,25 +168,27 @@ void MMOActor::increase_exp(int32_t exp)
 		current_exp -= levelup_exp;
 		levelup_exp *= 2;
 		level += 1;
+		send_chat_packet(system_msg_levelup);
 	}
+	ReleaseSRWLockExclusive(&this->lock);
 
 	sc_packet_stat_change stat_payload;
 	
 	stat_payload.hp					= this->hp;
 	stat_payload.level				= this->level;
 	stat_payload.exp				= this->current_exp;
-
-	ReleaseSRWLockExclusive(&this->lock);
-
-	stat_payload.header.type = S2C_STAT_CHANGE;
-	stat_payload.header.length = sizeof(sc_packet_stat_change);
+	stat_payload.header.type		= S2C_STAT_CHANGE;
+	stat_payload.header.length		= sizeof(sc_packet_stat_change);
 
 	c2::Packet* exp_packet = c2::Packet::alloc();
 	exp_packet->write(&stat_payload, sizeof(sc_packet_stat_change));
 
 	g_server->send_packet(this->session_id, exp_packet);
-	// db update 
 	
+	// db update 
+	send_chat_packet(system_msg_get_exp);
+
+	//this->send_chat_packet();
 	session->request_change_status(hp, level, current_exp);
 }
 
@@ -256,6 +258,7 @@ void MMOActor::decrease_hp(MMONPC* npc, int32_t damage)
 			ReleaseSRWLockExclusive(&current_sector->lock);
 
 			send_stat_change();
+			send_chat_packet(system_msg_die);
 
 			for (auto& iter : view_list)			// 뷰리스트 정리함 내가 없어졌다고. 
 			{
@@ -279,7 +282,6 @@ void MMOActor::decrease_hp(MMONPC* npc, int32_t damage)
 
 			ReleaseSRWLockExclusive(&this->lock); // 여기선 락을 푼다.
 
-			
 			// 나한테도 사망 메시지 보내야함.
 			local_timer->push_timer_task(session_id, TTT_RESPAWN_FOR_PLAYER, 30'000, 0);
 		}
@@ -456,7 +458,6 @@ void MMOActor::wake_up_npc(MMONPC* npc)
 	{
 		if (NPC_SLEEP == InterlockedExchange(&npc->is_active, NPC_WORKING) )		// 이전 상태가 자고 있었다면 꺠움.
 		{
-
 			// 내가 꺠운 상태.	// 내가 책임지고 일을 시켜야 함.
 			local_timer->push_timer_task(npc->id, TTT_ON_WAKE_FOR_NPC, 1000, session_id);
 		}
@@ -587,13 +588,13 @@ void MMOActor::send_leave_packet_without_updating_viewlist(MMONPC* other)
 	server->send_packet(this->session_id, leave_packet);
 }
 
-void MMOActor::send_chat_packet(MMOActor* other, const wchar_t* msg)
+void MMOActor::send_chat_packet(const wchar_t* msg)
 {
 	sc_packet_chat chat_payload;
 	chat_payload.header.length = sizeof(sc_packet_chat);
 	chat_payload.header.type = S2C_CHAT;
 	chat_payload.id = this->session_id;
-	wcscpy_s(chat_payload.chat, msg);
+	wcscpy_s(chat_payload.chat ,msg);
 
 	c2::Packet* chat_packet = c2::Packet::alloc();
 	chat_packet->write(&chat_payload, sizeof(sc_packet_chat));
@@ -606,8 +607,8 @@ void MMOActor::send_chat_packet(MMOActor* other, const wchar_t* msg)
 
 void MMOActor::attack()
 {
-	int ys[4];
-	int xs[4];
+	int ys[5];
+	int xs[5];
 	int effective_position_count {};
 
 	int y = this->y; 
@@ -635,6 +636,9 @@ void MMOActor::attack()
 		effective_position_count += 1;
 	}
 
+	ys[effective_position_count] = y;
+	xs[effective_position_count] = x;
+	effective_position_count += 1;
 
 	AcquireSRWLockShared(&lock); // 섹터에 npc에 대한 읽기 작업만.
 	auto& local_view_list_for_npc = view_list_for_npc;
@@ -656,6 +660,7 @@ void MMOActor::attack()
 					{
 						npc->set_target(this);
 						wake_up_npc(npc);
+						break;
 					}
 				}
 			}

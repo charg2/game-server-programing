@@ -42,7 +42,7 @@ struct MMOSector
 
 
 //////////
-	static inline std::bitset<c2::constant::MAP_WIDTH>	obstacle_table[c2::constant::MAP_HEIGHT];
+	//static inline std::bitset<c2::constant::MAP_WIDTH>	obstacle_table[c2::constant::MAP_HEIGHT];
 };
 
 

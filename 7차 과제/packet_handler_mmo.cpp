@@ -82,6 +82,10 @@ REGISTER_HANDLER(C2S_MOVE)
 		break;
 	}
 
+	if (true == g_zone->has_obstacle(local_y, local_x))
+	{
+		return;
+	}
 
 	my_actor->x = local_x;
 	my_actor->y = local_y;
@@ -145,7 +149,7 @@ REGISTER_HANDLER(C2S_MOVE)
 			MMONPC* npc = mmo_npc_mgr->get_npc(npc_id);
 			if (my_actor->is_near(npc) == true) // 내 근처가 맞다면 넣음.
 			{
-				my_actor->wake_up_npc(npc);
+				my_actor->wake_up_npc(npc);	// 전부다 깨우는 이유가 멀까?
 				//local_timer->push_timer_task(npc->id, TTT_ON_WAKE_FOR_NPC, 1, my_actor->session_id);
 				local_new_view_list_for_npc.insert(npc_id);
 			}
@@ -237,7 +241,7 @@ REGISTER_HANDLER(C2S_MOVE)
 			ReleaseSRWLockExclusive(&npc->lock);
 		}
 
-		if (NT_COMBAT_FIXED <= npc->type && true == npc->is_near(my_actor)) // 컴뱃 공격 대상으로 시도 해봄.
+		if (NT_COMBAT_FIXED <= npc->type && true == npc->is_in_attack_range(my_actor)) // 컴뱃 공격 대상으로 시도 해봄.
 		{
 			if (npc->has_target == false)
 			{
@@ -302,12 +306,16 @@ REGISTER_HANDLER(C2S_CHAT)
 	chat_payload.header.type = S2C_CHAT;
 	chat_payload.header.length = sizeof(cs_packet_chat);
 	out_packet->write(&chat_payload, sizeof(cs_packet_chat));	//여기가 좀 병목인가;
-	out_packet->add_ref( local_view_list.size() );
+	
+	out_packet->add_ref( local_view_list.size() + 1); // 나까지 
 
 	for (auto& actor_it : local_view_list)
 	{
 		mmo_server->send_packet(actor_it.second->session_id, out_packet);	// 
 	}
+
+
+	mmo_server->send_packet(my_actor->session_id, out_packet);	// 
 
 	out_packet->decrease_ref_count();
 }
@@ -330,6 +338,8 @@ REGISTER_HANDLER(C2S_LOGOUT)
 	{
 		return;
 	}
+
+
 	AcquireSRWLockExclusive(&my_actor->lock);				// 내 락.
 
 	AcquireSRWLockExclusive(&my_actor_sector->lock);		//  view lsit 에 제거 .
