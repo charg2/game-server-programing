@@ -187,6 +187,8 @@ uint32_t __stdcall DBManager::db_writer(LPVOID param)
 					DbHelper			db_helper;
 
 					db_helper.bind_param_wstr(create_task->name);
+					db_helper.bind_param_int(&create_task->y);
+					db_helper.bind_param_int(&create_task->x);
 
 					db_helper.bind_result_column_int(&create_task->user_id);
 

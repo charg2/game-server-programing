@@ -64,7 +64,23 @@ void MMOSession::on_handling_db_task(DBTask* task)
 			}
 			else // ID가 없을시 ID 새로 생성함.
 			{
-				CreateActorTask* create_task = new CreateActorTask(this->session_id, load_task->name);
+				int y = fast_rand() % 300;
+				int x = fast_rand() % 300;
+
+				for (;;)
+				{
+					if (g_zone->has_obstacle(y, x) == true)
+					{
+						y = fast_rand() % 300;
+						x = fast_rand() % 300;
+					}
+					else
+					{
+						break;
+					}
+				}
+
+				CreateActorTask* create_task = new CreateActorTask(this->session_id, load_task->name, y, x);
 				
 				g_db_manager->post_db_writing_task(create_task);
 			}
@@ -203,6 +219,8 @@ void MMOSession::enter_zone()
 	actor.view_list = std::move(local_view_list);
 	actor.view_list_for_npc = std::move(local_view_list_for_npc);
 	ReleaseSRWLockExclusive(&actor.lock);
+
+	actor.start_recover_hp();
 }
 
 void MMOSession::move_to(int y, int x, char direction)

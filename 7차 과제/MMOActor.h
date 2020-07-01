@@ -23,13 +23,13 @@ public:
 	MMOActor(MMOSession* owner);
 	~MMOActor();
 
-	void enter_sector(int32_t x, int32_t y);
 	void attack();
 	void reset();
 	void reset_when_respawn();
 	void exit();
 	void respawn();
 	void move(char direction);
+	void start_recover_hp();
 
 	// 체력이 깍이면 do_auto_recovery
 	void reset_data(const LoadActorTask* task);

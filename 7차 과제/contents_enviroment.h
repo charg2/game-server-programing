@@ -20,8 +20,8 @@ namespace c2
 		constexpr int MAX_STR_LEN = 80;
 		constexpr int MAX_CHAT_LEN = 80;
 
-		constexpr int FOV_WIDTH = 17;
-		constexpr int FOV_HEIGHT = 17;
+		constexpr int FOV_WIDTH = 19;
+		constexpr int FOV_HEIGHT = 19;
 
 		constexpr int SECTOR_WIDTH = FOV_WIDTH * 2;
 		constexpr int SECTOR_HEIGHT = FOV_HEIGHT * 2;

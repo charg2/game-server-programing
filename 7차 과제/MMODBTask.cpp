@@ -18,8 +18,8 @@ UpdatePositionTask::~UpdatePositionTask()
 }
 
 
-CreateActorTask::CreateActorTask(uint64_t session_id, const wchar_t* name)
-	: user_id{},/* y{}, x{}, hp{}, exp{}, level{}, */reason{}
+CreateActorTask::CreateActorTask(uint64_t session_id, const wchar_t* name, int y, int x)
+	: user_id{}, y{y}, x{x}//, hp{}, exp{}, level{}, */reason{}
 {
 	this->type = DBTaskType::DTT_CREATE_ACTOR;
 	this->session_id = session_id;
@@ -27,6 +27,8 @@ CreateActorTask::CreateActorTask(uint64_t session_id, const wchar_t* name)
 
 	wcsncpy_s(this->name, name, 50);
 }
+
+
 
 CreateActorTask::~CreateActorTask() {}
 

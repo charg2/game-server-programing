@@ -349,6 +349,11 @@ REGISTER_HANDLER(C2S_LOGOUT)
 	auto& view_list = my_actor->view_list;					// 
 	for (auto& actor_iter : view_list)
 	{
+		if (actor_iter.second == my_actor)
+		{
+			actor_iter.second->send_leave_packet_without_updating_viewlist(my_actor); 
+			continue;
+		}
 		//if (actor_iter.second == my_actor) continue;
 		AcquireSRWLockExclusive(&actor_iter.second->lock); 
 		if (0 != actor_iter.second->view_list.count(my_actor_id))

@@ -128,7 +128,25 @@ void SendPacket(int cl, void* packet)
 
 void ProcessPacket(int ci, unsigned char packet[])
 {
-	switch (packet[1]) {
+	switch (packet[1]) 
+	{
+	case S2C_LOGIN_OK:
+	{
+		g_clients[ci].connected = true;
+		active_clients++;
+		sc_packet_login_ok* login_packet = reinterpret_cast<sc_packet_login_ok*>(packet);
+		int my_id = ci;
+		client_map[login_packet->id] = my_id;
+		g_clients[my_id].id = login_packet->id;
+		g_clients[my_id].x = login_packet->x;
+		g_clients[my_id].y = login_packet->y;
+
+		//cs_packet_teleport t_packet;
+		//t_packet.size = sizeof(t_packet);
+		//t_packet.type = CS_TELEPORT;
+		//SendPacket(my_id, &t_packet);
+	}
+	break;
 	case S2C_MOVE: {
 		sc_packet_move* move_packet = reinterpret_cast<sc_packet_move*>(packet);
 		if (move_packet->id < MAX_CLIENTS) {
@@ -150,24 +168,10 @@ void ProcessPacket(int ci, unsigned char packet[])
 			   break;
 	case S2C_ENTER: break;
 	case S2C_LEAVE: break;
-	case S2C_LOGIN_OK:
-	{
-		g_clients[ci].connected = true;
-		active_clients++;
-		sc_packet_login_ok* login_packet = reinterpret_cast<sc_packet_login_ok*>(packet);
-		int my_id = ci;
-		client_map[login_packet->id] = my_id;
-		g_clients[my_id].id = login_packet->id;
-		g_clients[my_id].x = login_packet->x;
-		g_clients[my_id].y = login_packet->y;
 
-		//cs_packet_teleport t_packet;
-		//t_packet.size = sizeof(t_packet);
-		//t_packet.type = CS_TELEPORT;
-		//SendPacket(my_id, &t_packet);
-	}
-	break;
 	case S2C_CHAT:
+		break;
+	case S2C_STAT_CHANGE:
 		break;
 	default: MessageBox(hWnd, L"Unknown Packet Type", L"ERROR", 0);
 		while (true);

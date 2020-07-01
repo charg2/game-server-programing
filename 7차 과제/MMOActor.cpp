@@ -24,12 +24,6 @@ MMOActor::MMOActor(MMOSession* owner)
 
 MMOActor::~MMOActor(){}
 
-void MMOActor::enter_sector(int32_t x, int32_t y)
-{
-	//prev_sector = nullptr;
-
-	//current_sector/* = &zone->sectors[x][y];*/
-}
 
 
 void MMOActor::reset()
@@ -71,6 +65,19 @@ void MMOActor::reset_when_respawn()
 
 	zone = this->zone;
 	is_alive = true;
+	
+	for (;;)
+	{
+		if (g_zone->has_obstacle(y, x) == true)
+		{
+			y = fast_rand() % 300;
+			x = fast_rand() % 300;
+		}
+		else
+		{
+			break;
+		}
+	}
 }
 
 void MMOActor::exit()
@@ -83,11 +90,15 @@ void MMOActor::respawn()
 
 	session->enter_zone();
 
-	add_alarm(this->session_id, TimerTaskType::TTT_USER_RECOVER_HP, 10, 0);
-
 	session->request_change_status(hp, level, current_exp);
 
 	send_chat_packet(system_msg_respawn);
+	send_stat_change();
+}
+
+void MMOActor::start_recover_hp()
+{
+	local_timer->push_timer_task(this->session_id, TTT_USER_RECOVER_HP, 10* 1000, NULL);
 }
 
 void MMOActor::reset_data(const LoadActorTask* task)
@@ -219,27 +230,31 @@ void MMOActor::decrease_exp(int32_t exp) // 사망시..
 
 void MMOActor::increase_hp(int32_t hp)
 {
+	
 	AcquireSRWLockExclusive(&this->lock);
+	int prev_hp = hp;
 	this->hp += hp;
 	if (hp > 200)
 	{
-		current_exp = 200;
+		hp = 200;
 	}
-
 	ReleaseSRWLockExclusive(&this->lock); // 여기까지만 락이 필요함.
 
-	sc_packet_stat_change stat_payload;
-	stat_payload.hp = this->hp;
-	stat_payload.level = this->level;
-	stat_payload.exp = this->current_exp;
-	stat_payload.header.type = S2C_STAT_CHANGE;
-	stat_payload.header.length = sizeof(sc_packet_stat_change);
+	if (prev_hp != hp) // 체력이 변경 디었을때만 보냄.
+	{
+		sc_packet_stat_change stat_payload;
+		stat_payload.hp = this->hp;
+		stat_payload.level = this->level;
+		stat_payload.exp = this->current_exp;
+		stat_payload.header.type = S2C_STAT_CHANGE;
+		stat_payload.header.length = sizeof(sc_packet_stat_change);
 
-	c2::Packet* exp_packet = c2::Packet::alloc();
-	exp_packet->write(&stat_payload, sizeof(sc_packet_stat_change));
+		c2::Packet* exp_packet = c2::Packet::alloc();
+		exp_packet->write(&stat_payload, sizeof(sc_packet_stat_change));
 
-	g_server->send_packet(this->session_id, exp_packet);
-	session->request_change_status(hp, level, current_exp);
+		g_server->send_packet(this->session_id, exp_packet);
+		session->request_change_status(hp, level, current_exp);
+	}
 }
 
 void MMOActor::decrease_hp(MMONPC* npc, int32_t damage)
