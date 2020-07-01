@@ -66,12 +66,15 @@ void MMOActor::reset_when_respawn()
 	zone = this->zone;
 	is_alive = true;
 	
+	this->y = fast_rand() % 300;
+	this->x = fast_rand() % 300;
+
 	for (;;)
 	{
-		if (g_zone->has_obstacle(y, x) == true)
+		if (g_zone->has_obstacle(this->y, this->x) == true)
 		{
-			y = fast_rand() % 300;
-			x = fast_rand() % 300;
+			this->y = fast_rand() % 300;
+			this->x = fast_rand() % 300;
 		}
 		else
 		{
@@ -234,13 +237,13 @@ void MMOActor::increase_hp(int32_t hp)
 	AcquireSRWLockExclusive(&this->lock);
 	int prev_hp = hp;
 	this->hp += hp;
-	if (hp > 200)
+	if (this->hp > 200)
 	{
-		hp = 200;
+		this->hp = 200;
 	}
 	ReleaseSRWLockExclusive(&this->lock); // 여기까지만 락이 필요함.
 
-	if (prev_hp != hp) // 체력이 변경 디었을때만 보냄.
+	if (prev_hp != this->hp) // 체력이 변경 디었을때만 보냄.
 	{
 		sc_packet_stat_change stat_payload;
 		stat_payload.hp = this->hp;
