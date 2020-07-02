@@ -115,6 +115,8 @@ int main()
 
 	g_server->load_config_using_json(L"config.json");
 	
+	printf("config loading ok\n");
+
 	if (false == PathFinder::InitAstarMap((BYTE*)c2::global::obstacle_table, c2::global::obstacle_table_width, c2::global::obstacle_table_height))
 		return -3;
 
@@ -132,5 +134,4 @@ int main()
 	g_server->start();
 
 	g_server->finalize();
-	
 }

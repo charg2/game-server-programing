@@ -19,10 +19,7 @@ void MMONpcManager::initilize()
 	{
 		a = ( MMONpcManager::max_npc_count / NT_MAX ) * NPCType(dived_counter + 1);
 		dived_counter += 1;
-		printf(" a : %d\n", a);
 	}
-
-	
 
 	NPCType prev_npc_type{ NT_PEACE_FIXED };
 	for (size_t idx{}; idx < MMONpcManager::max_npc_count; ++idx)
