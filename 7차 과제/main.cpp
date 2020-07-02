@@ -122,14 +122,14 @@ int main()
 
 	g_db_manager = new DBManager();
 
-	if( false == g_db_manager->initialize() )
-		return -4; 
+	//if( false == g_db_manager->initialize() )
+	//	return -4; 
 
 	g_server->init_npcs();
 
 	g_server->initialize();
 
-	g_db_manager->bind_server_completion_port(g_server->get_completion_port());
+	//g_db_manager->bind_server_completion_port(g_server->get_completion_port());
 
 	g_server->start();
 

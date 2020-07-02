@@ -39,10 +39,7 @@ void MMOServer::on_connect(uint64_t session_id){}
 void MMOServer::on_disconnect(uint64_t session_id) 
 {
 	MMOActor*	my_actor = get_actor(session_id);
-	my_actor->session->request_updating_all( my_actor->y, my_actor->x, my_actor->hp, my_actor->level, my_actor->current_exp);
-	
 	int			my_actor_id = my_actor->get_id();
-
 	
 	MMOSector*	my_actor_sector = my_actor->current_sector;
 	if (my_actor_sector == nullptr)
@@ -55,33 +52,13 @@ void MMOServer::on_disconnect(uint64_t session_id)
 	ReleaseSRWLockExclusive(&my_actor_sector->lock);
 
 	AcquireSRWLockExclusive(&my_actor->lock);
-	auto local_view_list = my_actor->view_list;
+	auto local_view_list = std::move(my_actor->view_list);
 	ReleaseSRWLockExclusive(&my_actor->lock);
-
-	//auto& view_list = my_actor->view_list;
 
 	for( auto& actor_iter : local_view_list)
 	{
-		//if (actor_iter.second == my_actor)
-		//{
-		//	actor_iter.second->send_leave_packet_without_updating_viewlist(my_actor); // 이미 락을 걸어놓으애ㅕ서 
-		//	continue;
-		//}
-
-		//AcquireSRWLockExclusive(&actor_iter.second->lock); // 데드락 가능성 있다;
-		//if (0 != actor_iter.second->view_list.count(my_actor_id))
-		//{
-			//ReleaseSRWLockExclusive(&actor_iter.second->lock);
-			actor_iter.second->send_leave_packet(my_actor);
-		//}
-		//else
-		//{
-			//ReleaseSRWLockExclusive(&actor_iter.second->lock);
-		//}
+		actor_iter.second->send_leave_packet(my_actor);
 	}
-	
-
-	//ReleaseSRWLockExclusive(&my_actor->lock);
 }
 bool MMOServer::on_accept(Session* session) 
 { 

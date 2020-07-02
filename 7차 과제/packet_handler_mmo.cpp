@@ -34,7 +34,7 @@ REGISTER_HANDLER(C2S_LOGIN)
 		return;
 	}
 
-	mmo_session->request_login_validation(login_payload.name);
+	//mmo_session->request_login_validation(login_payload.name);
 
 	return;
 }
@@ -108,7 +108,7 @@ REGISTER_HANDLER(C2S_MOVE)
 		my_actor->current_sector = curent_sector;							// 타 스레드에서 접근하면 여기 일로 하고?
 		ReleaseSRWLockExclusive(&curent_sector->lock);						// 내 view_list 에 접근하기 쓰기 위해서 락을 얻고 
 
-		mmo_session->request_updating_position(local_y, local_x);
+		//mmo_session->request_updating_position(local_y, local_x);
 	}
 
 
@@ -323,13 +323,10 @@ REGISTER_HANDLER(C2S_CHAT)
 
 REGISTER_HANDLER(C2S_LOGOUT)
 {
-	MMOSession* mmo_session = (MMOSession*)session;
-	MMOActor* my_actor = mmo_session->get_actor();
-	MMOServer* mmo_server = (MMOServer*)session->server;
-	MMOZone* mmo_zone = mmo_server->get_zone();
-
-	//my_actor->session->request_updating_position(my_actor->y, my_actor->x); // 종료 전 DB 업뎃.
-	my_actor->session->request_updating_all(my_actor->y, my_actor->x, my_actor->hp, my_actor->level, my_actor->current_exp); // 추가 정보..
+	MMOSession* mmo_session		= (MMOSession*)session;
+	MMOActor*	my_actor		= mmo_session->get_actor();
+	MMOServer*	mmo_server		= (MMOServer*)session->server;
+	MMOZone*	mmo_zone		= mmo_server->get_zone();
 
 	int			my_actor_id = my_actor->get_id(); // 
 
@@ -339,35 +336,17 @@ REGISTER_HANDLER(C2S_LOGOUT)
 		return;
 	}
 
-
-	AcquireSRWLockExclusive(&my_actor->lock);				// 내 락.
-
-	AcquireSRWLockExclusive(&my_actor_sector->lock);		//  view lsit 에 제거 .
+	AcquireSRWLockExclusive(&my_actor_sector->lock);
 	my_actor_sector->actors.erase(my_actor_id);
 	ReleaseSRWLockExclusive(&my_actor_sector->lock);
 
-	auto& view_list = my_actor->view_list;					// 
-	for (auto& actor_iter : view_list)
-	{
-		if (actor_iter.second == my_actor)
-		{
-			actor_iter.second->send_leave_packet_without_updating_viewlist(my_actor); 
-			continue;
-		}
-		//if (actor_iter.second == my_actor) continue;
-		AcquireSRWLockExclusive(&actor_iter.second->lock); 
-		if (0 != actor_iter.second->view_list.count(my_actor_id))
-		{
-			ReleaseSRWLockExclusive(&actor_iter.second->lock);
-			actor_iter.second->send_leave_packet(my_actor);
-		}
-		else
-		{
-			ReleaseSRWLockExclusive(&actor_iter.second->lock);
-		}
-	}
-	view_list.clear();
-
+	AcquireSRWLockExclusive(&my_actor->lock);
+	auto local_view_list = std::move(my_actor->view_list);
 	ReleaseSRWLockExclusive(&my_actor->lock);
+
+	for( auto& actor_iter : local_view_list)
+	{
+		actor_iter.second->send_leave_packet(my_actor);
+	}
 }
 

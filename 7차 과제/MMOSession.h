@@ -20,14 +20,14 @@ public :
 	void response_loginok();
 	void response_login_failure();
 
-	virtual void on_handling_db_task(DBTask* task);
+	/*virtual void on_handling_db_task(DBTask* task);
 
 	void request_login_validation(const wchar_t* w_name);
 	void request_updating_position(int y, int x);
 	void request_updating_all(int y, int x, int hp, int level, int exp);
-	void request_change_status(int hp, int level, int exp);
+	void request_change_status(int hp, int level, int exp);*/
 
-	//void has_vliad_id();
+	//bool has_vliad_id();
 
 private:
 	MMOActor	actor;

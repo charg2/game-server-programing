@@ -93,7 +93,7 @@ void MMOActor::respawn()
 
 	session->enter_zone();
 
-	session->request_change_status(hp, level, current_exp);
+	//session->request_change_status(hp, level, current_exp);
 
 	send_chat_packet(system_msg_respawn);
 	send_stat_change();
@@ -203,7 +203,7 @@ void MMOActor::increase_exp(int32_t exp)
 	send_chat_packet(system_msg_get_exp);
 
 	//this->send_chat_packet();
-	session->request_change_status(hp, level, current_exp);
+	//session->request_change_status(hp, level, current_exp);
 }
 
 void MMOActor::decrease_exp(int32_t exp) // »ç¸Á½Ã..
@@ -228,7 +228,7 @@ void MMOActor::decrease_exp(int32_t exp) // »ç¸Á½Ã..
 
 	g_server->send_packet(this->session_id, exp_packet);
 
-	session->request_change_status(hp, level, current_exp);
+	//session->request_change_status(hp, level, current_exp);
 }
 
 void MMOActor::increase_hp(int32_t hp)
@@ -256,7 +256,7 @@ void MMOActor::increase_hp(int32_t hp)
 		exp_packet->write(&stat_payload, sizeof(sc_packet_stat_change));
 
 		g_server->send_packet(this->session_id, exp_packet);
-		session->request_change_status(hp, level, current_exp);
+		//session->request_change_status(hp, level, current_exp);
 	}
 }
 
@@ -316,7 +316,7 @@ void MMOActor::decrease_hp(MMONPC* npc, int32_t damage)
 		send_stat_change();
 	}
 
-	session->request_change_status(hp, level, current_exp);
+	//session->request_change_status(hp, level, current_exp);
 }
 
 
