@@ -34,7 +34,12 @@ REGISTER_HANDLER(C2S_LOGIN)
 		return;
 	}
 
-	//mmo_session->request_login_validation(login_payload.name);
+
+	my_actor->reset_data_when_login(&login_payload);
+
+	mmo_session->response_loginok();		// 로그인 처리 및 응답
+
+	mmo_session->enter_zone();
 
 	return;
 }

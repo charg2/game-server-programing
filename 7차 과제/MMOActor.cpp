@@ -143,10 +143,69 @@ void MMOActor::reset_data_when_creation(const CreateActorTask* task)
 	hp = 200;
 	level = 1;
 
-	x = fast_rand() % 800;
-	y = fast_rand() % 800;
+	// ÁÂÇ¥ ÁöÁ¤.
+	y = fast_rand() % 300;
+	x = fast_rand() % 300;
+
+	for (;;)
+	{
+		if (g_zone->has_obstacle(y, x) == true)
+		{
+			y = fast_rand() % 300;
+			x = fast_rand() % 300;
+		}
+		else
+		{
+			break;
+		}
+	}
 
 	memcpy(this->name, task->name, 50);
+
+	view_list.clear();
+	view_list_for_npc.clear();
+
+	status = ST_ACTIVE;
+
+	ReleaseSRWLockExclusive(&lock);
+}
+
+void MMOActor::reset_data_when_login(const cs_packet_login* packet)
+{
+	AcquireSRWLockExclusive(&lock);
+
+	zone = nullptr;
+
+	current_exp = packet->exp;
+	levelup_exp = 100 * pow(2, packet->level -1);
+	hp = packet->hp;
+	level = packet->level;
+
+	if(packet->x == -1)
+	{ 
+		y = fast_rand() % 300;
+		x = fast_rand() % 300;
+
+		for (;;)
+		{
+			if (g_zone->has_obstacle(y, x) == true)
+			{
+				y = fast_rand() % 300;
+				x = fast_rand() % 300;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+	else
+	{
+		x = packet->x;
+		y = packet->y;
+	}
+
+	wcsncpy(this->name, packet->name, 50);
 
 	view_list.clear();
 	view_list_for_npc.clear();

@@ -120,7 +120,7 @@ int main()
 	if (false == PathFinder::InitAstarMap((BYTE*)c2::global::obstacle_table, c2::global::obstacle_table_width, c2::global::obstacle_table_height))
 		return -3;
 
-	g_db_manager = new DBManager();
+	//g_db_manager = new DBManager();
 
 	//if( false == g_db_manager->initialize() )
 	//	return -4; 

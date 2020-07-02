@@ -34,6 +34,7 @@ public:
 	// 체력이 깍이면 do_auto_recovery
 	void reset_data(const LoadActorTask* task);
 	void reset_data_when_creation(const CreateActorTask* task);
+	void reset_data_when_login(const cs_packet_login* packet);
 
 	bool is_near(MMOActor* actor);
 	bool is_near(MMONPC* npc);

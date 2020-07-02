@@ -136,6 +136,8 @@ struct cs_packet_login
 	int			level;
 	int			hp;
 	int			exp;
+	int			x;
+	int			y;
 	wchar_t 	name[MAX_ID_LEN];
 };
 
