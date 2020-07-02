@@ -177,12 +177,14 @@ void MMOServer::on_timer_service(const TimerTask& task)
 		case TTT_USER_RECOVER_HP:
 		{
 			auto* actor = g_server->get_actor(task.actor_id);
-			
-			actor->increase_hp(10);
-
-			if (actor->hp > 0)
+			if (actor->is_alive == true)
 			{
-				local_timer->push_timer_task(actor->session_id, TTT_USER_RECOVER_HP, 10 * 1000, NULL);
+				actor->increase_hp(10);
+
+				if (actor->hp > 0)
+				{
+					local_timer->push_timer_task(actor->session_id, TTT_USER_RECOVER_HP, 10 * 1000, NULL);
+				}
 			}
 			break;
 		}

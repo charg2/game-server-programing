@@ -22,6 +22,7 @@ enum NPCType
 {
 	NT_PEACE_FIXED,		// 0000		
 	NT_PEACE_ROAMING,	// 0001
+
 	NT_COMBAT_FIXED,	// 0010
 	NT_COMBAT_ROAMING,	// 0011
 
@@ -56,8 +57,8 @@ struct MMONPC
 	void decrease_hp(MMOActor* actor, int32_t damage);
 	
 	bool is_in_attack_range(MMOActor* actor);
+	bool is_near(MMOActor* actor);
 
-	bool is_in_attack_scope(MMOActor* actor);
 	void send_chat_packet(const wchar_t* msg);
 	void send_chat_packet_to_target(MMOActor* target, const wchar_t* msg);
 

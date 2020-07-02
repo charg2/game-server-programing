@@ -241,7 +241,7 @@ REGISTER_HANDLER(C2S_MOVE)
 			ReleaseSRWLockExclusive(&npc->lock);
 		}
 
-		if (NT_COMBAT_FIXED <= npc->type && true == npc->is_in_attack_range(my_actor)) // 컴뱃 공격 대상으로 시도 해봄.
+		if (NT_COMBAT_FIXED <= npc->type && true == npc->is_near(my_actor)) // 컴뱃 공격 대상으로 시도 해봄.
 		{
 			if (npc->has_target == false)
 			{

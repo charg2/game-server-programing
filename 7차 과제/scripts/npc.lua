@@ -9,8 +9,6 @@ monster_combat_roaming = 3;
 
 
 
-
-
 function prepare_npc_script(id)
 	my_id = id;
 	counter = 0;
@@ -20,43 +18,51 @@ end
 function load_mob_data(mob_type)
 	if monster_peace_fixed == mob_type
 	then
+		name = string.format("LOG_F%d", my_id);
+
 		x = math.random(0, 400 -1);
 		y = math.random(0, 400 -1);
 
 		level = 1;
-		hp = 55;
+		hp = 100;
 		dmg = 20;
 
 	elseif monster_peace_roaming == mob_type
 	then
+		name = string.format("LOG_R%d", my_id);
+
 		x = math.random(0, 400 -1);
 		y = math.random(400 -1, 800 -1);
 		
 		level = 2;
-		hp = 55;
+		hp = 100;
 		dmg = 20;
 
 	elseif monster_combat_fixed == mob_type
 	then
+		name = string.format("OGRE_F%d", my_id);
+
 		x = math.random(400 -1, 800 -1);
 		y = math.random(0, 400-1);
 		
 		level = 3;
-		hp = 55;
+		hp = 100;
 		dmg = 20;
 
 	elseif monster_combat_roaming == mob_type
 	then
+		name = string.format("OGRE_R%d", my_id);
+
 		x = math.random(400 -1, 800 - 1);
 		y = math.random(400 -1, 800 - 1);
 		
-		level = 4;
+		level = 5;
 		hp = 55;
 		dmg = 20;
 	end
 
-	exp = level * 5;
-	return x, y, hp, dmg, level, exp;
+	exp = level * 7;
+	return name, x, y, hp, dmg, level, exp;
 end
 
 -- 플레이어가 깨우면. 

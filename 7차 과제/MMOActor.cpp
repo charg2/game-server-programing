@@ -410,7 +410,7 @@ void MMOActor::send_enter_packet(MMONPC* other)
 	payload.y = other->y;
 	wcscpy_s(payload.name, other->name);
 
-	payload.o_type = (other->type / 2) + 1;
+	payload.o_type = other->type + 1;// / 2) + 1;
 
 	AcquireSRWLockExclusive(&this->lock);
 	this->view_list_for_npc.emplace((int)other->id);
@@ -431,7 +431,7 @@ void MMOActor::send_enter_packet_without_updating_viewlist(MMONPC* other)
 	payload.x = other->x;
 	payload.y = other->y;
 	wcscpy_s(payload.name, other->name);
-	payload.o_type = (other->type / 2) + 1;
+	payload.o_type = other->type + 1;
 
 	c2::Packet* enter_packet = c2::Packet::alloc();
 	enter_packet->write(&payload, sizeof(sc_packet_enter));

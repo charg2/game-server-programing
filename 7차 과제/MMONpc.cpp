@@ -39,13 +39,19 @@ void MMONPC::initialize_vm_and_load_data()
 
 	lua_getglobal(lua_vm, "load_mob_data");
 	lua_pushnumber(lua_vm, this->type);		// 함수의 인자로 넣고 
-	error = lua_pcall(lua_vm, 1, 6, 0);		// 1 파라미터, 6리턴;
+	error = lua_pcall(lua_vm, 1, 7, 0);		// 1 파라미터, 6리턴;
 	if (error != 0)
 	{
 		printf("load_mob_data() lua error %s \n", lua_tostring(lua_vm, -1));
 	}
 
 	// return 값
+	const char* name = lua_tostring(lua_vm, -7);
+
+	int name_len = strlen(name);
+	int w_name_len = MultiByteToWideChar(CP_ACP, 0, name, name_len, NULL, NULL);
+	MultiByteToWideChar(CP_ACP, 0, name, name_len, this->name, w_name_len);
+
 	this->x = this->initial_x =	lua_tonumber(lua_vm, -6);
 	this->y = this->initial_y = lua_tonumber(lua_vm, -5);
 	this->hp =		lua_tonumber(lua_vm, -4);
@@ -544,7 +550,7 @@ void MMONPC::update_for_fixed_peace()
 
 	MMOActor* local_target		= this->target; 
 	bool	  local_has_target	= this->has_target;
-	if (false == has_target || false == is_in_attack_range(local_target)) // 대상이 없거나 거리가 멀어지면 종료.
+	if (false == has_target || false == is_near(local_target)) // 대상이 없거나 거리가 멀어지면 종료.
 	{
 		is_active = NPC_SLEEP;
 		has_target = false;
@@ -634,8 +640,6 @@ void MMONPC::update_for_fixed_peace()
 
 		if (true == has_obstacle)  // 장애물이 있다면 astar로 길 찾기.
 		{
-			printf("astar");
-
 			if (true == PathFindingHelper->NewPath(local_x, local_y, local_target_x, local_target_y))
 			{
 				if (true == PathFindingHelper->PathNextNode())
@@ -644,6 +648,9 @@ void MMONPC::update_for_fixed_peace()
 					y = local_y = PathFindingHelper->NodeGetY();
 				}
 			}
+//			끈내느걸로 추가해야하나.
+
+
 		}
 
 	
@@ -730,7 +737,7 @@ void MMONPC::update_for_fixed_peace()
 				}
 			}
 
-			if (true == is_in_attack_range(new_actor.second))
+			if (true == is_near(new_actor.second))
 			{
 				set_target(new_actor.second);
 			}
@@ -790,7 +797,7 @@ void MMONPC::update_for_peace()
 	MMOActor* local_target = this->target;
 	bool	  local_has_target = this->has_target;
 
-	if ( false == local_has_target || false == is_in_attack_range(target) ) // 대상이 없거나 거리가 멀어지면 종료.
+	if ( false == local_has_target || false == is_near(target) ) // 대상이 없거나 거리가 멀어지면 종료.
 	{
 		is_active = NPC_SLEEP;
 
@@ -880,7 +887,6 @@ void MMONPC::update_for_peace()
 		}
 
 
-
 		if(true == has_obstacle)  // 장애물이 있다면 astar로 길 찾기.
 		{
 			printf("astars\n");
@@ -890,7 +896,6 @@ void MMONPC::update_for_peace()
 			x = local_x = PathFindingHelper->NodeGetX();
 			y = local_y = PathFindingHelper->NodeGetY();
 		}
-
 
 
 		MMOSector* new_sector = g_zone->get_sector(local_y, local_x);			// view_list 긁어오기.
@@ -977,7 +982,7 @@ void MMONPC::update_for_peace()
 				}
 			}
 
-			if (true == is_in_attack_range(new_actor.second))
+			if (true == is_near(new_actor.second))
 			{
 				set_target(new_actor.second);
 			}
@@ -1033,7 +1038,7 @@ void MMONPC::update_for_fixed_combat()
 
 	MMOActor* local_target = this->target;
 	bool	  local_has_target = this->has_target;
-	if (false == has_target || false == is_in_attack_range(local_target)) // 대상이 없거나 거리가 멀어지면 종료.
+	if (false == has_target || false == is_near(local_target)) // 대상이 없거나 거리가 멀어지면 종료.
 	{
 		is_active = NPC_SLEEP;
 		has_target = false;
@@ -1217,7 +1222,7 @@ void MMONPC::update_for_fixed_combat()
 				}
 			}
 
-			if (true == is_in_attack_range(new_actor.second))
+			if (true == is_near(new_actor.second))
 			{
 				set_target(new_actor.second);
 			}
@@ -1366,6 +1371,7 @@ void MMONPC::update_for_combat()
 			{
 				if (true == PathFindingHelper->PathNextNode())
 				{
+					printf("using astar\n");
 					x = local_x = PathFindingHelper->NodeGetX();
 					y = local_y = PathFindingHelper->NodeGetY();
 				}
@@ -1456,7 +1462,7 @@ void MMONPC::update_for_combat()
 				}
 			}
 
-			if (true == is_in_attack_range(new_actor.second))
+			if (true == is_near(new_actor.second))
 			{
 				set_target(new_actor.second);
 			}
@@ -1505,7 +1511,7 @@ void MMONPC::set_target(MMOActor* actor)
 {
 	if (false == has_target && false == InterlockedExchange8((volatile char*)&has_target, true))
 	{
-		printf("%d target : %d \n", this->type, actor->session_id);
+		//printf("%d target : %d \n", this->type, actor->session_id);
 		this->target = actor;
 	}
 }
@@ -1560,6 +1566,14 @@ void MMONPC::decrease_hp(MMOActor* actor, int32_t damage)
 }
 
 bool MMONPC::is_in_attack_range(MMOActor* actor)
+{
+	if (abs(this->x - actor->x) > 1) return false;
+	if (abs(this->y - actor->y) > 1) return false;
+
+	return true;
+}
+
+bool MMONPC::is_near(MMOActor* actor)
 {
 	if (abs(this->x - actor->x) > FOV_HALF_WIDTH_FOR_COMBAT_MOB) return false;
 	if (abs(this->y - actor->y) > FOV_HALF_HEIGHT_FOR_COMBAT_MOB) return false;

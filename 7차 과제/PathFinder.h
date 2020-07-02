@@ -2,7 +2,7 @@
 
 
 #define TILESIZE 1			// change this also to reflect tile size. 64x64.
-//#define MAPDATANOCOPY		//use the pointer for mapdata
+#define MAPDATANOCOPY		//use the pointer for mapdata
 
 #include <Windows.h>
 
