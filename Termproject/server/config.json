@@ -1,0 +1,42 @@
+{
+  "[server config]": "",
+
+  "server_name": "c2",
+  "server_version": "0.1",
+  "enable_nagle_opt": false,
+  "enable_keep_alive_opt": false,
+  "concurrent_thread_count": 8,
+    "server_port": 21302,
+    "server_ip": "127.0.0.1",
+  "capacity": 10000,
+  "ccu": 10000,
+  "maximum_listening_count": 500,
+  "maximum_accept_count": 200,
+
+  "[encrypt config]": "",
+  "hash": "",
+
+  "[db config]": "//",
+  "db_ip": "",
+  "db_port": 23901,
+  "db_name": "charg2dang",
+  "db_password": "",
+  "db_connection_string": "Driver={SQL Server};SERVER=DESKTOP-TPGEADF; Database=game_server; UID=charg2dang; PWD=zx0925",
+  "db_thread_count": 5,
+  "db_server_name": "2016184041_gsdb",
+
+  "[contents config] ": "",
+  "maximum_npc_count": 20000,
+  "monster": [],
+
+
+  "mmo_map_width": 800,
+  "mmo_map_height": 800,
+  "mmo_map": []
+
+
+
+} 
+
+
+
