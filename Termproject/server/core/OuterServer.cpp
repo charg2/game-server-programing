@@ -6,7 +6,7 @@
 #include "IOContext.h"
 #include "../DBTask.h"
 
-
+#include <deque>
 
 
 OuterServer::OuterServer()
@@ -247,7 +247,6 @@ void OuterServer::io_service_procedure(uint64_t custom_thread_id)
 
 	for (;;)
 	{
-
 		DWORD			transfered_bytes	{};
 		LPOVERLAPPED	overlapped_ptr		{};
 		ULONG_PTR		completion_key		{};
@@ -332,17 +331,24 @@ void OuterServer::io_and_timer_service_procedure(uint64_t custom_thread_id)
 	local_timer->bind_server(this);
 	TimeTaskScheduler* local_timer_capture = local_timer;
 	printf("%d :: worker therad start !\n", GetCurrentThreadId());
-	OuterServer::local_storage_accessor = custom_thread_id;
-	c2::local::io_thread_id = custom_thread_id;
 
+
+	OuterServer::local_storage_accessor		= custom_thread_id;
+	c2::local::io_thread_id					= custom_thread_id;
+	
+
+	// ±æÃ£±â.
 	local_path_finder = new PathFinder();
 
-	HANDLE	local_completion_port{ this->completion_port };
-	int64_t	thread_id{ GetCurrentThreadId() };
+
+
+	HANDLE	local_completion_port	{ this->completion_port };
+	int64_t	thread_id				{ GetCurrentThreadId() };
 
 	for (;;)
 	{
 		local_timer_capture->do_timer_job();
+		do_session_event();
 
 		DWORD			transfered_bytes{};
 		LPOVERLAPPED	overlapped_ptr{};
@@ -428,6 +434,7 @@ void OuterServer::io_and_timer_service_procedure(uint64_t custom_thread_id)
 		on_sleep_io_thread();
 	}
 }
+
 
 void OuterServer::custom_precedure(uint64_t idx)
 {
@@ -750,6 +757,19 @@ size_t OuterServer::get_total_recv_count()
 size_t OuterServer::get_total_sent_count()
 {
 	return  InterlockedExchange64(&this->total_sent_count, 0);
+}
+
+void OuterServer::do_session_event()
+{
+	std::deque<Session*> session_events;
+	for (;;)
+	{
+		if (session_events.empty() != false)
+		{
+			Session* session = session_events.front();
+			session_events.pop_front();
+		}
+	}
 }
 
 constexpr size_t OuterServer::get_ccu() const

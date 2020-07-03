@@ -297,6 +297,9 @@
     <ClInclude Include="PathFinder.h">
       <Filter>소스 파일\extlib</Filter>
     </ClInclude>
+    <ClInclude Include="event_context.h">
+      <Filter>소스 파일\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

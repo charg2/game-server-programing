@@ -167,6 +167,7 @@
     <ClInclude Include="DBManager.h" />
     <ClInclude Include="DBTask.h" />
     <ClInclude Include="db_statement.h" />
+    <ClInclude Include="event_context.h" />
     <ClInclude Include="IO\KeyManager.h" />
     <ClInclude Include="lua\lauxlib.h" />
     <ClInclude Include="lua\lua.h" />

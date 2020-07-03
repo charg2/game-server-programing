@@ -76,12 +76,14 @@ public:
 	size_t								get_total_recv_count();
 	size_t								get_total_sent_count();
 
+	void								process_event();
+
 protected:
-	void					acceptor_procedure(uint64_t idx);
-	void					io_service_procedure(uint64_t idx);
-	void					io_and_timer_service_procedure(uint64_t idx);
-	virtual void			custom_precedure(uint64_t idx);
-	static uint32_t WINAPI 	start_thread(LPVOID param);
+	void						acceptor_procedure(uint64_t idx);
+	void						io_service_procedure(uint64_t idx);
+	void						io_and_timer_service_procedure(uint64_t idx);
+	virtual void				custom_precedure(uint64_t idx);
+	static uint32_t WINAPI 		start_thread(LPVOID param);
 
 
 protected:

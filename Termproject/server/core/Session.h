@@ -4,10 +4,12 @@
 #include "CircularBuffer.h"
 #include "IOContext.h"
 
+
 struct DBTask;
 class OuterServer;
 class CircularBuffer;
 struct IoContext;
+struct EventContext;
 
 #define inline_increase_refer(session) 		if ( 0 >= InterlockedIncrement64(&session->refer_count)) { c2::util::crash_assert(); }
 #define inline_decrease_refer(session, reason) 		\
@@ -86,8 +88,9 @@ public:
 	c2::Packet*		sent_packets[c2::constant::MAX_CONCURRENT_SEND_COUNT]; //   
 	c2::Packet		recv_packet;
 
-	uint64_t						packet_sent_count;
+	uint64_t		packet_sent_count;
 	c2::concurrency::ConcurrentQueue<c2::Packet*>	send_buffer;
+	c2::concurrency::MPSCQueue<EventContext*>		event_queue; // recv event, custom event 
 
 	IoContext		recv_context;			// 48 ( 32 + 8 + 8 )
 	IoContext		send_context;			// 48 ( 32 + 8 + 8 )

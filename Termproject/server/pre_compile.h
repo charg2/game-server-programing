@@ -15,6 +15,7 @@
 #include "core/macro.h"
 
 #include "concurrency/tls.h"
+#include "concurrency/MPSCQueue.h"
 //#include "concurrency/MemoryPoolTLS.h"
 //#include "concurrency/MPSCQueue.h"
 
