@@ -42,7 +42,6 @@ public:
 
 	virtual void		on_connect(uint64_t session_id);
 	virtual void		on_disconnect(uint64_t session_id);
-	virtual bool		on_accept(Session* session);
 	virtual void		on_wake_io_thread();
 	virtual void		on_sleep_io_thread();
 	
@@ -76,11 +75,10 @@ public:
 	size_t								get_total_recv_count();
 	size_t								get_total_sent_count();
 
-	void								process_event();
+	void								do_session_event();
 
 protected:
 	void						acceptor_procedure(uint64_t idx);
-	void						io_service_procedure(uint64_t idx);
 	void						io_and_timer_service_procedure(uint64_t idx);
 	virtual void				custom_precedure(uint64_t idx);
 	static uint32_t WINAPI 		start_thread(LPVOID param);
@@ -97,9 +95,9 @@ protected:
 	c2::enumeration::ErrorCode	custom_last_os_error;		// 8  kernel
 
 	Session**					sessions;					// 8
-	uint16_t					maximum_listening_count;		// 2
-	HANDLE						session_heap;				//8 
-	uint16_t					maximum_accept_count;	// 8 
+	uint16_t					maximum_listening_count;	// 2
+	HANDLE						session_heap;				// 8 
+	uint16_t					maximum_accept_count;		// 8 
 
 	size_t						concurrent_thread_count;	// 8
 	wchar_t						ip[16];						// 32
@@ -111,18 +109,19 @@ protected:
 
 	c2::concurrency::ConcurrentStack<uint64_t, 5000>	id_pool;
 
-	alignas(c2::constant::CACHE_LINE)	int64_t		total_recv_bytes;			// 8
-	alignas(c2::constant::CACHE_LINE)	int64_t		total_recv_count;			// 8
-	alignas(c2::constant::CACHE_LINE)	int64_t		total_sent_bytes;			// 8
-	alignas(c2::constant::CACHE_LINE)	int64_t		total_sent_count;			// 8
-	alignas(c2::constant::CACHE_LINE)	uint64_t	current_accepted_count;		// 8
+	alignas(c2::constant::CACHE_LINE)	int64_t		total_recv_bytes;			// 64
+	alignas(c2::constant::CACHE_LINE)	int64_t		total_recv_count;			// 64
+	alignas(c2::constant::CACHE_LINE)	int64_t		total_sent_bytes;			// 64
+	alignas(c2::constant::CACHE_LINE)	int64_t		total_sent_count;			// 64
+	alignas(c2::constant::CACHE_LINE)	uint64_t	current_accepted_count;		// 64
 
 private:
 	static inline LPFN_ACCEPTEX		accept_ex		{};
 	static inline LPFN_DISCONNECTEX	disconnect_ex	{};
 	static inline LPFN_CONNECTEX	connect_ex		{};
 
-	static inline thread_local size_t	local_storage_accessor{};
+	static inline thread_local size_t					local_storage_accessor{};
+	static inline thread_local std::deque<Session*>*	local_sessions_queue{};
 
 	friend class Session;
 };

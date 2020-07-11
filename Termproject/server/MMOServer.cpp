@@ -83,11 +83,7 @@ void MMOServer::on_disconnect(uint64_t session_id)
 
 	//ReleaseSRWLockExclusive(&my_actor->lock);
 }
-bool MMOServer::on_accept(Session* session) 
-{ 
-	//printf( "accept() : %d \n", session->session_id );
-	return true; 
-}
+
 void MMOServer::on_wake_io_thread(){}
 void MMOServer::on_sleep_io_thread(){}
 void MMOServer::custom_precedure(uint64_t idx) {}

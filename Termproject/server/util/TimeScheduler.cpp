@@ -18,7 +18,6 @@ void TimeTaskScheduler::push_timer_task(uint64_t session_id, TimerTaskType task,
 void TimeTaskScheduler::bind_server(OuterServer* server)
 {
 	this->server = server;
-
 }
 
 void TimeTaskScheduler::do_timer_job()

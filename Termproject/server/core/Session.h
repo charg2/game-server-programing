@@ -69,7 +69,6 @@ public:
 	void disconnect_completion();
 
 	void parse_packet();
-	//void parse_packet_echo();
 	void reset();
 
 	void increase_refer();
@@ -78,6 +77,10 @@ public:
 	virtual void on_handling_db_task(DBTask* task);
 
 	bool is_valid(uint64_t session_id);
+	
+	void process_event();
+
+	bool try_get_event_ownership();
 
 public:
 	// read and write frequently.
@@ -90,10 +93,11 @@ public:
 
 	uint64_t		packet_sent_count;
 	c2::concurrency::ConcurrentQueue<c2::Packet*>	send_buffer;
-	c2::concurrency::MPSCQueue<EventContext*>		event_queue; // recv event, custom event 
 
-	IoContext		recv_context;			// 48 ( 32 + 8 + 8 )
 	IoContext		send_context;			// 48 ( 32 + 8 + 8 )
+	IoContext		recv_context;			// 48 ( 32 + 8 + 8 )
+	c2::concurrency::MPSCQueue<EventContext*>	event_queue; // recv event, custom event 
+	EventContext	recv_event_context;
 	IoContext		accept_context;			// 48 ( 32 + 8 + 8 )
 	IoContext		discon_context;			// 48 ( 32 + 8 + 8 )
 
@@ -104,6 +108,7 @@ public:
 	uint64_t		release_flag;			// 8
 	uint64_t		io_cancled;
 	uint64_t		last_error;
+	uint64_t		event_ownership;
 	SOCKET			sock;					// 8
 	OuterServer*	server;					// 8
 

@@ -18,8 +18,10 @@ namespace c2
 		{
 			buffer = new char[kMaximumSegmentSize];
 		}
+
 		//Packet(const Packet& other);
 		//Packet(Packet&& other) noexcept;
+
 		~Packet()
 		{
 #ifdef PROFILE_ON
@@ -167,7 +169,6 @@ namespace c2
 				// 이건 문제가 있는 상황.
 				size_t* invliad_ptr{}; *invliad_ptr = 0xDEADDEAD;
 			}
-
 
 			// 1 2 4  8 바이트 읽기에 대해서도 최적화를 해준다.
 			switch (size)

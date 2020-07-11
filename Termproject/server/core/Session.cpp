@@ -11,7 +11,7 @@ refer_count{ 0 }, send_flag{ 0 }, packet_sent_count{ 0 },
 recv_packet{ }, 
 accept_context{ {}, IO_ACCEPT, this}, send_context{ {},  IO_SEND, this },
 recv_context{ {},  IO_RECV, this }, discon_context{ {},IO_DISCONNECT, this },
-sock_addr{}, total_recv_bytes{}, total_sent_bytes{},
+sock_addr{}, total_recv_bytes{}, total_sent_bytes{}, event_ownership{ 0 },
 release_flag{}, io_cancled{}, sock{ INVALID_SOCKET }, server{ nullptr }
 {
 	this->sock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
@@ -163,7 +163,7 @@ void Session::post_send()
 			if (WSA_IO_PENDING != local_last_error)
 			{
 				//debug_console(printf("ret_val of WSASend() is not IO_PENDING  : %d \n", local_last_error));
-				printf("WSASend() failure : %llu,  error_code : %llu \n", session_id, local_last_error);
+ 				printf("WSASend() failure : %llu,  error_code : %llu \n", session_id, local_last_error);
 				if ( 1 > InterlockedDecrement64(&this->refer_count)) // 
 				{
 					//this->decrease_refer();
@@ -190,7 +190,7 @@ void Session::recv_completion(size_t transfered_bytes)
 	{
 		if (0 == InterlockedDecrement64(&this->refer_count))
 		{
-			server->request_disconnection(this->session_id, DR_RECV_BUFFER_FULL);
+			server->request_disconnection(this->session_id, DR_RECV_ZERO_BYTE);
 		}
 
 		return;
@@ -209,9 +209,12 @@ void Session::recv_completion(size_t transfered_bytes)
 	InterlockedAdd64(&server->total_recv_bytes, transfered_bytes);
 	InterlockedIncrement64(&server->total_recv_count);
 
+	//event_queue.push(&this->recv_event_context);
+
 	this->parse_packet();
 	this->post_recv();
 }
+
 
 void Session::send_completion(size_t transfered_bytes)
 {
@@ -235,6 +238,7 @@ void Session::send_completion(size_t transfered_bytes)
 
 void Session::accept_completion()
 {
+	// register session 
 	HANDLE returned_hanlde = CreateIoCompletionPort((HANDLE)this->sock, server->completion_port, session_id, 0);
 	if(returned_hanlde == NULL ||  returned_hanlde != server->completion_port)
 	{
@@ -250,10 +254,11 @@ void Session::accept_completion()
 	//{
 	//}
 
+
 	InterlockedIncrement(&server->current_accepted_count); 
 	
-	// 인터락 증감을 하지 않고 대로 사용함.
-	
+	// session에 대한 인터락 증감을 하지 않고 그대로 사용함.
+	server->on_connect(session_id);
 
 	this->post_recv();
 }
@@ -399,5 +404,37 @@ void Session::on_handling_db_task(DBTask* task)
 bool Session::is_valid(uint64_t session_id)
 {
 	return this->session_id = session_id;
+}
+
+
+void Session::process_event()
+{
+	EventContext* event_context;
+	while (event_queue.try_pop(event_context))
+	{
+		switch (event_context->type)
+		{
+		case 0: 
+			recv_completion((size_t)recv_context.overalpped.hEvent);
+			break;
+
+		default:
+			break;
+		}
+	}
+	//this->event_ownership = false;
+}
+
+bool Session::try_get_event_ownership()
+{
+	if (event_ownership == 0)
+	{
+		if ( 0 == InterlockedExchange(&event_ownership, 1)) // 진자로 얻으면
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 

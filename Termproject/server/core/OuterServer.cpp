@@ -238,109 +238,22 @@ void OuterServer::acceptor_procedure(uint64_t idx)
 
 }
 
-
-void OuterServer::io_service_procedure(uint64_t custom_thread_id)
-{
-	OuterServer::local_storage_accessor = custom_thread_id;
-	HANDLE	local_completion_port{ this->completion_port };
-	int64_t	thread_id{ GetCurrentThreadId() };
-
-	for (;;)
-	{
-		DWORD			transfered_bytes	{};
-		LPOVERLAPPED	overlapped_ptr		{};
-		ULONG_PTR		completion_key		{};
-
-		bool ret = GetQueuedCompletionStatus(local_completion_port, &transfered_bytes, &completion_key, &overlapped_ptr, INFINITE);
-		if (ret == 0)
-		{
-			if (GetLastError() == WAIT_TIMEOUT)
-				continue;
-		}
-		else if (transfered_bytes == 0 && overlapped_ptr == nullptr && completion_key == 0)
-		{
-			return;
-		}
-
-		on_wake_io_thread();
-
-		// accpet 처리.
-		if (completion_key == c2::constant::ASYNC_ACCEPT_SIGN)
-		{
-			IoContext* context_ptr{ reinterpret_cast<IoContext*>(overlapped_ptr) };
-			Session* session = (Session*)context_ptr->session;
-			
-			session->accept_completion();
-			on_accept(session);
-			continue;
-		}
-
-		// 
-		Session* session = acquire_session_ownership(completion_key);
-		if (nullptr == session)
-		{
-			c2::util::crash_assert();
-		}
-
-		// acquire session
-		if ((size_t)overlapped_ptr == c2::constant::SEND_SIGN) 
-		{
-			session->post_send();
-
-			release_session_ownership(completion_key);
-
-			continue;
-		}
-
-		IoContext* context_ptr	{ reinterpret_cast<IoContext*>(overlapped_ptr) };
-		switch (context_ptr->io_type)
-		{
-		case IO_RECV:
-			session->recv_completion(transfered_bytes);
-			break;
-
-		case IO_SEND:
-			session->send_completion(transfered_bytes);
-			break;
-
-		case IO_DISCONNECT:
-			session->disconnect_completion();
-			on_disconnect(session->session_id);
-			break;
-
-		case IO_ACCEPT:
-			//session->accept_completion();
-			//break;
-		default:
-			c2::util::crash_assert();
-			break;
-		}
-
-		// release session
-		release_session_ownership(completion_key);
-
-		on_sleep_io_thread();
-	}
-}
-
 #include "../PathFinder.h"
 
 void OuterServer::io_and_timer_service_procedure(uint64_t custom_thread_id)
 {
+	printf("%d :: worker therad start !\n", GetCurrentThreadId());
+
 	local_timer = new TimeTaskScheduler{};
 	local_timer->bind_server(this);
 	TimeTaskScheduler* local_timer_capture = local_timer;
-	printf("%d :: worker therad start !\n", GetCurrentThreadId());
-
 
 	OuterServer::local_storage_accessor		= custom_thread_id;
 	c2::local::io_thread_id					= custom_thread_id;
-	
 
 	// 길찾기.
 	local_path_finder = new PathFinder();
-
-
+	local_sessions_queue = new std::deque<Session*>();
 
 	HANDLE	local_completion_port	{ this->completion_port };
 	int64_t	thread_id				{ GetCurrentThreadId() };
@@ -374,7 +287,7 @@ void OuterServer::io_and_timer_service_procedure(uint64_t custom_thread_id)
 			Session* session = (Session*)context_ptr->session;
 
 			session->accept_completion();
-			on_accept(session);
+
 			continue;
 		}
 
@@ -408,7 +321,13 @@ void OuterServer::io_and_timer_service_procedure(uint64_t custom_thread_id)
 		switch (context_ptr->io_type)
 		{
 		case IO_RECV:
-			session->recv_completion(transfered_bytes);
+			session->recv_context.overalpped.hEvent = (HANDLE)transfered_bytes;
+			session->event_queue.push(&session->recv_event_context);
+			if ( session->try_get_event_ownership() == true )
+			{
+				local_sessions_queue->push_back(session);
+			}
+
 			break;
 
 		case IO_SEND:
@@ -456,9 +375,9 @@ uint32_t WINAPI OuterServer::start_thread(LPVOID param)
 		info->server->acceptor_procedure(info->index);
 		break;
 
-	case ThreadType::TT_IO:
-		info->server->io_service_procedure(info->index);
-		break;
+	//case ThreadType::TT_IO:
+	//	info->server->io_service_procedure(info->index);
+	//	break;
 
 	case ThreadType::TT_IO_AND_TIMER:
 		info->server->io_and_timer_service_procedure(info->index);
@@ -521,11 +440,6 @@ void OuterServer::finalize()
 }
 
 void OuterServer::on_connect(uint64_t session_id){}
-bool OuterServer::on_accept(Session* session)
-{
-	return false;
-}
-
 void OuterServer::on_disconnect(uint64_t session_id){}
 void OuterServer::on_wake_io_thread() {}
 void OuterServer::on_sleep_io_thread() {}
@@ -761,14 +675,19 @@ size_t OuterServer::get_total_sent_count()
 
 void OuterServer::do_session_event()
 {
-	std::deque<Session*> session_events;
-	for (;;)
+	int lsa = local_storage_accessor;
+
+	while (local_sessions_queue->empty() != true)
 	{
-		if (session_events.empty() != false)
-		{
-			Session* session = session_events.front();
-			session_events.pop_front();
-		}
+		Session* session = local_sessions_queue->front();
+	
+		//Session* session = acquire_session_ownership(session_id);
+
+		session->process_event();
+		//release_session_ownership(session_id);
+		local_sessions_queue->pop_front();
+
+		session->event_ownership = 0;
 	}
 }
 
@@ -797,8 +716,6 @@ const c2::enumeration::ErrorCode OuterServer::get_server_last_error() const
 	return this->custom_last_server_error;
 }
 
-
-
 void OuterServer::load_config_using_json(const wchar_t* file_name)
 {
 	c2::util::JsonParser json_parser;
@@ -820,7 +737,6 @@ void OuterServer::load_config_using_json(const wchar_t* file_name)
 	
 	this->concurrent_thread_count = c2::global::concurrent_io_thread_count;
 
-
 	if (false == json_parser.get_uint16(L"server_port", this->port))
 		c2::util::crash_assert();
 
@@ -838,8 +754,6 @@ void OuterServer::load_config_using_json(const wchar_t* file_name)
 
 	if(false == on_load_config(&json_parser))
 		c2::util::crash_assert();
-
-
 
 	return;
 }

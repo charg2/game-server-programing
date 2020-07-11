@@ -95,7 +95,7 @@ namespace c2::concurrency
 					new_block->magic_number = Keyword::DEAD;
 					//new(new_block) BlockNode;
 
-					if (PlacementNew) // 持失切 鉄.
+					if constexpr (PlacementNew) // 持失切 鉄.
 						new(&new_block->data) Type();
 
 					return &new_block->data;
